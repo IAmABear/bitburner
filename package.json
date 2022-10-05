@@ -1,6 +1,6 @@
 {
-  "name": "bitburner-typescript-template",
-  "version": "1.0.0",
+  "name": "bitburner",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -12,13 +12,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bitburner-official/vscode-template.git"
+    "url": "git+https://github.com/IAmABear/bitburner.git"
   },
-  "author": "SlyCedix",
-  "bugs": {
-    "url": "https://github.com/bitburner-official/vscode-template/issues"
-  },
-  "homepage": "https://github.com/bitburner-official/vscode-template#readme",
+  "author": "Floyd van Boksel",
+  "homepage": "https://github.com/IAmABear/bitburner#readme",
   "devDependencies": {
     "@types/lodash": "^4.14.178",
     "@types/node": "^16.4.3",
