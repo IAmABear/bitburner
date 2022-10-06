@@ -1,11 +1,30 @@
 // @ts-nocheck
 export default async (
   ns: any,
-  { inlcudeHome = false, includeGhost = false, mustHaveRootAccess = false }: { inlcudeHome: boolean, includeGhost: boolean, mustHaveRootAccess: boolean}
+  {
+    inlcudeHome = false,
+    includeGhost = false,
+    mustHaveRootAccess = false,
+  }: {
+    inlcudeHome: boolean;
+    includeGhost: boolean;
+    mustHaveRootAccess: boolean;
+  }
 ): Array<string> => {
   const scannedServers: Array<string> = [];
 
-  async function scanServer(ns: any, server: string, { includeGhost, inlcudeHome }: { inlcudeHome: boolean, includeGhost: boolean, mustHaveRootAccess: boolean}) {
+  async function scanServer(
+    ns: any,
+    server: string,
+    {
+      includeGhost,
+      inlcudeHome,
+    }: {
+      inlcudeHome: boolean;
+      includeGhost: boolean;
+      mustHaveRootAccess: boolean;
+    }
+  ) {
     const serversFound = ns.scan(server);
 
     for (const serverFoundIndex in serversFound) {

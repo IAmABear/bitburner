@@ -1,4 +1,4 @@
 // @ts-nocheck
 export async function main(ns) {
-  return await ns.grow(ns.args[0])
+  return await ns.grow(ns.args[0]);
 }
