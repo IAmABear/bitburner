@@ -49,7 +49,7 @@ export async function main(ns: NS): Promise<void> {
       ) {
         const scriptRAM = ns.getScriptRam(hackScriptPath, currentServer);
         const threadCount = Math.ceil(
-          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM) / 9
+          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
         );
 
         if (
