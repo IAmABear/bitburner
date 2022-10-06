@@ -1,5 +1,5 @@
 export async function main(ns: NS): Promise<void> {
-  const ram = 8;
+  const ram = Number(ns.args[0]) || 8;
   const i = await ns.getPurchasedServers().length;
 
   while ((await ns.getPurchasedServerLimit()) >= i) {
