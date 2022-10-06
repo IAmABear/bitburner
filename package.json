@@ -8,7 +8,7 @@
     "watch": "npx tsc -w",
     "lint": "eslint . --ext .ts",
     "defs": "node ./updateDefs.js",
-    "sync": "bitburner-sync"
+    "sync": "npx tsc && bitburner-sync"
   },
   "repository": {
     "type": "git",
