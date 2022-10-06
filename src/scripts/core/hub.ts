@@ -4,6 +4,15 @@ const growScriptPath = "/scripts/hacks/grow.js";
 const weakenScriptPath = "/scripts/hacks/weaken.js";
 const hackScriptPath = "/scripts/hacks/hack.js";
 
+/**
+ * Initial centralized hacking hub for mass hacking.
+ * The goal of this hub is simply to weaken/grwo/hack
+ * as many servers as fast as possible without any
+ * regard to efficienty. This works fine for initial
+ * money gathering but will be quite ineffecient later on.
+ *
+ * @param ns The bitburner NS scope
+ */
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
   while (true) {
