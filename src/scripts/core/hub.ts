@@ -53,8 +53,7 @@ export async function main(ns: NS): Promise<void> {
 
       if (
         !ns.scriptRunning(hackScriptPath, currentServer) &&
-        isHackThresholdReached &&
-        !isGhostServer
+        isHackThresholdReached
       ) {
         const scriptRAM = ns.getScriptRam(hackScriptPath, currentServer);
         const threadCount = Math.ceil(
@@ -75,10 +74,8 @@ export async function main(ns: NS): Promise<void> {
         isWeakenThresholdReached
       ) {
         const scriptRAM = ns.getScriptRam(weakenScriptPath, currentServer);
-        const threadModifier = isGhostServer ? 2 : 1;
         const threadCount = Math.floor(
-          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM) /
-            threadModifier
+          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
         );
 
         if (
@@ -92,12 +89,11 @@ export async function main(ns: NS): Promise<void> {
 
       if (
         !ns.scriptRunning(growScriptPath, currentServer) &&
-        !isGhostServer &&
         isGrowThresholdReached
       ) {
         const scriptRAM = ns.getScriptRam(growScriptPath, currentServer);
         const threadCount = Math.floor(
-          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM) / 2
+          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
         );
 
         if (
