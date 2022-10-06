@@ -1,5 +1,4 @@
-// @ts-nocheck
-export async function main(ns) {
+export async function main(ns: NS): Promise<void> {
   const ram = 8;
   const i = await ns.getPurchasedServers().length;
 

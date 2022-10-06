@@ -1,5 +1,4 @@
-// @ts-nocheck
-export async function main(ns) {
+export async function main(ns: NS): Promise<void> {
   const servers = await ns.getPurchasedServers();
 
   while (servers.length > 0) {
@@ -9,9 +8,7 @@ export async function main(ns) {
         continue;
       }
       const targetServerCurrentRam = await ns.getServerMaxRam(targetServer);
-      const maxPossibleRamServer = await ns.getPurchasedServerMaxRam(
-        targetServer
-      );
+      const maxPossibleRamServer = await ns.getPurchasedServerMaxRam();
       const newTargetRam = targetServerCurrentRam * 2;
 
       if (

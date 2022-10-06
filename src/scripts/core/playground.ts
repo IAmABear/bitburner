@@ -1,6 +1,4 @@
-// @ts-nocheck
-/** @param {NS} ns **/
-export async function main(ns) {
+export async function main(ns: NS): Promise<void> {
   const server = "n00dles";
 
   ns.tprint(ns.getServerGrowth(server));

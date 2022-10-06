@@ -1,12 +1,10 @@
-// @ts-nocheck
-/** @param {NS} ns **/
 import getServers from "/scripts/utils/getServers.js";
 
 const growScriptPath = "/scripts/hacks/grow.js";
 const weakenScriptPath = "/scripts/hacks/weaken.js";
 const hackScriptPath = "/scripts/hacks/hack.js";
 
-export async function main(ns) {
+export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
   while (true) {
     const targetServers = await getServers(ns, {
@@ -38,8 +36,8 @@ export async function main(ns) {
       !ns.scriptRunning(hackScriptPath, currentServer) &&
       isHackThresholdReached
     ) {
-      var scriptRAM = ns.getScriptRam(hackScriptPath, currentServer);
-      var threadCount = Math.ceil(
+      const scriptRAM = ns.getScriptRam(hackScriptPath, currentServer);
+      const threadCount = Math.ceil(
         Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
       );
 
@@ -57,8 +55,8 @@ export async function main(ns) {
       !ns.scriptRunning(weakenScriptPath, currentServer) &&
       !isWeakenThresholdReached
     ) {
-      var scriptRAM = ns.getScriptRam(weakenScriptPath, currentServer);
-      var threadCount = Math.floor(
+      const scriptRAM = ns.getScriptRam(weakenScriptPath, currentServer);
+      const threadCount = Math.floor(
         Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
       );
 
@@ -71,8 +69,8 @@ export async function main(ns) {
       !ns.scriptRunning(growScriptPath, currentServer) &&
       isGrowThresholdReached
     ) {
-      var scriptRAM = ns.getScriptRam(growScriptPath, currentServer);
-      var threadCount = Math.floor(
+      const scriptRAM = ns.getScriptRam(growScriptPath, currentServer);
+      const threadCount = Math.floor(
         Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
       );
 

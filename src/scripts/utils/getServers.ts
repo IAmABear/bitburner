@@ -1,28 +1,27 @@
-// @ts-nocheck
 export default async (
-  ns: any,
+  ns: NS,
   {
-    inlcudeHome = false,
+    includeHome = false,
     includeGhost = false,
     mustHaveRootAccess = false,
   }: {
-    inlcudeHome: boolean;
+    includeHome: boolean;
     includeGhost: boolean;
-    mustHaveRootAccess: boolean;
+    mustHaveRootAccess?: boolean;
   }
-): Array<string> => {
-  const scannedServers: Array<string> = [];
+): Promise<string[]> => {
+  const scannedServers: string[] = [];
 
   async function scanServer(
     ns: any,
     server: string,
     {
       includeGhost,
-      inlcudeHome,
+      includeHome,
     }: {
-      inlcudeHome: boolean;
+      includeHome: boolean;
       includeGhost: boolean;
-      mustHaveRootAccess: boolean;
+      mustHaveRootAccess?: boolean;
     }
   ) {
     const serversFound = ns.scan(server);
@@ -32,21 +31,21 @@ export default async (
 
       if (!scannedServers.includes(serverFound)) {
         if (
-          (inlcudeHome && serverFound === "home") ||
+          (includeHome && serverFound === "home") ||
           (includeGhost && serverFound.includes("ghost-")) ||
           (!serverFound.includes("ghost-") && serverFound !== "home")
         ) {
           scannedServers.push(serverFound);
-          await scanServer(ns, serverFound, { includeGhost, inlcudeHome });
+          await scanServer(ns, serverFound, { includeGhost, includeHome });
         }
       }
     }
 
     return serversFound;
   }
-  await scanServer(ns, "home", { includeGhost, inlcudeHome });
+  await scanServer(ns, "home", { includeGhost, includeHome });
 
-  return scannedServers.reduce((allServers, currentServer) => {
+  return scannedServers.reduce((allServers: string[], currentServer) => {
     if (mustHaveRootAccess) {
       if (ns.hasRootAccess(currentServer)) {
         return [...allServers, currentServer];

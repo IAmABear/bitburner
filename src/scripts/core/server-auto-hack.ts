@@ -1,9 +1,6 @@
-// @ts-nocheck
-/** @param {NS} ns **/
-
-async function crackOpenServer(ns, server) {
+async function crackOpenServer(ns: NS, server: string): Promise<void> {
   const serverInfo = ns.getServer(server);
-  if (serverInfo.hasRootAccess) {
+  if (serverInfo.hasAdminRights) {
     return;
   }
 
@@ -47,7 +44,7 @@ async function crackOpenServer(ns, server) {
   }
 }
 
-async function copyHackFilesToServer(ns, server) {
+async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {
   const res = await ns.scp(
     [
       "/scripts/hacks/hack.js",
@@ -60,9 +57,9 @@ async function copyHackFilesToServer(ns, server) {
   return res;
 }
 
-const scannedServers = [];
+const scannedServers: string[] = [];
 
-async function scanServer(ns, server) {
+async function scanServer(ns: NS, server: string) {
   const serversFound = ns.scan(server);
 
   for (const serverFoundIndex in serversFound) {
@@ -83,7 +80,7 @@ async function scanServer(ns, server) {
 }
 
 let currentHackingLevel = 0;
-export async function main(ns) {
+export async function main(ns: NS): Promise<void> {
   ns.tprint("Auto hack method");
   const servers = await scanServer(ns, "home");
   ns.tprint(servers);

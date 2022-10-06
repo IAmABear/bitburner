@@ -1,13 +1,10 @@
-// @ts-nocheck
-/** @param {NS} ns **/
-
 import getServers from "/scripts/utils/getServers.js";
 
 const growScriptPath = "/scripts/hacks/grow.js";
 const weakenScriptPath = "/scripts/hacks/weaken.js";
 const hackScriptPath = "/scripts/hacks/hack.js";
 
-export async function main(ns) {
+export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
   while (true) {
     const servers = await getServers(ns, {
@@ -50,8 +47,8 @@ export async function main(ns) {
         isHackThresholdReached &&
         !isGhostServer
       ) {
-        var scriptRAM = ns.getScriptRam(hackScriptPath, currentServer);
-        var threadCount = Math.ceil(
+        const scriptRAM = ns.getScriptRam(hackScriptPath, currentServer);
+        const threadCount = Math.ceil(
           Math.floor((serverMaxRam - serverUsedRam) / scriptRAM) / 9
         );
 
@@ -64,10 +61,13 @@ export async function main(ns) {
         }
       }
 
-      if (!ns.scriptRunning(weakenScriptPath, currentServer)) {
-        var scriptRAM = ns.getScriptRam(weakenScriptPath, currentServer);
+      if (
+        !ns.scriptRunning(weakenScriptPath, currentServer) &&
+        isWeakenThresholdReached
+      ) {
+        const scriptRAM = ns.getScriptRam(weakenScriptPath, currentServer);
         const threadModifier = isGhostServer ? 2 : 1;
-        var threadCount = Math.floor(
+        const threadCount = Math.floor(
           Math.floor((serverMaxRam - serverUsedRam) / scriptRAM) /
             threadModifier
         );
@@ -81,9 +81,13 @@ export async function main(ns) {
         }
       }
 
-      if (!ns.scriptRunning(growScriptPath, currentServer) && !isGhostServer) {
-        var scriptRAM = ns.getScriptRam(growScriptPath, currentServer);
-        var threadCount = Math.floor(
+      if (
+        !ns.scriptRunning(growScriptPath, currentServer) &&
+        !isGhostServer &&
+        isGrowThresholdReached
+      ) {
+        const scriptRAM = ns.getScriptRam(growScriptPath, currentServer);
+        const threadCount = Math.floor(
           Math.floor((serverMaxRam - serverUsedRam) / scriptRAM) / 2
         );
 
