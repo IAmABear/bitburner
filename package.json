@@ -1,6 +1,6 @@
 {
   "name": "bitburner",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "watch": "npx tsc -w",
     "lint": "eslint . --ext .ts",
     "defs": "node ./updateDefs.js",
-    "sync": "bitburner-sync"
+    "sync": "npx tsc && bitburner-sync"
   },
   "repository": {
     "type": "git",
