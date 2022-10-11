@@ -1,28 +1,25 @@
+type Options = {
+  includeHome: boolean;
+  includeGhost: boolean;
+  onlyGhost?: boolean;
+  mustHaveRootAccess?: boolean;
+};
+
 export default async (
   ns: NS,
   {
     includeHome = false,
     includeGhost = false,
+    onlyGhost = false,
     mustHaveRootAccess = false,
-  }: {
-    includeHome: boolean;
-    includeGhost: boolean;
-    mustHaveRootAccess?: boolean;
-  }
+  }: Options
 ): Promise<string[]> => {
   const scannedServers: string[] = [];
 
   async function scanServer(
     ns: any,
     server: string,
-    {
-      includeGhost,
-      includeHome,
-    }: {
-      includeHome: boolean;
-      includeGhost: boolean;
-      mustHaveRootAccess?: boolean;
-    }
+    { includeGhost, includeHome }: Options
   ) {
     const serversFound = ns.scan(server);
 
@@ -30,20 +27,32 @@ export default async (
       const serverFound = serversFound[serverFoundIndex];
 
       if (!scannedServers.includes(serverFound)) {
-        if (
-          (includeHome && serverFound === "home") ||
-          (includeGhost && serverFound.includes("ghost-")) ||
-          (!serverFound.includes("ghost-") && serverFound !== "home")
+        if (onlyGhost && serverFound.includes("ghost-")) {
+          scannedServers.push(serverFound);
+          await scanServer(ns, serverFound, {
+            includeGhost,
+            includeHome,
+            onlyGhost,
+          });
+        } else if (
+          !onlyGhost &&
+          ((includeHome && serverFound === "home") ||
+            (includeGhost && serverFound.includes("ghost-")) ||
+            (!serverFound.includes("ghost-") && serverFound !== "home"))
         ) {
           scannedServers.push(serverFound);
-          await scanServer(ns, serverFound, { includeGhost, includeHome });
+          await scanServer(ns, serverFound, {
+            includeGhost,
+            includeHome,
+            onlyGhost,
+          });
         }
       }
     }
 
     return serversFound;
   }
-  await scanServer(ns, "home", { includeGhost, includeHome });
+  await scanServer(ns, "home", { includeGhost, includeHome, onlyGhost });
 
   return scannedServers.reduce((allServers: string[], currentServer) => {
     if (mustHaveRootAccess) {

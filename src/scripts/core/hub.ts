@@ -18,18 +18,21 @@ export async function main(ns: NS): Promise<void> {
   while (true) {
     const servers = await getServers(ns, {
       includeHome: false,
-      includeGhost: true,
+      includeGhost: false,
     });
     const targetServers = await getServers(ns, {
       includeHome: false,
       includeGhost: false,
       mustHaveRootAccess: true,
     });
-    let avaibleServers = Object.assign([], targetServers);
+    const filteredServers = targetServers.filter(
+      (server: string) => server !== "foodnstuff"
+    );
+    let avaibleServers = Object.assign([], filteredServers);
 
     for (const serverIndex in servers) {
       if (avaibleServers.length === 0) {
-        avaibleServers = Object.assign([], targetServers);
+        avaibleServers = Object.assign([], filteredServers);
       }
 
       const currentServer = servers[serverIndex];
