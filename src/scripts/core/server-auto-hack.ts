@@ -81,9 +81,8 @@ async function scanServer(ns: NS, server: string) {
 
 let currentHackingLevel = 0;
 export async function main(ns: NS): Promise<void> {
-  ns.tprint("Auto hack method");
   const servers = await scanServer(ns, "home");
-  ns.tprint(servers);
+
   while (true) {
     if (currentHackingLevel !== ns.getHackingLevel()) {
       currentHackingLevel = ns.getHackingLevel();
@@ -94,7 +93,6 @@ export async function main(ns: NS): Promise<void> {
             ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(server)
           ) {
             await crackOpenServer(ns, server);
-            ns.tprint(server);
             await copyHackFilesToServer(ns, server);
           }
         }
