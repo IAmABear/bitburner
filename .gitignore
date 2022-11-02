@@ -1,3 +1,4 @@
 node_modules/
 dist/
 .vscode/
+bitburner-sync.json
