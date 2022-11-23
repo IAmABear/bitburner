@@ -1,3 +1,9 @@
+import {
+  growScriptPath,
+  weakenScriptPath,
+  hackScriptPath,
+} from "/scripts/utils/scriptPaths.js";
+
 async function crackOpenServer(ns: NS, server: string): Promise<void> {
   const serverInfo = ns.getServer(server);
   if (serverInfo.hasAdminRights) {
@@ -46,11 +52,7 @@ async function crackOpenServer(ns: NS, server: string): Promise<void> {
 
 async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {
   const res = await ns.scp(
-    [
-      "/scripts/hacks/hack.js",
-      "/scripts/hacks/grow.js",
-      "/scripts/hacks/weaken.js",
-    ],
+    [hackScriptPath, growScriptPath, weakenScriptPath],
     server
   );
 

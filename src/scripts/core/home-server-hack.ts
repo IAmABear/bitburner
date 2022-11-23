@@ -1,8 +1,9 @@
 import getServers from "/scripts/utils/getServers.js";
-
-const growScriptPath = "/scripts/hacks/grow.js";
-const weakenScriptPath = "/scripts/hacks/weaken.js";
-const hackScriptPath = "/scripts/hacks/hack.js";
+import {
+  growScriptPath,
+  weakenScriptPath,
+  hackScriptPath,
+} from "/scripts/utils/scriptPaths.js";
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
