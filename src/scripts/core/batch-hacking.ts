@@ -40,6 +40,14 @@ const hasServerRunningsScripts = (ns: NS, server: string) => {
   );
 };
 
+const getPossibleThreadCount = (ns: NS, server: string, script: string) => {
+  const serverMaxRam = ns.getServerMaxRam(server);
+  const serverUsedRam = ns.getServerUsedRam(server);
+  const scriptRAM = ns.getScriptRam(script, server);
+
+  return Math.ceil(Math.floor((serverMaxRam - serverUsedRam) / scriptRAM));
+};
+
 const prepServer = async (ns: NS, servers: string[]) => {
   const targetServer = batchableServers.find(
     (server) => server.prepped === false
@@ -61,11 +69,10 @@ const prepServer = async (ns: NS, servers: string[]) => {
 
   await servers.forEach(async (currentServer) => {
     const neededThreads = weakenThreadsNeeded - weakenScriptsActive;
-    const serverMaxRam = ns.getServerMaxRam(currentServer);
-    const serverUsedRam = ns.getServerUsedRam(currentServer);
-    const scriptRAM = ns.getScriptRam(weakenScriptPath, currentServer);
-    const possibleThreadCount = Math.ceil(
-      Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
+    const possibleThreadCount = getPossibleThreadCount(
+      ns,
+      currentServer,
+      weakenScriptPath
     );
     const threadCount =
       weakenScriptsActive + possibleThreadCount >= neededThreads
@@ -122,13 +129,12 @@ const weakenServer = async (
   const serverWeakenTime = ns.getWeakenTime(server);
 
   await servers.forEach(async (currentServer) => {
-    const neededThreads = weakenThreadsNeeded - weakenScriptsActive;
-    const serverMaxRam = ns.getServerMaxRam(currentServer);
-    const serverUsedRam = ns.getServerUsedRam(currentServer);
-    const scriptRAM = ns.getScriptRam(weakenScriptPath, currentServer);
-    const possibleThreadCount = Math.ceil(
-      Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
+    const possibleThreadCount = getPossibleThreadCount(
+      ns,
+      currentServer,
+      weakenScriptPath
     );
+    const neededThreads = weakenThreadsNeeded - weakenScriptsActive;
     const threadCount =
       weakenScriptsActive + possibleThreadCount >= neededThreads
         ? neededThreads - weakenScriptsActive
@@ -171,11 +177,10 @@ const growServer = async (ns: NS, targetServer: string, servers: string[]) => {
   const growthTime = ns.getGrowTime(targetServer);
 
   await servers.forEach(async (currentServer) => {
-    const serverMaxRam = ns.getServerMaxRam(currentServer);
-    const serverUsedRam = ns.getServerUsedRam(currentServer);
-    const scriptRAM = ns.getScriptRam(growScriptPath, currentServer);
-    const possibleThreadCount = Math.ceil(
-      Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
+    const possibleThreadCount = getPossibleThreadCount(
+      ns,
+      currentServer,
+      growScriptPath
     );
 
     const threadCount =
@@ -210,11 +215,10 @@ const hackServer = async (ns: NS, server: string, servers: string[]) => {
   let hackScriptsActive = 0;
 
   await servers.forEach(async (currentServer) => {
-    const serverMaxRam = ns.getServerMaxRam(currentServer);
-    const serverUsedRam = ns.getServerUsedRam(currentServer);
-    const scriptRAM = ns.getScriptRam(hackScriptPath, currentServer);
-    const possibleThreadCount = Math.ceil(
-      Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
+    const possibleThreadCount = getPossibleThreadCount(
+      ns,
+      currentServer,
+      hackScriptPath
     );
 
     const threadCount =
