@@ -134,6 +134,15 @@ const runScript = async (
     scriptCompletionTime: number;
   }
 ) => {
+  // Fail-safe to avoid infinite triggers without actual results
+  if (threadsNeeded === 0) {
+    events.push({
+      server: targetServer,
+      status: onSuccessEvent.status,
+      timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
+    });
+  }
+
   let scriptsActive = 0;
 
   await servers.forEach(async (currentServer) => {
