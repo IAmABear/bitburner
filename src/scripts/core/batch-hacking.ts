@@ -1,3 +1,24 @@
+/**
+ * Notes to self:
+ *
+ * - Need to handle which servers are going to be used since I can't use the
+ *   bitburner API to see if a script is going to run since I'll be using
+ *   setTimeout to delay triggering the scripts.
+ * - Need to see if its needed to create a method to check if a server can
+ *   handle the requests (grow and hack in particular) in one go to avoid
+ *   requests failing due to security being to high since multiple requests
+ *   might have finished before it.
+ * - Need to check if servers arn't going to be flooded with multiple small
+ *   requests (weaken, grow, hack) which avoid the server ever being able to
+ *   handle larger requests (hack and grow in particular).
+ * - Check if its worth the time to create a method to see how much ram is
+ *   needed if we want to complete requests in one go and mark these servers
+ *   so that we will always have some avaible.
+ * - Need to check how far ahead we need to batch. Can we manage with just
+ *   in time batching where we only ensure the next even to be scheduled or do
+ *   we need to complete entire batches and queue the next one as well?
+ */
+
 import getServers from "/scripts/utils/getServers.js";
 
 const growScriptPath = "/scripts/hacks/grow.js";
