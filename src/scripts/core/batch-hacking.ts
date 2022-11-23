@@ -162,9 +162,6 @@ const runScript = async (
         scriptsActive += threadCount;
 
         if (scriptsActive >= threadsNeeded) {
-          // Do this in hack function
-          // const hackTime = ns.getHackTime(targetServer);
-
           events.push({
             server: targetServer,
             status: onSuccessEvent.status,
