@@ -298,7 +298,7 @@ export async function main(ns: NS): Promise<void> {
           );
           break;
         default:
-          await prepServer(ns, servers);
+          console.log("Unknown event given");
           break;
       }
 
