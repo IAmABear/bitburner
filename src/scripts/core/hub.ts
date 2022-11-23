@@ -19,7 +19,7 @@ export async function main(ns: NS): Promise<void> {
   while (true) {
     const servers = await getServers(ns, {
       includeHome: false,
-      includeGhost: false,
+      includeGhost: true,
     });
     const targetServers = await getServers(ns, {
       includeHome: false,
