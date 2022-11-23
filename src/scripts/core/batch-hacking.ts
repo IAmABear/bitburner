@@ -23,6 +23,22 @@ type BatchEvent = {
 
 let events: BatchEvent[] = [];
 
+/**
+ * Temporary fix to ensure no duplicate scripts are running and servers only run
+ * on script at the time. This will be fixed later with better betection but for
+ * now it will suffice.
+ *
+ * @param server The server name to check
+ * @returns boolean is the server has a script running already
+ */
+const hasServerRunningsScripts = (server: string) => {
+  return (
+    ns.scriptRunning(growScriptPath, server) ||
+    ns.scriptRunning(weakenScriptPath, server) ||
+    ns.scriptRunning(hackScriptPath, server)
+  );
+};
+
 const prepServer = async (ns: NS, servers: string[]) => {
   const targetServer = batchableServers.find(
     (server) => server.prepped === false
@@ -56,7 +72,7 @@ const prepServer = async (ns: NS, servers: string[]) => {
         : possibleThreadCount;
 
     if (threadCount >= 0) {
-      if (!ns.scriptRunning(weakenScriptPath, targetServer.name)) {
+      if (!hasServerRunningsScripts(targetServer.name)) {
         ns.exec(
           weakenScriptPath,
           currentServer,
@@ -118,7 +134,7 @@ const weakenServer = async (
         : possibleThreadCount;
 
     if (threadCount >= 0) {
-      if (!ns.scriptRunning(weakenScriptPath, server)) {
+      if (!hasServerRunningsScripts(targetServer.name)) {
         ns.exec(weakenScriptPath, currentServer, threadCount, server);
         weakenScriptsActive += threadCount;
 
@@ -167,7 +183,7 @@ const growServer = async (ns: NS, targetServer: string, servers: string[]) => {
         : possibleThreadCount;
 
     if (threadCount !== 0) {
-      if (!ns.scriptRunning(growScriptPath, currentServer)) {
+      if (!hasServerRunningsScripts(targetServer.name))) {
         ns.exec(growScriptPath, currentServer, threadCount, targetServer);
         growthScriptsActive += threadCount;
 
