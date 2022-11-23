@@ -17,6 +17,11 @@
  * - Need to check how far ahead we need to batch. Can we manage with just
  *   in time batching where we only ensure the next even to be scheduled or do
  *   we need to complete entire batches and queue the next one as well?
+ * - Do we infinitly batch on server or do we split our threads among several
+ *   servers?
+ * - Check when its realistic to use batch scripting and make a script that
+ *   switches between the current hub which forces it way through and the
+ *   new batching script.
  */
 
 import getServers from "/scripts/utils/getServers.js";
