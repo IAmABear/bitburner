@@ -61,60 +61,11 @@ const prepServer = async (ns: NS, servers: string[]) => {
   const targetServer = batchableServers.find(
     (server) => server.prepped === false
   );
-
   if (!targetServer) {
     return;
   }
 
-  const weakenThreadsNeeded = threadsNeededToWeaken(ns, targetServer.name);
-
-  let weakenScriptsActive = 0;
-
-  await servers.forEach(async (currentServer) => {
-    const neededThreads = weakenThreadsNeeded - weakenScriptsActive;
-    const possibleThreadCount = getPossibleThreadCount(
-      ns,
-      currentServer,
-      weakenScriptPath
-    );
-    const threadCount =
-      weakenScriptsActive + possibleThreadCount >= neededThreads
-        ? neededThreads - weakenScriptsActive
-        : possibleThreadCount;
-
-    if (threadCount >= 0) {
-      if (!hasServerRunningsScripts(ns, targetServer.name)) {
-        ns.exec(
-          weakenScriptPath,
-          currentServer,
-          threadCount,
-          targetServer.name
-        );
-        weakenScriptsActive += threadCount;
-
-        if (weakenScriptsActive === weakenThreadsNeeded) {
-          const serverWeakenTime = ns.getWeakenTime(targetServer.name);
-
-          events.push({
-            server: targetServer.name,
-            status: "prepped",
-            timeScriptsDone: Date.now() + serverWeakenTime,
-          });
-
-          const batchableServer = batchableServers.find(
-            (server) => server.name === targetServer.name
-          );
-          if (batchableServer) {
-            batchableServer.prepped = true;
-            return await prepServer(ns, servers);
-          }
-        }
-      }
-    } else {
-      targetServer.prepped = true;
-      events.push({ server: targetServer.name, status: "prepped" });
-    }
-  });
+  return weakenServer(ns, targetServer.name, servers);
 };
 
 const weakenServer = async (
@@ -263,9 +214,17 @@ export async function main(ns: NS): Promise<void> {
         case "hackable":
           await hackServer(ns, batchableServers[0].name, servers);
           break;
-        case "prepped":
+        case "prepped": {
+          const targetServer = batchableServers.find(
+            (server) => server.name === event.server
+          );
+          if (targetServer) {
+            targetServer.prepped = true;
+          }
+
           await growServer(ns, batchableServers[0].name, servers);
           break;
+        }
         case "fullyGrown":
         case "fullyHacked":
           await weakenServer(
