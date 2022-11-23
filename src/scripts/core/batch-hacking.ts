@@ -48,6 +48,15 @@ const getPossibleThreadCount = (ns: NS, server: string, script: string) => {
   return Math.ceil(Math.floor((serverMaxRam - serverUsedRam) / scriptRAM));
 };
 
+const threadsNeededToWeaken = (ns: NS, server: string) => {
+  const serverMinSecurity = ns.getServerMinSecurityLevel(server);
+  const serverSecurity = ns.getServerSecurityLevel(server);
+  const secDiff = serverSecurity - serverMinSecurity;
+  const weakenEffect = ns.weakenAnalyze(1);
+
+  return Math.ceil(secDiff / weakenEffect);
+};
+
 const prepServer = async (ns: NS, servers: string[]) => {
   const targetServer = batchableServers.find(
     (server) => server.prepped === false
@@ -57,15 +66,9 @@ const prepServer = async (ns: NS, servers: string[]) => {
     return;
   }
 
-  const serverMinSecurity = ns.getServerMinSecurityLevel(targetServer.name);
-  const serverSecurity = ns.getServerSecurityLevel(targetServer.name);
-  const secDiff = serverSecurity - serverMinSecurity;
-  const weakenEffect = ns.weakenAnalyze(1);
-  const weakenThreadsNeeded = Math.ceil(secDiff / weakenEffect);
+  const weakenThreadsNeeded = threadsNeededToWeaken(ns, targetServer.name);
 
   let weakenScriptsActive = 0;
-
-  const serverWeakenTime = ns.getWeakenTime(targetServer.name);
 
   await servers.forEach(async (currentServer) => {
     const neededThreads = weakenThreadsNeeded - weakenScriptsActive;
@@ -90,6 +93,8 @@ const prepServer = async (ns: NS, servers: string[]) => {
         weakenScriptsActive += threadCount;
 
         if (weakenScriptsActive === weakenThreadsNeeded) {
+          const serverWeakenTime = ns.getWeakenTime(targetServer.name);
+
           events.push({
             server: targetServer.name,
             status: "prepped",
@@ -118,15 +123,9 @@ const weakenServer = async (
   servers: string[],
   eventType: BatchStatus = "prepped"
 ) => {
-  const serverMinSecurity = ns.getServerMinSecurityLevel(server);
-  const serverSecurity = ns.getServerSecurityLevel(server);
-  const secDiff = serverSecurity - serverMinSecurity;
-  const weakenEffect = ns.weakenAnalyze(1);
-  const weakenThreadsNeeded = Math.ceil(secDiff / weakenEffect);
+  const weakenThreadsNeeded = threadsNeededToWeaken(ns, server);
 
   let scriptsActive = 0;
-
-  const serverWeakenTime = ns.getWeakenTime(server);
 
   await servers.forEach(async (currentServer) => {
     const possibleThreadCount = getPossibleThreadCount(
@@ -146,6 +145,7 @@ const weakenServer = async (
         scriptsActive += threadCount;
 
         if (scriptsActive === weakenThreadsNeeded) {
+          const serverWeakenTime = ns.getWeakenTime(server);
           events.push({
             server,
             status: eventType,
@@ -161,20 +161,23 @@ const weakenServer = async (
   });
 };
 
+const threadsNeededToGrow = (ns: NS, server: string) => {
+  const currentMoney = ns.getServerMoneyAvailable(server);
+  const maxMoney = ns.getServerMaxMoney(server);
+  const moneyDiff = (maxMoney - currentMoney) / currentMoney;
+
+  return moneyDiff <= 1 ? 0 : Math.ceil(ns.growthAnalyze(server, moneyDiff));
+};
+
 const growServer = async (ns: NS, targetServer: string, servers: string[]) => {
   ns.tprint(`Growin server ${targetServer}`);
-  const currentMoney = ns.getServerMoneyAvailable(targetServer);
-  const maxMoney = ns.getServerMaxMoney(targetServer);
-  const moneyDiff = (maxMoney - currentMoney) / currentMoney;
-  const threadsNeeded =
-    moneyDiff <= 1 ? 0 : Math.ceil(ns.growthAnalyze(targetServer, moneyDiff));
+  const threadsNeeded = threadsNeededToGrow(ns, targetServer);
   if (threadsNeeded < 1) {
     events.push({ server: targetServer, status: "fullyGrown" });
     return;
   }
 
   let scriptsActive = 0;
-  const growthTime = ns.getGrowTime(targetServer);
 
   await servers.forEach(async (currentServer) => {
     const possibleThreadCount = getPossibleThreadCount(
@@ -195,7 +198,7 @@ const growServer = async (ns: NS, targetServer: string, servers: string[]) => {
 
         if (scriptsActive >= threadsNeeded) {
           ns.tprint("All growth scripts needed triggered");
-
+          const growthTime = ns.getGrowTime(targetServer);
           events.push({
             server: targetServer,
             status: "fullyGrown",
@@ -207,11 +210,16 @@ const growServer = async (ns: NS, targetServer: string, servers: string[]) => {
   });
 };
 
+const threadsNeededToHack = (ns: NS, server: string) => {
+  const targetMoneyHeist = ns.getServerMaxMoney(server) * 0.3;
+
+  return ns.hackAnalyzeThreads(server, targetMoneyHeist);
+};
+
 const hackServer = async (ns: NS, server: string, servers: string[]) => {
   ns.tprint("Hacking server");
-  const targetMoneyHeist = ns.getServerMaxMoney(server) * 0.3;
-  const threadsNeeded = ns.hackAnalyzeThreads(server, targetMoneyHeist);
-  const hackTime = ns.getHackTime(server);
+  const threadsNeeded = threadsNeededToHack(ns, server);
+
   let scriptsActive = 0;
 
   await servers.forEach(async (currentServer) => {
@@ -232,6 +240,8 @@ const hackServer = async (ns: NS, server: string, servers: string[]) => {
         scriptsActive += threadCount;
 
         if (scriptsActive >= threadsNeeded) {
+          const hackTime = ns.getHackTime(server);
+
           events.push({
             server: server,
             status: "fullyHacked",
