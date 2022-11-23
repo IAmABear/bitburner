@@ -18,7 +18,7 @@ const batchableServers: BatchableServer[] = [
 type BatchEvent = {
   server: string;
   status: "hackable" | "prepped" | "fullyGrown" | "fullyHacked";
-  timeScriptsDone: string;
+  timeScriptsDone?: number;
 };
 
 let events: BatchEvent[] = [];
@@ -31,7 +31,7 @@ let events: BatchEvent[] = [];
  * @param server The server name to check
  * @returns boolean is the server has a script running already
  */
-const hasServerRunningsScripts = (server: string) => {
+const hasServerRunningsScripts = (ns: NS, server: string) => {
   return (
     ns.scriptRunning(growScriptPath, server) ||
     ns.scriptRunning(weakenScriptPath, server) ||
@@ -72,7 +72,7 @@ const prepServer = async (ns: NS, servers: string[]) => {
         : possibleThreadCount;
 
     if (threadCount >= 0) {
-      if (!hasServerRunningsScripts(targetServer.name)) {
+      if (!hasServerRunningsScripts(ns, targetServer.name)) {
         ns.exec(
           weakenScriptPath,
           currentServer,
@@ -134,7 +134,7 @@ const weakenServer = async (
         : possibleThreadCount;
 
     if (threadCount >= 0) {
-      if (!hasServerRunningsScripts(targetServer.name)) {
+      if (!hasServerRunningsScripts(ns, server)) {
         ns.exec(weakenScriptPath, currentServer, threadCount, server);
         weakenScriptsActive += threadCount;
 
@@ -183,7 +183,7 @@ const growServer = async (ns: NS, targetServer: string, servers: string[]) => {
         : possibleThreadCount;
 
     if (threadCount !== 0) {
-      if (!hasServerRunningsScripts(targetServer.name))) {
+      if (!hasServerRunningsScripts(ns, targetServer)) {
         ns.exec(growScriptPath, currentServer, threadCount, targetServer);
         growthScriptsActive += threadCount;
 
