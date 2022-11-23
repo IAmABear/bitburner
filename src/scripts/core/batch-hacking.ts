@@ -119,133 +119,96 @@ const prepServer = async (ns: NS, servers: string[]) => {
 
 const weakenServer = async (
   ns: NS,
-  server: string,
+  targetServer: string,
   servers: string[],
   eventType: BatchStatus = "prepped"
 ) => {
-  const weakenThreadsNeeded = threadsNeededToWeaken(ns, server);
+  const threadsNeeded = threadsNeededToWeaken(ns, targetServer);
+  const serverWeakenTime = ns.getWeakenTime(targetServer);
 
-  let scriptsActive = 0;
-
-  await servers.forEach(async (currentServer) => {
-    const possibleThreadCount = getPossibleThreadCount(
-      ns,
-      currentServer,
-      weakenScriptPath
-    );
-    const neededThreads = weakenThreadsNeeded - scriptsActive;
-    const threadCount =
-      scriptsActive + possibleThreadCount >= neededThreads
-        ? neededThreads - scriptsActive
-        : possibleThreadCount;
-
-    if (threadCount >= 0) {
-      if (!hasServerRunningsScripts(ns, server)) {
-        ns.exec(weakenScriptPath, currentServer, threadCount, server);
-        scriptsActive += threadCount;
-
-        if (scriptsActive === weakenThreadsNeeded) {
-          const serverWeakenTime = ns.getWeakenTime(server);
-          events.push({
-            server,
-            status: eventType,
-            timeScriptsDone: Date.now() + serverWeakenTime,
-          });
-        }
-      }
-    } else {
-      ns.tprint("All weaken scripts needed triggered");
-
-      events.push({ server, status: eventType });
-    }
+  return runScript(ns, targetServer, servers, weakenScriptPath, threadsNeeded, {
+    status: eventType,
+    scriptCompletionTime: serverWeakenTime,
   });
 };
 
-const threadsNeededToGrow = (ns: NS, server: string) => {
-  const currentMoney = ns.getServerMoneyAvailable(server);
-  const maxMoney = ns.getServerMaxMoney(server);
+const threadsNeededToGrow = (ns: NS, targetServer: string) => {
+  const currentMoney = ns.getServerMoneyAvailable(targetServer);
+  const maxMoney = ns.getServerMaxMoney(targetServer);
   const moneyDiff = (maxMoney - currentMoney) / currentMoney;
 
-  return moneyDiff <= 1 ? 0 : Math.ceil(ns.growthAnalyze(server, moneyDiff));
+  return moneyDiff <= 1
+    ? 0
+    : Math.ceil(ns.growthAnalyze(targetServer, moneyDiff));
 };
 
 const growServer = async (ns: NS, targetServer: string, servers: string[]) => {
   ns.tprint(`Growin server ${targetServer}`);
+
   const threadsNeeded = threadsNeededToGrow(ns, targetServer);
-  if (threadsNeeded < 1) {
-    events.push({ server: targetServer, status: "fullyGrown" });
-    return;
-  }
+  const growthTime = ns.getGrowTime(targetServer);
 
-  let scriptsActive = 0;
-
-  await servers.forEach(async (currentServer) => {
-    const possibleThreadCount = getPossibleThreadCount(
-      ns,
-      currentServer,
-      growScriptPath
-    );
-
-    const threadCount =
-      scriptsActive + possibleThreadCount >= threadsNeeded
-        ? threadsNeeded - scriptsActive
-        : possibleThreadCount;
-
-    if (threadCount !== 0) {
-      if (!hasServerRunningsScripts(ns, targetServer)) {
-        ns.exec(growScriptPath, currentServer, threadCount, targetServer);
-        scriptsActive += threadCount;
-
-        if (scriptsActive >= threadsNeeded) {
-          ns.tprint("All growth scripts needed triggered");
-          const growthTime = ns.getGrowTime(targetServer);
-          events.push({
-            server: targetServer,
-            status: "fullyGrown",
-            timeScriptsDone: Date.now() + growthTime,
-          });
-        }
-      }
-    }
+  return runScript(ns, targetServer, servers, growScriptPath, threadsNeeded, {
+    status: "fullyGrown",
+    scriptCompletionTime: growthTime,
   });
 };
 
-const threadsNeededToHack = (ns: NS, server: string) => {
-  const targetMoneyHeist = ns.getServerMaxMoney(server) * 0.3;
+const threadsNeededToHack = (ns: NS, targetServer: string) => {
+  const targetMoneyHeist = ns.getServerMaxMoney(targetServer) * 0.3;
 
-  return ns.hackAnalyzeThreads(server, targetMoneyHeist);
+  return ns.hackAnalyzeThreads(targetServer, targetMoneyHeist);
 };
 
-const hackServer = async (ns: NS, server: string, servers: string[]) => {
+const hackServer = async (ns: NS, targetServer: string, servers: string[]) => {
   ns.tprint("Hacking server");
-  const threadsNeeded = threadsNeededToHack(ns, server);
 
+  const threadsNeeded = threadsNeededToHack(ns, targetServer);
+  const hackTime = ns.getHackTime(targetServer);
+
+  return runScript(ns, targetServer, servers, hackScriptPath, threadsNeeded, {
+    status: "fullyHacked",
+    scriptCompletionTime: hackTime,
+  });
+};
+
+const runScript = async (
+  ns: NS,
+  targetServer: string,
+  servers: string[],
+  scriptPath: string,
+  threadsNeeded: number,
+  onSuccessEvent: {
+    status: BatchStatus;
+    scriptCompletionTime: number;
+  }
+) => {
   let scriptsActive = 0;
 
   await servers.forEach(async (currentServer) => {
     const possibleThreadCount = getPossibleThreadCount(
       ns,
       currentServer,
-      hackScriptPath
+      scriptPath
     );
-
     const threadCount =
       scriptsActive + possibleThreadCount >= threadsNeeded
         ? threadsNeeded - scriptsActive
         : possibleThreadCount;
 
     if (threadCount >= 0) {
-      if (!ns.scriptRunning(hackScriptPath, currentServer)) {
-        ns.exec(hackScriptPath, currentServer, threadCount, server);
+      if (!hasServerRunningsScripts(ns, currentServer)) {
+        ns.exec(scriptPath, currentServer, threadCount, targetServer);
         scriptsActive += threadCount;
 
         if (scriptsActive >= threadsNeeded) {
-          const hackTime = ns.getHackTime(server);
+          // Do this in hack function
+          // const hackTime = ns.getHackTime(targetServer);
 
           events.push({
-            server: server,
-            status: "fullyHacked",
-            timeScriptsDone: Date.now() + hackTime,
+            server: targetServer,
+            status: onSuccessEvent.status,
+            timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
           });
         }
       }
