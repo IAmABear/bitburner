@@ -15,9 +15,10 @@ const batchableServers: BatchableServer[] = [
   { name: "sigma-cosmetics", prepped: false },
 ];
 
+type BatchStatus = "hackable" | "prepped" | "fullyGrown" | "fullyHacked";
 type BatchEvent = {
   server: string;
-  status: "hackable" | "prepped" | "fullyGrown" | "fullyHacked";
+  status: BatchStatus;
   timeScriptsDone?: number;
 };
 
@@ -108,7 +109,7 @@ const weakenServer = async (
   ns: NS,
   server: string,
   servers: string[],
-  eventType: "hackable" | "prepped" | "fullyGrown" | "fullyHacked" = "prepped"
+  eventType: BatchStatus = "prepped"
 ) => {
   const serverMinSecurity = ns.getServerMinSecurityLevel(server);
   const serverSecurity = ns.getServerSecurityLevel(server);
