@@ -33,6 +33,7 @@ import {
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
+import { medium } from "/scripts/utils/timeoutTimes";
 
 type BatchableServer = {
   name: string;
@@ -253,6 +254,6 @@ export async function main(ns: NS): Promise<void> {
 
     events = [];
 
-    await ns.sleep(3000);
+    await ns.sleep(medium);
   }
 }

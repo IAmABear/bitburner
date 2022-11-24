@@ -4,6 +4,7 @@ import {
   weakenScriptPath,
   hackScriptPath,
 } from "/scripts/utils/scriptPaths.js";
+import { short } from "/scripts/utils/timeoutTimes";
 
 /**
  * Initial centralized hacking hub for mass hacking.
@@ -111,7 +112,7 @@ export async function main(ns: NS): Promise<void> {
 
       avaibleServers.shift();
 
-      await ns.sleep(50);
+      await ns.sleep(short);
     }
   }
 }

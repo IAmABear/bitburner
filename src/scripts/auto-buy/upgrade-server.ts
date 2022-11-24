@@ -1,3 +1,5 @@
+import { long } from "/scripts/utils/timeoutTimes";
+
 export async function main(ns: NS): Promise<void> {
   const servers = await ns.getPurchasedServers();
 
@@ -56,7 +58,7 @@ export async function main(ns: NS): Promise<void> {
         );
       }
 
-      await ns.sleep(1000);
+      await ns.sleep(long);
     }
   }
 }

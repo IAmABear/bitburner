@@ -3,6 +3,7 @@ import {
   weakenScriptPath,
   hackScriptPath,
 } from "/scripts/utils/scriptPaths.js";
+import { medium } from "/scripts/utils/timeoutTimes";
 
 async function crackOpenServer(ns: NS, server: string): Promise<void> {
   const serverInfo = ns.getServer(server);
@@ -101,6 +102,6 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    await ns.sleep(1000);
+    await ns.sleep(medium);
   }
 }
