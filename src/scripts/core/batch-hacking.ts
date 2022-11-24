@@ -33,7 +33,7 @@ import {
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import { medium, short } from "/scripts/utils/timeoutTimes";
+import { medium, long, short } from "/scripts/utils/timeoutTimes";
 
 type BatchableServer = {
   name: string;
@@ -42,12 +42,18 @@ type BatchableServer = {
 
 const batchableServers: BatchableServer[] = [
   { name: "foodnstuff", prepped: false },
-  { name: "n00dles", prepped: false },
-  { name: "sigma-cosmetics", prepped: false },
+  // { name: "n00dles", prepped: false },
+  // { name: "sigma-cosmetics", prepped: false },
 ];
 
-type BatchStatus = "hackable" | "prepped" | "fullyGrown" | "fullyHacked";
+type BatchStatus =
+  | "hackable"
+  | "prepped"
+  | "fullyGrown"
+  | "fullyHacked"
+  | "needsGrowing";
 type BatchEvent = {
+  id: number;
   server: string;
   status: BatchStatus;
   timeScriptsDone: number;
@@ -56,43 +62,12 @@ type BatchEvent = {
 };
 
 let events: BatchEvent[] = [];
-
+let scriptsActive = 0;
 type ServerThreadsInUse = {
   server: string;
   hack: number;
   weaken: number;
   grow: number;
-};
-const serverThreadsWatchdog: ServerThreadsInUse[] = [];
-
-const getThreadServer = (server: string): ServerThreadsInUse => {
-  const currentServerThread = serverThreadsWatchdog.find(
-    (currentServer) => currentServer.server === server
-  );
-
-  return currentServerThread
-    ? currentServerThread
-    : {
-        server: server,
-        hack: 0,
-        grow: 0,
-        weaken: 0,
-      };
-};
-
-const updateServerThread = (serverThread: ServerThreadsInUse) => {
-  const currentServerThreadIndex = serverThreadsWatchdog.findIndex(
-    (currentServer) => currentServer.server === serverThread.server
-  );
-
-  if (currentServerThreadIndex >= 0) {
-    serverThreadsWatchdog[currentServerThreadIndex] = {
-      ...serverThreadsWatchdog[currentServerThreadIndex],
-      ...serverThread,
-    };
-  } else {
-    serverThreadsWatchdog.push(serverThread);
-  }
 };
 
 /**
@@ -112,12 +87,9 @@ const hasServerRunningsScripts = (ns: NS, server: string) => {
 };
 
 const prepServer = (ns: NS, servers: string[]) => {
-  const targetServer = batchableServers.find(
-    (server) => server.prepped === false
-  );
-  if (!targetServer) {
-    return Promise.resolve();
-  }
+  const targetServer =
+    batchableServers.find((server) => server.prepped === false) ||
+    batchableServers[0];
 
   return weakenServer(ns, targetServer.name, servers, 0);
 };
@@ -126,11 +98,22 @@ const weakenServer = (
   ns: NS,
   targetServer: string,
   servers: string[],
-  timeBeforeScriptCanRun: number,
-  eventType: BatchStatus = "prepped"
+  previousScriptDone: number,
+  eventType: BatchStatus = "prepped",
+  eventThreads = 0
 ) => {
-  const threadsNeeded = threadsNeededToWeaken(ns, targetServer);
-  const serverWeakenTime = ns.getWeakenTime(targetServer);
+  ns.print(`Running weaken on ${targetServer}`);
+  const predictedSecurity =
+    eventType === "hackable"
+      ? ns.growthAnalyzeSecurity(eventThreads, targetServer, 1)
+      : ns.hackAnalyzeSecurity(eventThreads, targetServer);
+
+  const threadsNeeded = threadsNeededToWeaken(
+    ns,
+    targetServer,
+    predictedSecurity
+  );
+  const serverWeakenTime = Math.ceil(ns.getWeakenTime(targetServer));
 
   return runScript(
     ns,
@@ -138,7 +121,7 @@ const weakenServer = (
     servers,
     weakenScriptPath,
     threadsNeeded,
-    timeBeforeScriptCanRun,
+    previousScriptDone - Date.now() - serverWeakenTime + short,
     {
       status: eventType,
       scriptCompletionTime: serverWeakenTime,
@@ -150,12 +133,12 @@ const growServer = (
   ns: NS,
   targetServer: string,
   servers: string[],
-  timeBeforeScriptCanRun: number
+  previousScriptDone: number
 ) => {
-  ns.tprint(`Growin server ${targetServer}`);
+  ns.print(`Growin server ${targetServer}`);
 
   const threadsNeeded = threadsNeededToGrow(ns, targetServer);
-  const growthTime = ns.getGrowTime(targetServer);
+  const growthTime = Math.ceil(ns.getGrowTime(targetServer));
 
   return runScript(
     ns,
@@ -163,7 +146,7 @@ const growServer = (
     servers,
     growScriptPath,
     threadsNeeded,
-    timeBeforeScriptCanRun,
+    previousScriptDone - Date.now() - growthTime + short,
     {
       status: "fullyGrown",
       scriptCompletionTime: growthTime,
@@ -174,19 +157,19 @@ const growServer = (
 const threadsNeededToHack = (ns: NS, targetServer: string) => {
   const targetMoneyHeist = ns.getServerMaxMoney(targetServer) * 0.3;
 
-  return ns.hackAnalyzeThreads(targetServer, targetMoneyHeist);
+  return Math.ceil(ns.hackAnalyzeThreads(targetServer, targetMoneyHeist));
 };
 
 const hackServer = (
   ns: NS,
   targetServer: string,
   servers: string[],
-  timeBeforeScriptCanRun: number
+  previousScriptDone: number
 ) => {
-  ns.tprint("Hacking server");
+  ns.print(`Hacking server: ${targetServer}`);
 
   const threadsNeeded = threadsNeededToHack(ns, targetServer);
-  const hackTime = ns.getHackTime(targetServer);
+  const hackTime = Math.ceil(ns.getHackTime(targetServer));
 
   return runScript(
     ns,
@@ -194,7 +177,7 @@ const hackServer = (
     servers,
     hackScriptPath,
     threadsNeeded,
-    timeBeforeScriptCanRun,
+    previousScriptDone - Date.now() - hackTime + short,
     {
       status: "fullyHacked",
       scriptCompletionTime: hackTime,
@@ -215,63 +198,66 @@ const runScript = async (
   }
 ) => {
   // Fail-safe to avoid infinite triggers without actual results
-  if (threadsNeeded === 0) {
+  if (threadsNeeded <= 0) {
+    ns.print("nothing needed");
+
     events.push({
+      id: Math.random() + Date.now(),
       server: targetServer,
       status: onSuccessEvent.status,
-      timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
+      timeScriptsDone: Date.now(),
       script: scriptPath,
       threads: 0,
     });
+
+    scriptsActive = 0;
+    return ns.sleep(medium);
   }
 
-  let scriptsActive = 0;
+  await ns.sleep(timeBeforeScriptCanRun > 0 ? timeBeforeScriptCanRun : short);
 
-  await servers.forEach(async (currentServer) => {
-    const possibleThreadCount = getPossibleThreadCount(
-      ns,
-      currentServer,
-      scriptPath
-    );
-    const threadCount =
-      scriptsActive + possibleThreadCount >= threadsNeeded
-        ? threadsNeeded - scriptsActive
-        : possibleThreadCount;
+  for (let index = 0; index < servers.length; index++) {
+    const currentServer = servers[index];
 
-    if (threadCount >= 0) {
-      if (!hasServerRunningsScripts(ns, currentServer)) {
-        scriptsActive += threadCount;
+    if (scriptsActive !== threadsNeeded) {
+      const possibleThreadCount = getPossibleThreadCount(
+        ns,
+        currentServer,
+        scriptPath
+      );
+      const threadCount =
+        scriptsActive + possibleThreadCount >= threadsNeeded
+          ? threadsNeeded - scriptsActive
+          : possibleThreadCount;
 
-        if (scriptsActive >= threadsNeeded) {
-          const serverThreadServer = getThreadServer(currentServer);
-          updateServerThread({
-            server: currentServer,
-            hack:
-              serverThreadServer.hack +
-              (scriptPath === hackScriptPath ? scriptsActive : 0),
-            grow:
-              serverThreadServer.grow +
-              (scriptPath === growScriptPath ? scriptsActive : 0),
-            weaken:
-              serverThreadServer.weaken +
-              (scriptPath === weakenScriptPath ? scriptsActive : 0),
-          });
+      if (threadCount >= 0) {
+        if (!hasServerRunningsScripts(ns, currentServer)) {
+          scriptsActive += threadCount;
 
-          setTimeout(() => {
-            ns.exec(scriptPath, currentServer, threadCount, targetServer);
-
-            events.push({
-              server: targetServer,
-              status: onSuccessEvent.status,
-              timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
-              script: scriptPath,
-              threads: scriptsActive,
-            });
-          }, timeBeforeScriptCanRun + short);
+          ns.exec(scriptPath, currentServer, threadCount, targetServer);
         }
       }
+
+      if (scriptsActive >= threadsNeeded) {
+        ns.print("active scripts reached");
+
+        events.push({
+          id: Math.random() + Date.now(),
+          server: targetServer,
+          status: onSuccessEvent.status,
+          timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
+          script: scriptPath,
+          threads: scriptsActive,
+        });
+
+        scriptsActive = 0;
+
+        break;
+      }
     }
-  });
+  }
+
+  return ns.sleep(medium);
 };
 
 /**
@@ -300,7 +286,6 @@ export async function main(ns: NS): Promise<void> {
     onlyGhost: true,
   });
 
-  await prepServer(ns, servers);
   /**
    * Before batches can be run a server should always be at minimum security
    * level to simplify this process
@@ -314,70 +299,66 @@ export async function main(ns: NS): Promise<void> {
 
   while (true) {
     ns.print(events);
-    for (let index = 0; index < events.length; index++) {
-      const event = events[index];
+    if (events.length === 0) {
+      await prepServer(ns, servers);
+    } else {
+      for (let index = 0; index < events.length; index++) {
+        const event = events[index];
+        switch (event.status) {
+          case "hackable":
+            await hackServer(
+              ns,
+              batchableServers[0].name,
+              servers,
+              event.timeScriptsDone - Date.now()
+            );
+            break;
+          case "prepped": {
+            const targetServer = batchableServers.find(
+              (server) => server.name === event.server
+            );
+            if (targetServer) {
+              targetServer.prepped = true;
+            }
 
-      setTimeout(() => {
-        const serverThreadServer = getThreadServer(event.server);
-        updateServerThread({
-          server: event.server,
-          hack:
-            serverThreadServer.hack -
-            (event.script === hackScriptPath ? event.threads : 0),
-          grow:
-            serverThreadServer.grow -
-            (event.script === growScriptPath ? event.threads : 0),
-          weaken:
-            serverThreadServer.weaken -
-            (event.script === weakenScriptPath ? event.threads : 0),
-        });
-      }, Date.now() - event.timeScriptsDone + short);
-
-      ns.tprint(serverThreadsWatchdog);
-      switch (event.status) {
-        case "hackable":
-          await hackServer(
-            ns,
-            batchableServers[0].name,
-            servers,
-            event.timeScriptsDone
-          );
-          break;
-        case "prepped": {
-          const targetServer = batchableServers.find(
-            (server) => server.name === event.server
-          );
-          if (targetServer) {
-            targetServer.prepped = true;
+            await growServer(
+              ns,
+              batchableServers[0].name,
+              servers,
+              event.timeScriptsDone
+            );
+            break;
           }
-
-          await growServer(
-            ns,
-            batchableServers[0].name,
-            servers,
-            event.timeScriptsDone
-          );
-          break;
+          case "needsGrowing": {
+            await growServer(
+              ns,
+              batchableServers[0].name,
+              servers,
+              event.timeScriptsDone
+            );
+            break;
+          }
+          case "fullyGrown":
+          case "fullyHacked":
+            await weakenServer(
+              ns,
+              batchableServers[0].name,
+              servers,
+              event.timeScriptsDone,
+              event.status === "fullyGrown" ? "hackable" : "needsGrowing",
+              event.threads
+            );
+            break;
+          default:
+            console.log("Unknown event given");
+            break;
         }
-        case "fullyGrown":
-        case "fullyHacked":
-          await weakenServer(
-            ns,
-            batchableServers[0].name,
-            servers,
-            event.timeScriptsDone,
-            event.status === "fullyGrown" ? "hackable" : "prepped"
-          );
-          break;
-        default:
-          console.log("Unknown event given");
-          break;
+
+        events = events.filter((currentEvent) => currentEvent.id !== event.id);
+
+        index++;
       }
-
-      index++;
     }
-
-    events = [];
 
     await ns.sleep(medium);
   }
