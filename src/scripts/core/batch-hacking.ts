@@ -33,7 +33,7 @@ import {
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import { medium, long, short } from "/scripts/utils/timeoutTimes";
+import { medium, short } from "/scripts/utils/timeoutTimes";
 
 const batchableServers: string[] = ["sigma-cosmetics"];
 
@@ -49,12 +49,6 @@ type BatchEvent = {
 
 let events: BatchEvent[] = [];
 let scriptsActive = 0;
-type ServerThreadsInUse = {
-  server: string;
-  hack: number;
-  weaken: number;
-  grow: number;
-};
 
 /**
  * Temporary fix to ensure no duplicate scripts are running and servers only run
