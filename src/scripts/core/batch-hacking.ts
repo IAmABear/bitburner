@@ -111,12 +111,12 @@ const hasServerRunningsScripts = (ns: NS, server: string) => {
   );
 };
 
-const prepServer = async (ns: NS, servers: string[]) => {
+const prepServer = (ns: NS, servers: string[]) => {
   const targetServer = batchableServers.find(
     (server) => server.prepped === false
   );
   if (!targetServer) {
-    return;
+    return Promise.resolve();
   }
 
   return weakenServer(ns, targetServer.name, servers, 0);
