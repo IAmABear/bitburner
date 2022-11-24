@@ -30,6 +30,9 @@ import {
   weakenScriptPath,
   hackScriptPath,
 } from "/scripts/utils/scriptPaths.js";
+import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
+import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
+import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 
 type BatchableServer = {
   name: string;
@@ -67,23 +70,6 @@ const hasServerRunningsScripts = (ns: NS, server: string) => {
   );
 };
 
-const getPossibleThreadCount = (ns: NS, server: string, script: string) => {
-  const serverMaxRam = ns.getServerMaxRam(server);
-  const serverUsedRam = ns.getServerUsedRam(server);
-  const scriptRAM = ns.getScriptRam(script, server);
-
-  return Math.ceil(Math.floor((serverMaxRam - serverUsedRam) / scriptRAM));
-};
-
-const threadsNeededToWeaken = (ns: NS, server: string) => {
-  const serverMinSecurity = ns.getServerMinSecurityLevel(server);
-  const serverSecurity = ns.getServerSecurityLevel(server);
-  const secDiff = serverSecurity - serverMinSecurity;
-  const weakenEffect = ns.weakenAnalyze(1);
-
-  return Math.ceil(secDiff / weakenEffect);
-};
-
 const prepServer = async (ns: NS, servers: string[]) => {
   const targetServer = batchableServers.find(
     (server) => server.prepped === false
@@ -108,16 +94,6 @@ const weakenServer = async (
     status: eventType,
     scriptCompletionTime: serverWeakenTime,
   });
-};
-
-const threadsNeededToGrow = (ns: NS, targetServer: string) => {
-  const currentMoney = ns.getServerMoneyAvailable(targetServer);
-  const maxMoney = ns.getServerMaxMoney(targetServer);
-  const moneyDiff = (maxMoney - currentMoney) / currentMoney;
-
-  return moneyDiff <= 1
-    ? 0
-    : Math.ceil(ns.growthAnalyze(targetServer, moneyDiff));
 };
 
 const growServer = async (ns: NS, targetServer: string, servers: string[]) => {
