@@ -35,23 +35,9 @@ import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 import { medium, long, short } from "/scripts/utils/timeoutTimes";
 
-type BatchableServer = {
-  name: string;
-  prepped: boolean;
-};
+const batchableServers: string[] = ["sigma-cosmetics"];
 
-const batchableServers: BatchableServer[] = [
-  { name: "foodnstuff", prepped: false },
-  // { name: "n00dles", prepped: false },
-  // { name: "sigma-cosmetics", prepped: false },
-];
-
-type BatchStatus =
-  | "hackable"
-  | "prepped"
-  | "fullyGrown"
-  | "fullyHacked"
-  | "needsGrowing";
+type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 type BatchEvent = {
   id: number;
   server: string;
@@ -86,20 +72,12 @@ const hasServerRunningsScripts = (ns: NS, server: string) => {
   );
 };
 
-const prepServer = (ns: NS, servers: string[]) => {
-  const targetServer =
-    batchableServers.find((server) => server.prepped === false) ||
-    batchableServers[0];
-
-  return weakenServer(ns, targetServer.name, servers, 0);
-};
-
 const weakenServer = (
   ns: NS,
   targetServer: string,
   servers: string[],
   previousScriptDone: number,
-  eventType: BatchStatus = "prepped",
+  eventType: BatchStatus = "needsGrowing",
   eventThreads = 0
 ) => {
   ns.print(`Running weaken on ${targetServer}`);
@@ -211,7 +189,7 @@ const runScript = async (
     });
 
     scriptsActive = 0;
-    return ns.sleep(medium);
+    return ns.sleep(short);
   }
 
   await ns.sleep(timeBeforeScriptCanRun > 0 ? timeBeforeScriptCanRun : short);
@@ -260,6 +238,16 @@ const runScript = async (
   return ns.sleep(medium);
 };
 
+const triggerAllServers = async (ns: NS, servers: string[]) => {
+  for (let index = 0; index < batchableServers.length; index++) {
+    const batchableServer = batchableServers[index];
+
+    await weakenServer(ns, batchableServer, servers, 0);
+  }
+
+  return ns.sleep(short);
+};
+
 /**
  * Batch hack a server enabling maximum profits.
  *
@@ -300,7 +288,7 @@ export async function main(ns: NS): Promise<void> {
   while (true) {
     ns.print(events);
     if (events.length === 0) {
-      await prepServer(ns, servers);
+      await triggerAllServers(ns, servers);
     } else {
       for (let index = 0; index < events.length; index++) {
         const event = events[index];
@@ -308,41 +296,20 @@ export async function main(ns: NS): Promise<void> {
           case "hackable":
             await hackServer(
               ns,
-              batchableServers[0].name,
+              event.server,
               servers,
               event.timeScriptsDone - Date.now()
             );
             break;
-          case "prepped": {
-            const targetServer = batchableServers.find(
-              (server) => server.name === event.server
-            );
-            if (targetServer) {
-              targetServer.prepped = true;
-            }
-
-            await growServer(
-              ns,
-              batchableServers[0].name,
-              servers,
-              event.timeScriptsDone
-            );
-            break;
-          }
           case "needsGrowing": {
-            await growServer(
-              ns,
-              batchableServers[0].name,
-              servers,
-              event.timeScriptsDone
-            );
+            await growServer(ns, event.server, servers, event.timeScriptsDone);
             break;
           }
           case "fullyGrown":
           case "fullyHacked":
             await weakenServer(
               ns,
-              batchableServers[0].name,
+              event.server,
               servers,
               event.timeScriptsDone,
               event.status === "fullyGrown" ? "hackable" : "needsGrowing",
@@ -360,6 +327,6 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    await ns.sleep(medium);
+    await ns.sleep(short);
   }
 }
