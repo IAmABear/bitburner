@@ -122,7 +122,7 @@ const prepServer = (ns: NS, servers: string[]) => {
   return weakenServer(ns, targetServer.name, servers, 0);
 };
 
-const weakenServer = async (
+const weakenServer = (
   ns: NS,
   targetServer: string,
   servers: string[],
@@ -146,7 +146,7 @@ const weakenServer = async (
   );
 };
 
-const growServer = async (
+const growServer = (
   ns: NS,
   targetServer: string,
   servers: string[],
@@ -177,7 +177,7 @@ const threadsNeededToHack = (ns: NS, targetServer: string) => {
   return ns.hackAnalyzeThreads(targetServer, targetMoneyHeist);
 };
 
-const hackServer = async (
+const hackServer = (
   ns: NS,
   targetServer: string,
   servers: string[],
