@@ -119,34 +119,56 @@ const prepServer = async (ns: NS, servers: string[]) => {
     return;
   }
 
-  return weakenServer(ns, targetServer.name, servers);
+  return weakenServer(ns, targetServer.name, servers, 0);
 };
 
 const weakenServer = async (
   ns: NS,
   targetServer: string,
   servers: string[],
+  timeBeforeScriptCanRun: number,
   eventType: BatchStatus = "prepped"
 ) => {
   const threadsNeeded = threadsNeededToWeaken(ns, targetServer);
   const serverWeakenTime = ns.getWeakenTime(targetServer);
 
-  return runScript(ns, targetServer, servers, weakenScriptPath, threadsNeeded, {
-    status: eventType,
-    scriptCompletionTime: serverWeakenTime,
-  });
+  return runScript(
+    ns,
+    targetServer,
+    servers,
+    weakenScriptPath,
+    threadsNeeded,
+    timeBeforeScriptCanRun,
+    {
+      status: eventType,
+      scriptCompletionTime: serverWeakenTime,
+    }
+  );
 };
 
-const growServer = async (ns: NS, targetServer: string, servers: string[]) => {
+const growServer = async (
+  ns: NS,
+  targetServer: string,
+  servers: string[],
+  timeBeforeScriptCanRun: number
+) => {
   ns.tprint(`Growin server ${targetServer}`);
 
   const threadsNeeded = threadsNeededToGrow(ns, targetServer);
   const growthTime = ns.getGrowTime(targetServer);
 
-  return runScript(ns, targetServer, servers, growScriptPath, threadsNeeded, {
-    status: "fullyGrown",
-    scriptCompletionTime: growthTime,
-  });
+  return runScript(
+    ns,
+    targetServer,
+    servers,
+    growScriptPath,
+    threadsNeeded,
+    timeBeforeScriptCanRun,
+    {
+      status: "fullyGrown",
+      scriptCompletionTime: growthTime,
+    }
+  );
 };
 
 const threadsNeededToHack = (ns: NS, targetServer: string) => {
@@ -155,16 +177,29 @@ const threadsNeededToHack = (ns: NS, targetServer: string) => {
   return ns.hackAnalyzeThreads(targetServer, targetMoneyHeist);
 };
 
-const hackServer = async (ns: NS, targetServer: string, servers: string[]) => {
+const hackServer = async (
+  ns: NS,
+  targetServer: string,
+  servers: string[],
+  timeBeforeScriptCanRun: number
+) => {
   ns.tprint("Hacking server");
 
   const threadsNeeded = threadsNeededToHack(ns, targetServer);
   const hackTime = ns.getHackTime(targetServer);
 
-  return runScript(ns, targetServer, servers, hackScriptPath, threadsNeeded, {
-    status: "fullyHacked",
-    scriptCompletionTime: hackTime,
-  });
+  return runScript(
+    ns,
+    targetServer,
+    servers,
+    hackScriptPath,
+    threadsNeeded,
+    timeBeforeScriptCanRun,
+    {
+      status: "fullyHacked",
+      scriptCompletionTime: hackTime,
+    }
+  );
 };
 
 const runScript = async (
@@ -173,6 +208,7 @@ const runScript = async (
   servers: string[],
   scriptPath: string,
   threadsNeeded: number,
+  timeBeforeScriptCanRun: number,
   onSuccessEvent: {
     status: BatchStatus;
     scriptCompletionTime: number;
@@ -204,7 +240,6 @@ const runScript = async (
 
     if (threadCount >= 0) {
       if (!hasServerRunningsScripts(ns, currentServer)) {
-        ns.exec(scriptPath, currentServer, threadCount, targetServer);
         scriptsActive += threadCount;
 
         if (scriptsActive >= threadsNeeded) {
@@ -222,13 +257,17 @@ const runScript = async (
               (scriptPath === weakenScriptPath ? scriptsActive : 0),
           });
 
-          events.push({
-            server: targetServer,
-            status: onSuccessEvent.status,
-            timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
-            script: scriptPath,
-            threads: scriptsActive,
-          });
+          setTimeout(() => {
+            ns.exec(scriptPath, currentServer, threadCount, targetServer);
+
+            events.push({
+              server: targetServer,
+              status: onSuccessEvent.status,
+              timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
+              script: scriptPath,
+              threads: scriptsActive,
+            });
+          }, timeBeforeScriptCanRun + short);
         }
       }
     }
@@ -297,7 +336,12 @@ export async function main(ns: NS): Promise<void> {
       ns.tprint(serverThreadsWatchdog);
       switch (event.status) {
         case "hackable":
-          await hackServer(ns, batchableServers[0].name, servers);
+          await hackServer(
+            ns,
+            batchableServers[0].name,
+            servers,
+            event.timeScriptsDone
+          );
           break;
         case "prepped": {
           const targetServer = batchableServers.find(
@@ -307,7 +351,12 @@ export async function main(ns: NS): Promise<void> {
             targetServer.prepped = true;
           }
 
-          await growServer(ns, batchableServers[0].name, servers);
+          await growServer(
+            ns,
+            batchableServers[0].name,
+            servers,
+            event.timeScriptsDone
+          );
           break;
         }
         case "fullyGrown":
@@ -316,6 +365,7 @@ export async function main(ns: NS): Promise<void> {
             ns,
             batchableServers[0].name,
             servers,
+            event.timeScriptsDone,
             event.status === "fullyGrown" ? "hackable" : "prepped"
           );
           break;
