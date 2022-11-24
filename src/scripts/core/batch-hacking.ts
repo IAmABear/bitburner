@@ -33,7 +33,7 @@ import {
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import { medium } from "/scripts/utils/timeoutTimes";
+import { medium, short } from "/scripts/utils/timeoutTimes";
 
 type BatchableServer = {
   name: string;
@@ -50,10 +50,50 @@ type BatchStatus = "hackable" | "prepped" | "fullyGrown" | "fullyHacked";
 type BatchEvent = {
   server: string;
   status: BatchStatus;
-  timeScriptsDone?: number;
+  timeScriptsDone: number;
+  script: string;
+  threads: number;
 };
 
 let events: BatchEvent[] = [];
+
+type ServerThreadsInUse = {
+  server: string;
+  hack: number;
+  weaken: number;
+  grow: number;
+};
+const serverThreadsWatchdog: ServerThreadsInUse[] = [];
+
+const getThreadServer = (server: string): ServerThreadsInUse => {
+  const currentServerThread = serverThreadsWatchdog.find(
+    (currentServer) => currentServer.server === server
+  );
+
+  return currentServerThread
+    ? currentServerThread
+    : {
+        server: server,
+        hack: 0,
+        grow: 0,
+        weaken: 0,
+      };
+};
+
+const updateServerThread = (serverThread: ServerThreadsInUse) => {
+  const currentServerThreadIndex = serverThreadsWatchdog.findIndex(
+    (currentServer) => currentServer.server === serverThread.server
+  );
+
+  if (currentServerThreadIndex >= 0) {
+    serverThreadsWatchdog[currentServerThreadIndex] = {
+      ...serverThreadsWatchdog[currentServerThreadIndex],
+      ...serverThread,
+    };
+  } else {
+    serverThreadsWatchdog.push(serverThread);
+  }
+};
 
 /**
  * Temporary fix to ensure no duplicate scripts are running and servers only run
@@ -144,6 +184,8 @@ const runScript = async (
       server: targetServer,
       status: onSuccessEvent.status,
       timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
+      script: scriptPath,
+      threads: 0,
     });
   }
 
@@ -166,10 +208,26 @@ const runScript = async (
         scriptsActive += threadCount;
 
         if (scriptsActive >= threadsNeeded) {
+          const serverThreadServer = getThreadServer(currentServer);
+          updateServerThread({
+            server: currentServer,
+            hack:
+              serverThreadServer.hack +
+              (scriptPath === hackScriptPath ? scriptsActive : 0),
+            grow:
+              serverThreadServer.grow +
+              (scriptPath === growScriptPath ? scriptsActive : 0),
+            weaken:
+              serverThreadServer.weaken +
+              (scriptPath === weakenScriptPath ? scriptsActive : 0),
+          });
+
           events.push({
             server: targetServer,
             status: onSuccessEvent.status,
             timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
+            script: scriptPath,
+            threads: scriptsActive,
           });
         }
       }
@@ -220,6 +278,23 @@ export async function main(ns: NS): Promise<void> {
     for (let index = 0; index < events.length; index++) {
       const event = events[index];
 
+      setTimeout(() => {
+        const serverThreadServer = getThreadServer(event.server);
+        updateServerThread({
+          server: event.server,
+          hack:
+            serverThreadServer.hack -
+            (event.script === hackScriptPath ? event.threads : 0),
+          grow:
+            serverThreadServer.grow -
+            (event.script === growScriptPath ? event.threads : 0),
+          weaken:
+            serverThreadServer.weaken -
+            (event.script === weakenScriptPath ? event.threads : 0),
+        });
+      }, Date.now() - event.timeScriptsDone + short);
+
+      ns.tprint(serverThreadsWatchdog);
       switch (event.status) {
         case "hackable":
           await hackServer(ns, batchableServers[0].name, servers);
