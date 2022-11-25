@@ -262,12 +262,6 @@ const triggerAllServers = async (ns: NS, servers: string[]) => {
  * @param ns The bitburner NS scope
  */
 export async function main(ns: NS): Promise<void> {
-  const servers = await getServers(ns, {
-    includeHome: false,
-    includeGhost: false,
-    onlyGhost: true,
-  });
-
   /**
    * Before batches can be run a server should always be at minimum security
    * level to simplify this process
@@ -280,7 +274,12 @@ export async function main(ns: NS): Promise<void> {
    */
 
   while (true) {
-    ns.print(events);
+    const servers = await getServers(ns, {
+      includeHome: false,
+      includeGhost: false,
+      onlyGhost: true,
+    });
+
     if (events.length === 0) {
       await triggerAllServers(ns, servers);
     } else {
