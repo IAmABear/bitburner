@@ -1,3 +1,9 @@
+import {
+  growScriptPath,
+  hackScriptPath,
+  weakenScriptPath,
+} from "/scripts/utils/scriptPaths";
+
 export async function main(ns: NS): Promise<void> {
   ns.tprint("Start");
   /**
@@ -39,11 +45,7 @@ export async function main(ns: NS): Promise<void> {
      * Copy hack-server file to server if not present and execute it
      */
     await ns.scp(
-      [
-        "/scripts/hacks/hack.js",
-        "/scripts/hacks/grow.js",
-        "/scripts/hacks/weaken.js",
-      ],
+      [hackScriptPath, growScriptPath, weakenScriptPath],
       targetServer
     );
 
