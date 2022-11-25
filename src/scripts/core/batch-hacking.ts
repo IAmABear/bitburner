@@ -70,7 +70,8 @@ const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
     event,
     weakenScriptPath,
     calculateThreadsNeededToWeaken,
-    event.timeScriptsDone - Date.now() - serverWeakenTime + short,
+    // event.timeScriptsDone - Date.now() - serverWeakenTime + short,
+    event.timeScriptsDone - Date.now() + short,
     {
       status: event.status === "fullyGrown" ? "hackable" : "needsGrowing",
       scriptCompletionTime: serverWeakenTime,
@@ -89,7 +90,8 @@ const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
     event,
     growScriptPath,
     threadsNeededToGrow,
-    event.timeScriptsDone - Date.now() - growthTime + short,
+    // event.timeScriptsDone - Date.now() - growthTime + short,
+    event.timeScriptsDone - Date.now() + short,
     {
       status: "fullyGrown",
       scriptCompletionTime: growthTime,
