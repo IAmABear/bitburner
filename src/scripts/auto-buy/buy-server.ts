@@ -1,4 +1,4 @@
-import { long } from "/scripts/utils/timeoutTimes";
+import { medium } from "/scripts/utils/timeoutTimes";
 
 export async function main(ns: NS): Promise<void> {
   const ram = Number(ns.args[0]) || 8;
@@ -18,6 +18,6 @@ export async function main(ns: NS): Promise<void> {
       );
     }
 
-    await ns.sleep(long);
+    await ns.sleep(medium);
   }
 }
