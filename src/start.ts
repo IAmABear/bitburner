@@ -21,10 +21,9 @@ export async function main(ns: NS): Promise<void> {
    * Start all servers and copy the files
    */
   const servers = await ns.getPurchasedServers();
-  let i = 0;
 
-  while (servers.length > 0 && i < servers.length) {
-    const targetServer = servers[i];
+  for (let index = 0; index < servers.length; index++) {
+    const targetServer = servers[index];
 
     /**
      * Remove all previous script files
@@ -42,9 +41,6 @@ export async function main(ns: NS): Promise<void> {
       [hackScriptPath, growScriptPath, weakenScriptPath],
       targetServer
     );
-
-    // Onwards to the next server
-    i = i + 1;
   }
 
   /**
