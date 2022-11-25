@@ -236,6 +236,7 @@ const triggerAllServers = async (ns: NS, servers: string[]) => {
  * @param ns The bitburner NS scope
  */
 export async function main(ns: NS): Promise<void> {
+  ns.disableLog("ALL");
   /**
    * Before batches can be run a server should always be at minimum security
    * level to simplify this process
