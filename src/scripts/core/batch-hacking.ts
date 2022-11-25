@@ -33,7 +33,7 @@ import {
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import { medium, short } from "/scripts/utils/timeoutTimes";
+import { medium, short, skip } from "/scripts/utils/timeoutTimes";
 
 const batchableServers: string[] = ["foodnstuff"];
 
@@ -155,7 +155,7 @@ const runScript = async (
     });
 
     scriptsActive = 0;
-    return ns.sleep(short);
+    return ns.sleep(skip);
   }
 
   for (let index = 0; index < servers.length; index++) {
