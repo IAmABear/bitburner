@@ -66,8 +66,8 @@ const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
 
   return runScript(
     ns,
-    event.server,
     servers,
+    event,
     weakenScriptPath,
     threadsNeeded,
     event.timeScriptsDone - Date.now() - serverWeakenTime + short,
@@ -86,8 +86,8 @@ const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
 
   return runScript(
     ns,
-    event.server,
     servers,
+    event,
     growScriptPath,
     threadsNeeded,
     event.timeScriptsDone - Date.now() - growthTime + short,
@@ -112,8 +112,8 @@ const hackServer = (ns: NS, servers: string[], event: BatchEvent) => {
 
   return runScript(
     ns,
-    event.server,
     servers,
+    event,
     hackScriptPath,
     threadsNeeded,
     event.timeScriptsDone - Date.now() - hackTime + short,
@@ -126,8 +126,8 @@ const hackServer = (ns: NS, servers: string[], event: BatchEvent) => {
 
 const runScript = async (
   ns: NS,
-  targetServer: string,
   servers: string[],
+  event: BatchEvent,
   scriptPath: string,
   threadsNeeded: number,
   timeBeforeScriptCanRun: number,
@@ -142,7 +142,7 @@ const runScript = async (
 
     events.push({
       id: Math.random() + Date.now(),
-      server: targetServer,
+      server: event.server,
       status: onSuccessEvent.status,
       timeScriptsDone: Date.now(),
       script: scriptPath,
@@ -173,7 +173,7 @@ const runScript = async (
         if (!ns.scriptRunning(scriptPath, currentServer)) {
           scriptsActive += threadCount;
 
-          ns.exec(scriptPath, currentServer, threadCount, targetServer);
+          ns.exec(scriptPath, currentServer, threadCount, event.server);
         }
       }
 
@@ -182,7 +182,7 @@ const runScript = async (
 
         events.push({
           id: Math.random() + Date.now(),
-          server: targetServer,
+          server: event.server,
           status: onSuccessEvent.status,
           timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
           script: scriptPath,
