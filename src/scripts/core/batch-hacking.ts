@@ -134,11 +134,12 @@ const runScript = async (
   onSuccessEvent: {
     status: BatchStatus;
     scriptCompletionTime: number;
-  }
+  },
+  overflowThreadsNeeded?: number
 ) => {
   await ns.sleep(timeBeforeScriptCanRun > 0 ? timeBeforeScriptCanRun : short);
 
-  const threadsNeeded = getThreadsNeeded(ns, event);
+  const threadsNeeded = overflowThreadsNeeded || getThreadsNeeded(ns, event);
 
   // Fail-safe to avoid infinite triggers without actual results
   if (threadsNeeded <= 0) {
@@ -196,6 +197,19 @@ const runScript = async (
         break;
       }
     }
+  }
+
+  if (scriptsActive !== 0) {
+    await runScript(
+      ns,
+      servers,
+      event,
+      scriptPath,
+      getThreadsNeeded,
+      timeBeforeScriptCanRun,
+      onSuccessEvent,
+      threadsNeeded
+    );
   }
 
   return ns.sleep(medium);
