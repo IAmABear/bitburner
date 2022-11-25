@@ -50,36 +50,29 @@ type BatchEvent = {
 let events: BatchEvent[] = [];
 let scriptsActive = 0;
 
-const weakenServer = (
-  ns: NS,
-  targetServer: string,
-  servers: string[],
-  previousScriptDone: number,
-  eventType: BatchStatus = "needsGrowing",
-  eventThreads = 0
-) => {
-  ns.print(`Running weaken on ${targetServer}`);
+const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
+  ns.print(`Running weaken on ${event.server}`);
   const predictedSecurity =
-    eventType === "hackable"
-      ? ns.growthAnalyzeSecurity(eventThreads, targetServer, 1)
-      : ns.hackAnalyzeSecurity(eventThreads, targetServer);
+    event.status === "hackable"
+      ? ns.growthAnalyzeSecurity(event.threads, event.server, 1)
+      : ns.hackAnalyzeSecurity(event.threads, event.server);
 
   const threadsNeeded = threadsNeededToWeaken(
     ns,
-    targetServer,
+    event.server,
     predictedSecurity
   );
-  const serverWeakenTime = Math.ceil(ns.getWeakenTime(targetServer));
+  const serverWeakenTime = Math.ceil(ns.getWeakenTime(event.server));
 
   return runScript(
     ns,
-    targetServer,
+    event.server,
     servers,
     weakenScriptPath,
     threadsNeeded,
-    previousScriptDone - Date.now() - serverWeakenTime + short,
+    event.timeScriptsDone - Date.now() - serverWeakenTime + short,
     {
-      status: eventType,
+      status: event.status === "fullyGrown" ? "hackable" : "needsGrowing",
       scriptCompletionTime: serverWeakenTime,
     }
   );
@@ -187,7 +180,7 @@ const runScript = async (
           : possibleThreadCount;
 
       if (threadCount > 0) {
-        if (!ns.scriptRunning(ns, currentServer)) {
+        if (!ns.scriptRunning(scriptPath, currentServer)) {
           scriptsActive += threadCount;
 
           ns.exec(scriptPath, currentServer, threadCount, targetServer);
@@ -220,7 +213,14 @@ const triggerAllServers = async (ns: NS, servers: string[]) => {
   for (let index = 0; index < batchableServers.length; index++) {
     const batchableServer = batchableServers[index];
 
-    await weakenServer(ns, batchableServer, servers, 0);
+    await weakenServer(ns, servers, {
+      id: Math.random() + Date.now(),
+      server: batchableServer,
+      status: "needsGrowing",
+      timeScriptsDone: 0,
+      script: weakenScriptPath,
+      threads: 0,
+    });
   }
 
   return ns.sleep(short);
@@ -284,14 +284,7 @@ export async function main(ns: NS): Promise<void> {
           }
           case "fullyGrown":
           case "fullyHacked":
-            await weakenServer(
-              ns,
-              event.server,
-              servers,
-              event.timeScriptsDone,
-              event.status === "fullyGrown" ? "hackable" : "needsGrowing",
-              event.threads
-            );
+            await weakenServer(ns, servers, event);
             break;
           default:
             console.log("Unknown event given");
