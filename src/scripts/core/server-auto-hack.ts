@@ -1,3 +1,10 @@
+import {
+  growScriptPath,
+  weakenScriptPath,
+  hackScriptPath,
+} from "/scripts/utils/scriptPaths.js";
+import { medium } from "/scripts/utils/timeoutTimes";
+
 async function crackOpenServer(ns: NS, server: string): Promise<void> {
   const serverInfo = ns.getServer(server);
   if (serverInfo.hasAdminRights) {
@@ -46,11 +53,7 @@ async function crackOpenServer(ns: NS, server: string): Promise<void> {
 
 async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {
   const res = await ns.scp(
-    [
-      "/scripts/hacks/hack.js",
-      "/scripts/hacks/grow.js",
-      "/scripts/hacks/weaken.js",
-    ],
+    [hackScriptPath, growScriptPath, weakenScriptPath],
     server
   );
 
@@ -81,9 +84,8 @@ async function scanServer(ns: NS, server: string) {
 
 let currentHackingLevel = 0;
 export async function main(ns: NS): Promise<void> {
-  ns.tprint("Auto hack method");
   const servers = await scanServer(ns, "home");
-  ns.tprint(servers);
+
   while (true) {
     if (currentHackingLevel !== ns.getHackingLevel()) {
       currentHackingLevel = ns.getHackingLevel();
@@ -94,13 +96,12 @@ export async function main(ns: NS): Promise<void> {
             ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(server)
           ) {
             await crackOpenServer(ns, server);
-            ns.tprint(server);
             await copyHackFilesToServer(ns, server);
           }
         }
       }
     }
 
-    await ns.sleep(1000);
+    await ns.sleep(medium);
   }
 }

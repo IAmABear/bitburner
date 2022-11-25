@@ -1,4 +1,4 @@
 node_modules/
 dist/
-NetscriptDefinitions.d.ts
 .vscode/
+bitburner-sync.json

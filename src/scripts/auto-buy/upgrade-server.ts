@@ -1,3 +1,5 @@
+import { long } from "/scripts/utils/timeoutTimes";
+
 export async function main(ns: NS): Promise<void> {
   const servers = await ns.getPurchasedServers();
 
@@ -16,7 +18,7 @@ export async function main(ns: NS): Promise<void> {
         ns.getPurchasedServerCost(newTargetRam) <
           ns.getServerMoneyAvailable("home")
       ) {
-        ns.tprint(
+        ns.print(
           "Upgrading " +
             targetServer +
             " server from " +
@@ -45,7 +47,7 @@ export async function main(ns: NS): Promise<void> {
           ],
           newServerName
         );
-        ns.tprint(
+        ns.print(
           "Finished upgrading " +
             targetServer +
             " server from " +
@@ -56,7 +58,7 @@ export async function main(ns: NS): Promise<void> {
         );
       }
 
-      await ns.sleep(1000);
+      await ns.sleep(long);
     }
   }
 }

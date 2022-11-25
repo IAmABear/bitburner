@@ -1,4 +1,5 @@
 import getServers from "/scripts/utils/getServers.js";
+import { long } from "/scripts/utils/timeoutTimes";
 
 export async function main(ns: NS): Promise<void> {
   const servers = await getServers(ns, {
@@ -37,6 +38,6 @@ export async function main(ns: NS): Promise<void> {
       );
     });
 
-    await ns.sleep(60000);
+    await ns.sleep(long);
   }
 }
