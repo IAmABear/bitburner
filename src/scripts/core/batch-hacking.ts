@@ -50,18 +50,18 @@ type BatchEvent = {
 let events: BatchEvent[] = [];
 let scriptsActive = 0;
 
-const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
-  ns.print(`Running weaken on ${event.server}`);
+const calculateThreadsNeededToWeaken = (ns: NS, event: BatchEvent) => {
   const predictedSecurity =
     event.status === "hackable"
       ? ns.growthAnalyzeSecurity(event.threads, event.server, 1)
       : ns.hackAnalyzeSecurity(event.threads, event.server);
 
-  const threadsNeeded = threadsNeededToWeaken(
-    ns,
-    event.server,
-    predictedSecurity
-  );
+  return threadsNeededToWeaken(ns, event.server, predictedSecurity);
+};
+
+const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
+  ns.print(`Running weaken on ${event.server}`);
+
   const serverWeakenTime = Math.ceil(ns.getWeakenTime(event.server));
 
   return runScript(
@@ -69,7 +69,7 @@ const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
     servers,
     event,
     weakenScriptPath,
-    threadsNeeded,
+    calculateThreadsNeededToWeaken,
     event.timeScriptsDone - Date.now() - serverWeakenTime + short,
     {
       status: event.status === "fullyGrown" ? "hackable" : "needsGrowing",
@@ -81,7 +81,6 @@ const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
 const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
   ns.print(`Growin server ${event.server}`);
 
-  const threadsNeeded = threadsNeededToGrow(ns, event.server);
   const growthTime = Math.ceil(ns.getGrowTime(event.server));
 
   return runScript(
@@ -89,7 +88,7 @@ const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
     servers,
     event,
     growScriptPath,
-    threadsNeeded,
+    threadsNeededToGrow,
     event.timeScriptsDone - Date.now() - growthTime + short,
     {
       status: "fullyGrown",
@@ -98,16 +97,15 @@ const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
   );
 };
 
-const threadsNeededToHack = (ns: NS, targetServer: string) => {
-  const targetMoneyHeist = ns.getServerMaxMoney(targetServer) * 0.3;
+const threadsNeededToHack = (ns: NS, event: BatchEvent) => {
+  const targetMoneyHeist = ns.getServerMaxMoney(event.server) * 0.3;
 
-  return Math.ceil(ns.hackAnalyzeThreads(targetServer, targetMoneyHeist));
+  return Math.ceil(ns.hackAnalyzeThreads(event.server, targetMoneyHeist));
 };
 
 const hackServer = (ns: NS, servers: string[], event: BatchEvent) => {
   ns.print(`Hacking server: ${event.server}`);
 
-  const threadsNeeded = threadsNeededToHack(ns, event.server);
   const hackTime = Math.ceil(ns.getHackTime(event.server));
 
   return runScript(
@@ -115,7 +113,7 @@ const hackServer = (ns: NS, servers: string[], event: BatchEvent) => {
     servers,
     event,
     hackScriptPath,
-    threadsNeeded,
+    threadsNeededToHack,
     event.timeScriptsDone - Date.now() - hackTime + short,
     {
       status: "fullyHacked",
@@ -129,13 +127,17 @@ const runScript = async (
   servers: string[],
   event: BatchEvent,
   scriptPath: string,
-  threadsNeeded: number,
+  getThreadsNeeded: (ns: NS, event: BatchEvent) => number,
   timeBeforeScriptCanRun: number,
   onSuccessEvent: {
     status: BatchStatus;
     scriptCompletionTime: number;
   }
 ) => {
+  await ns.sleep(timeBeforeScriptCanRun > 0 ? timeBeforeScriptCanRun : short);
+
+  const threadsNeeded = getThreadsNeeded(ns, event);
+
   // Fail-safe to avoid infinite triggers without actual results
   if (threadsNeeded <= 0) {
     ns.print("nothing needed");
@@ -152,8 +154,6 @@ const runScript = async (
     scriptsActive = 0;
     return ns.sleep(short);
   }
-
-  await ns.sleep(timeBeforeScriptCanRun > 0 ? timeBeforeScriptCanRun : short);
 
   for (let index = 0; index < servers.length; index++) {
     const currentServer = servers[index];
