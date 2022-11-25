@@ -104,24 +104,19 @@ const threadsNeededToHack = (ns: NS, targetServer: string) => {
   return Math.ceil(ns.hackAnalyzeThreads(targetServer, targetMoneyHeist));
 };
 
-const hackServer = (
-  ns: NS,
-  targetServer: string,
-  servers: string[],
-  previousScriptDone: number
-) => {
-  ns.print(`Hacking server: ${targetServer}`);
+const hackServer = (ns: NS, servers: string[], event: BatchEvent) => {
+  ns.print(`Hacking server: ${event.server}`);
 
-  const threadsNeeded = threadsNeededToHack(ns, targetServer);
-  const hackTime = Math.ceil(ns.getHackTime(targetServer));
+  const threadsNeeded = threadsNeededToHack(ns, event.server);
+  const hackTime = Math.ceil(ns.getHackTime(event.server));
 
   return runScript(
     ns,
-    targetServer,
+    event.server,
     servers,
     hackScriptPath,
     threadsNeeded,
-    previousScriptDone - Date.now() - hackTime + short,
+    event.timeScriptsDone - Date.now() - hackTime + short,
     {
       status: "fullyHacked",
       scriptCompletionTime: hackTime,
@@ -266,12 +261,7 @@ export async function main(ns: NS): Promise<void> {
         const event = events[index];
         switch (event.status) {
           case "hackable":
-            await hackServer(
-              ns,
-              event.server,
-              servers,
-              event.timeScriptsDone - Date.now()
-            );
+            await hackServer(ns, servers, event);
             break;
           case "needsGrowing": {
             await growServer(ns, servers, event);
