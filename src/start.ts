@@ -56,7 +56,13 @@ export async function main(ns: NS): Promise<void> {
   /**
    * Start the hub so all the servers start working
    */
-  if (!ns.isRunning("/scripts/core/hub.js", "home")) {
-    await ns.run("/scripts/core/hub.js");
+  if ((ns.args[0] as string) === "batch") {
+    if (!ns.isRunning("/scripts/core/batch-hackingjs", "home")) {
+      await ns.run("/scripts/core/batch-hacking.js");
+    }
+  } else {
+    if (!ns.isRunning("/scripts/core/hub.js", "home")) {
+      await ns.run("/scripts/core/hub.js");
+    }
   }
 }
