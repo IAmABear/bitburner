@@ -10,16 +10,11 @@ export async function main(ns: NS): Promise<void> {
    * Start the auto hacking
    */
   if (!ns.isRunning("/scripts/core/server-auto-hack.js", "home")) {
-    ns.tprint("Start running auto hack");
     await ns.run("/scripts/core/server-auto-hack.js");
-  } else {
-    ns.tprint("Auto hack already running");
   }
-  ns.tprint(
-    `${ns.getPurchasedServers().length} ${ns.getPurchasedServerLimit()}`
-  );
+
   if (ns.getPurchasedServers().length === ns.getPurchasedServerLimit()) {
-    ns.run("/scripts/auto-buy/upgrade-server.js");
+    ns.run("/scripts/auto-buy/upgrade-servers.js");
   } else if (!ns.isRunning("/scripts/auto-buy/buy-server.js", "home")) {
     ns.run("/scripts/auto-buy/buy-server.js");
   }
@@ -32,7 +27,6 @@ export async function main(ns: NS): Promise<void> {
 
   while (servers.length > 0 && i < servers.length) {
     const targetServer = servers[i];
-    ns.tprint("Starting statup on server: " + targetServer);
 
     /**
      * Remove all previous script files
