@@ -1,3 +1,8 @@
+import {
+  growScriptPath,
+  hackScriptPath,
+  weakenScriptPath,
+} from "/scripts/utils/scriptPaths";
 import { medium } from "/scripts/utils/timeoutTimes";
 
 export async function main(ns: NS): Promise<void> {
@@ -7,13 +12,9 @@ export async function main(ns: NS): Promise<void> {
   while ((await ns.getPurchasedServerLimit()) >= i) {
     if (ns.getPurchasedServerCost(ram) < ns.getServerMoneyAvailable("home")) {
       const targetServer = await ns.purchaseServer("ghost-" + ram, ram);
-      ns.print(`${targetServer} bought`);
+
       await ns.scp(
-        [
-          "/scripts/hacks/hack.js",
-          "/scripts/hacks/grow.js",
-          "/scripts/hacks/weaken.js",
-        ],
+        [hackScriptPath, growScriptPath, weakenScriptPath],
         targetServer
       );
     }
