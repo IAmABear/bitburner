@@ -202,7 +202,7 @@ const runScript = async (
           ? threadsNeeded - scriptsActive
           : possibleThreadCount;
 
-      if (threadCount >= 0) {
+      if (threadCount > 0) {
         if (!hasServerRunningsScripts(ns, currentServer)) {
           scriptsActive += threadCount;
 
