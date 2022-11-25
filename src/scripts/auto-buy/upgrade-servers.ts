@@ -1,3 +1,8 @@
+import {
+  growScriptPath,
+  hackScriptPath,
+  weakenScriptPath,
+} from "/scripts/utils/scriptPaths";
 import { long } from "/scripts/utils/timeoutTimes";
 
 export async function main(ns: NS): Promise<void> {
@@ -18,15 +23,6 @@ export async function main(ns: NS): Promise<void> {
         ns.getPurchasedServerCost(newTargetRam) <
           ns.getServerMoneyAvailable("home")
       ) {
-        ns.print(
-          "Upgrading " +
-            targetServer +
-            " server from " +
-            targetServerCurrentRam +
-            " ram to " +
-            newTargetRam +
-            "ram."
-        );
         await ns.killall(targetServer);
         await ns.deleteServer(targetServer);
 
@@ -40,21 +36,8 @@ export async function main(ns: NS): Promise<void> {
         }
 
         await ns.scp(
-          [
-            "/scripts/hacks/hack.js",
-            "/scripts/hacks/grow.js",
-            "/scripts/hacks/weaken.js",
-          ],
+          [hackScriptPath, growScriptPath, weakenScriptPath],
           newServerName
-        );
-        ns.print(
-          "Finished upgrading " +
-            targetServer +
-            " server from " +
-            targetServerCurrentRam +
-            " ram to " +
-            newTargetRam +
-            "ram."
         );
       }
 
