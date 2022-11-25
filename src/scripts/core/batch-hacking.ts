@@ -50,22 +50,6 @@ type BatchEvent = {
 let events: BatchEvent[] = [];
 let scriptsActive = 0;
 
-/**
- * Temporary fix to ensure no duplicate scripts are running and servers only run
- * on script at the time. This will be fixed later with better betection but for
- * now it will suffice.
- *
- * @param server The server name to check
- * @returns boolean is the server has a script running already
- */
-const hasServerRunningsScripts = (ns: NS, server: string) => {
-  return (
-    ns.scriptRunning(growScriptPath, server) ||
-    ns.scriptRunning(weakenScriptPath, server) ||
-    ns.scriptRunning(hackScriptPath, server)
-  );
-};
-
 const weakenServer = (
   ns: NS,
   targetServer: string,
@@ -203,7 +187,7 @@ const runScript = async (
           : possibleThreadCount;
 
       if (threadCount > 0) {
-        if (!hasServerRunningsScripts(ns, currentServer)) {
+        if (!ns.scriptRunning(ns, currentServer)) {
           scriptsActive += threadCount;
 
           ns.exec(scriptPath, currentServer, threadCount, targetServer);
