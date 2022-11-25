@@ -12,7 +12,7 @@ export async function main(ns: NS): Promise<void> {
   while ((await ns.getPurchasedServerLimit()) >= i) {
     if (ns.getPurchasedServerCost(ram) < ns.getServerMoneyAvailable("home")) {
       const targetServer = await ns.purchaseServer("ghost-" + ram, ram);
-      ns.print(`${targetServer} bought`);
+
       await ns.scp(
         [hackScriptPath, growScriptPath, weakenScriptPath],
         targetServer
