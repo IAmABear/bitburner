@@ -78,24 +78,19 @@ const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
   );
 };
 
-const growServer = (
-  ns: NS,
-  targetServer: string,
-  servers: string[],
-  previousScriptDone: number
-) => {
-  ns.print(`Growin server ${targetServer}`);
+const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
+  ns.print(`Growin server ${event.server}`);
 
-  const threadsNeeded = threadsNeededToGrow(ns, targetServer);
-  const growthTime = Math.ceil(ns.getGrowTime(targetServer));
+  const threadsNeeded = threadsNeededToGrow(ns, event.server);
+  const growthTime = Math.ceil(ns.getGrowTime(event.server));
 
   return runScript(
     ns,
-    targetServer,
+    event.server,
     servers,
     growScriptPath,
     threadsNeeded,
-    previousScriptDone - Date.now() - growthTime + short,
+    event.timeScriptsDone - Date.now() - growthTime + short,
     {
       status: "fullyGrown",
       scriptCompletionTime: growthTime,
@@ -279,7 +274,7 @@ export async function main(ns: NS): Promise<void> {
             );
             break;
           case "needsGrowing": {
-            await growServer(ns, event.server, servers, event.timeScriptsDone);
+            await growServer(ns, servers, event);
             break;
           }
           case "fullyGrown":
