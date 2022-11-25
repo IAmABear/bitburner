@@ -15,9 +15,11 @@ export async function main(ns: NS): Promise<void> {
   } else {
     ns.tprint("Auto hack already running");
   }
-
+  ns.tprint(
+    `${ns.getPurchasedServers().length} ${ns.getPurchasedServerLimit()}`
+  );
   if (ns.getPurchasedServers().length === ns.getPurchasedServerLimit()) {
-    ns.run("/scripts/auto-buy/upgrade-servers.js");
+    ns.run("/scripts/auto-buy/upgrade-server.js");
   } else if (!ns.isRunning("/scripts/auto-buy/buy-server.js", "home")) {
     ns.run("/scripts/auto-buy/buy-server.js");
   }
