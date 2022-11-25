@@ -16,7 +16,7 @@ export async function main(ns: NS): Promise<void> {
     ns.tprint("Auto hack already running");
   }
 
-  if (ns.getPurchasedServers().length === 25) {
+  if (ns.getPurchasedServers().length === ns.getPurchasedServerLimit()) {
     ns.run("/scripts/auto-buy/upgrade-servers.js");
   } else if (!ns.isRunning("/scripts/auto-buy/buy-server.js", "home")) {
     ns.run("/scripts/auto-buy/buy-server.js");
