@@ -36,7 +36,7 @@ import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
 import { Server } from "/../NetscriptDefinitions";
 
-const batchableServers = async (ns: NS, amount = 1) => {
+const batchableServers = async (ns: NS) => {
   const allServers = await getServers(ns, {
     includeHome: false,
     includeGhost: false,
@@ -54,7 +54,41 @@ const batchableServers = async (ns: NS, amount = 1) => {
         secondServer.serverGrowth - firstServer.serverGrowth
     );
 
-  withinHackingLevelRange.length = amount;
+  const ghostServers = await getServers(ns, {
+    includeHome: false,
+    includeGhost: false,
+    onlyGhost: true,
+  });
+  const ghostServersInfo = ghostServers.map((server: string) =>
+    ns.getServer(server)
+  );
+  let avaibleRam: number = ghostServersInfo.reduce(
+    (totalRam: number, server: Server) =>
+      totalRam + ns.getServer(server.hostname).maxRam,
+    0
+  );
+  const severWeakenEffect = 0.05;
+
+  // For now we'll just check what is needed to weaken the secutiry twice its base
+  const serversAbleToSupport =
+    withinHackingLevelRange.reduce((serverAmount: number, server: Server) => {
+      const threadsNeededForFullWeaken =
+        (server.minDifficulty * 2) / severWeakenEffect;
+
+      ns.tprint(
+        `threadsNeededForFullWeaken: ${threadsNeededForFullWeaken}; avaibleRam: ${avaibleRam}`
+      );
+      if (threadsNeededForFullWeaken <= avaibleRam) {
+        avaibleRam = avaibleRam - threadsNeededForFullWeaken;
+        return serverAmount + 1;
+      }
+
+      return serverAmount;
+    }, 0) || 1;
+
+  if (withinHackingLevelRange.length >= serversAbleToSupport) {
+    withinHackingLevelRange.length = serversAbleToSupport;
+  }
 
   return withinHackingLevelRange.map((server: Server) => server.hostname);
 };
