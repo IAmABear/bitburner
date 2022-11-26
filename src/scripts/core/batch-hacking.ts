@@ -33,16 +33,31 @@ import {
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import { medium, short, skip } from "/scripts/utils/timeoutTimes";
+import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
+import { Server } from "/../NetscriptDefinitions";
 
-const batchableServers: string[] = [
-  "n00dles",
-  "foodnstuff",
-  "phantasy",
-  "joesguns",
-  "sigma-cosmetics",
-  "silver-helix",
-];
+const batchableServers = async (ns: NS, amount = 1) => {
+  const allServers = await getServers(ns, {
+    includeHome: false,
+    includeGhost: false,
+  });
+  const serversInfo = allServers.map((server: string) => ns.getServer(server));
+  const withinHackingLevelRange = serversInfo
+    .filter((server: Server) => server.moneyMax !== 0)
+    .filter(
+      (server: Server) =>
+        server.requiredHackingSkill <= ns.getHackingLevel() / 3
+    )
+    .sort(
+      (firstServer: Server, secondServer: Server) =>
+        secondServer.moneyMax - firstServer.moneyMax &&
+        secondServer.serverGrowth - firstServer.serverGrowth
+    );
+
+  withinHackingLevelRange.length = amount;
+
+  return withinHackingLevelRange.map((server: Server) => server.hostname);
+};
 
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 type BatchEvent = {
@@ -230,8 +245,9 @@ const runScript = async (
 };
 
 const triggerAllServers = async (ns: NS, servers: string[]) => {
-  for (let index = 0; index < batchableServers.length; index++) {
-    const batchableServer = batchableServers[index];
+  const serversToTrigger = await batchableServers(ns);
+  for (let index = 0; index < serversToTrigger.length; index++) {
+    const batchableServer = serversToTrigger[index];
 
     await weakenServer(ns, servers, {
       id: Math.random() + Date.now(),
