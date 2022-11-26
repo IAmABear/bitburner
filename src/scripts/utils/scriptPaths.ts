@@ -1,3 +1,3 @@
-export const growScriptPath = "/scripts/hacks/grow.js";
-export const weakenScriptPath = "/scripts/hacks/weaken.js";
-export const hackScriptPath = "/scripts/hacks/hack.js";
+export const growScriptPath = "/scripts/serverScripts/grow.js";
+export const weakenScriptPath = "/scripts/serverScripts/weaken.js";
+export const hackScriptPath = "/scripts/serverScripts/hack.js";
