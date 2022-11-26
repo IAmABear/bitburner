@@ -137,6 +137,10 @@ const runScript = async (
   },
   overflowThreadsNeeded?: number
 ) => {
+  if (timeBeforeScriptCanRun >= 30000) {
+    return await ns.sleep(skip);
+  }
+
   await ns.sleep(timeBeforeScriptCanRun > 0 ? timeBeforeScriptCanRun : short);
 
   const threadsNeeded = overflowThreadsNeeded || getThreadsNeeded(ns, event);
@@ -192,6 +196,7 @@ const runScript = async (
           threads: scriptsActive,
         });
 
+        events = events.filter((currentEvent) => currentEvent.id !== event.id);
         scriptsActive = 0;
 
         break;
@@ -292,8 +297,6 @@ export async function main(ns: NS): Promise<void> {
             console.log("Unknown event given");
             break;
         }
-
-        events = events.filter((currentEvent) => currentEvent.id !== event.id);
 
         index++;
       }
