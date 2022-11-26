@@ -33,9 +33,65 @@ import {
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import { medium, short } from "/scripts/utils/timeoutTimes";
+import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
+import { Server } from "/../NetscriptDefinitions";
 
-const batchableServers: string[] = ["foodnstuff"];
+const batchableServers = async (ns: NS) => {
+  const allServers = await getServers(ns, {
+    includeHome: false,
+    includeGhost: false,
+  });
+  const serversInfo = allServers.map((server: string) => ns.getServer(server));
+  const withinHackingLevelRange = serversInfo
+    .filter((server: Server) => server.moneyMax !== 0)
+    .filter(
+      (server: Server) =>
+        server.requiredHackingSkill <= ns.getHackingLevel() / 3
+    )
+    .sort(
+      (firstServer: Server, secondServer: Server) =>
+        secondServer.moneyMax - firstServer.moneyMax &&
+        secondServer.serverGrowth - firstServer.serverGrowth
+    );
+
+  const ghostServers = await getServers(ns, {
+    includeHome: false,
+    includeGhost: false,
+    onlyGhost: true,
+  });
+  const ghostServersInfo = ghostServers.map((server: string) =>
+    ns.getServer(server)
+  );
+  let avaibleRam: number = ghostServersInfo.reduce(
+    (totalRam: number, server: Server) =>
+      totalRam + ns.getServer(server.hostname).maxRam,
+    0
+  );
+  const severWeakenEffect = 0.05;
+
+  // For now we'll just check what is needed to weaken the secutiry twice its base
+  const serversAbleToSupport =
+    withinHackingLevelRange.reduce((serverAmount: number, server: Server) => {
+      const threadsNeededForFullWeaken =
+        (server.minDifficulty * 2) / severWeakenEffect;
+
+      ns.tprint(
+        `threadsNeededForFullWeaken: ${threadsNeededForFullWeaken}; avaibleRam: ${avaibleRam}`
+      );
+      if (threadsNeededForFullWeaken <= avaibleRam) {
+        avaibleRam = avaibleRam - threadsNeededForFullWeaken;
+        return serverAmount + 1;
+      }
+
+      return serverAmount;
+    }, 0) || 1;
+
+  if (withinHackingLevelRange.length >= serversAbleToSupport) {
+    withinHackingLevelRange.length = serversAbleToSupport;
+  }
+
+  return withinHackingLevelRange.map((server: Server) => server.hostname);
+};
 
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 type BatchEvent = {
@@ -50,75 +106,48 @@ type BatchEvent = {
 let events: BatchEvent[] = [];
 let scriptsActive = 0;
 
-/**
- * Temporary fix to ensure no duplicate scripts are running and servers only run
- * on script at the time. This will be fixed later with better betection but for
- * now it will suffice.
- *
- * @param server The server name to check
- * @returns boolean is the server has a script running already
- */
-const hasServerRunningsScripts = (ns: NS, server: string) => {
-  return (
-    ns.scriptRunning(growScriptPath, server) ||
-    ns.scriptRunning(weakenScriptPath, server) ||
-    ns.scriptRunning(hackScriptPath, server)
-  );
+const calculateThreadsNeededToWeaken = (ns: NS, event: BatchEvent) => {
+  const predictedSecurity =
+    event.status === "hackable"
+      ? ns.growthAnalyzeSecurity(event.threads, event.server, 1)
+      : ns.hackAnalyzeSecurity(event.threads, event.server);
+
+  return threadsNeededToWeaken(ns, event.server, predictedSecurity);
 };
 
-const weakenServer = (
-  ns: NS,
-  targetServer: string,
-  servers: string[],
-  previousScriptDone: number,
-  eventType: BatchStatus = "needsGrowing",
-  eventThreads = 0
-) => {
-  ns.print(`Running weaken on ${targetServer}`);
-  const predictedSecurity =
-    eventType === "hackable"
-      ? ns.growthAnalyzeSecurity(eventThreads, targetServer, 1)
-      : ns.hackAnalyzeSecurity(eventThreads, targetServer);
+const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
+  ns.print(`Running weaken on ${event.server}`);
 
-  const threadsNeeded = threadsNeededToWeaken(
-    ns,
-    targetServer,
-    predictedSecurity
-  );
-  const serverWeakenTime = Math.ceil(ns.getWeakenTime(targetServer));
+  const serverWeakenTime = Math.ceil(ns.getWeakenTime(event.server));
 
   return runScript(
     ns,
-    targetServer,
     servers,
+    event,
     weakenScriptPath,
-    threadsNeeded,
-    previousScriptDone - Date.now() - serverWeakenTime + short,
+    calculateThreadsNeededToWeaken,
+    // event.timeScriptsDone - Date.now() - serverWeakenTime + short,
+    event.timeScriptsDone - Date.now() + short,
     {
-      status: eventType,
+      status: event.status === "fullyGrown" ? "hackable" : "needsGrowing",
       scriptCompletionTime: serverWeakenTime,
     }
   );
 };
 
-const growServer = (
-  ns: NS,
-  targetServer: string,
-  servers: string[],
-  previousScriptDone: number
-) => {
-  ns.print(`Growin server ${targetServer}`);
+const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
+  ns.print(`Growin server ${event.server}`);
 
-  const threadsNeeded = threadsNeededToGrow(ns, targetServer);
-  const growthTime = Math.ceil(ns.getGrowTime(targetServer));
+  const growthTime = Math.ceil(ns.getGrowTime(event.server));
 
   return runScript(
     ns,
-    targetServer,
     servers,
+    event,
     growScriptPath,
-    threadsNeeded,
-    previousScriptDone - Date.now() - growthTime + short,
+    threadsNeededToGrow,
+    // event.timeScriptsDone - Date.now() - growthTime + short,
+    event.timeScriptsDone - Date.now() + short,
     {
       status: "fullyGrown",
       scriptCompletionTime: growthTime,
@@ -126,30 +155,24 @@ const growServer = (
   );
 };
 
-const threadsNeededToHack = (ns: NS, targetServer: string) => {
-  const targetMoneyHeist = ns.getServerMaxMoney(targetServer) * 0.3;
+const threadsNeededToHack = (ns: NS, event: BatchEvent) => {
+  const targetMoneyHeist = ns.getServerMaxMoney(event.server) * 0.3;
 
-  return Math.ceil(ns.hackAnalyzeThreads(targetServer, targetMoneyHeist));
+  return Math.ceil(ns.hackAnalyzeThreads(event.server, targetMoneyHeist));
 };
 
-const hackServer = (
-  ns: NS,
-  targetServer: string,
-  servers: string[],
-  previousScriptDone: number
-) => {
-  ns.print(`Hacking server: ${targetServer}`);
+const hackServer = (ns: NS, servers: string[], event: BatchEvent) => {
+  ns.print(`Hacking server: ${event.server}`);
 
-  const threadsNeeded = threadsNeededToHack(ns, targetServer);
-  const hackTime = Math.ceil(ns.getHackTime(targetServer));
+  const hackTime = Math.ceil(ns.getHackTime(event.server));
 
   return runScript(
     ns,
-    targetServer,
     servers,
+    event,
     hackScriptPath,
-    threadsNeeded,
-    previousScriptDone - Date.now() - hackTime + short,
+    threadsNeededToHack,
+    event.timeScriptsDone - Date.now() - hackTime + short,
     {
       status: "fullyHacked",
       scriptCompletionTime: hackTime,
@@ -159,23 +182,32 @@ const hackServer = (
 
 const runScript = async (
   ns: NS,
-  targetServer: string,
   servers: string[],
+  event: BatchEvent,
   scriptPath: string,
-  threadsNeeded: number,
+  getThreadsNeeded: (ns: NS, event: BatchEvent) => number,
   timeBeforeScriptCanRun: number,
   onSuccessEvent: {
     status: BatchStatus;
     scriptCompletionTime: number;
-  }
+  },
+  overflowThreadsNeeded?: number
 ) => {
+  if (timeBeforeScriptCanRun >= short) {
+    return await ns.sleep(skip);
+  }
+
+  await ns.sleep(timeBeforeScriptCanRun > 0 ? timeBeforeScriptCanRun : short);
+
+  const threadsNeeded = overflowThreadsNeeded || getThreadsNeeded(ns, event);
+
   // Fail-safe to avoid infinite triggers without actual results
   if (threadsNeeded <= 0) {
     ns.print("nothing needed");
 
     events.push({
       id: Math.random() + Date.now(),
-      server: targetServer,
+      server: event.server,
       status: onSuccessEvent.status,
       timeScriptsDone: Date.now(),
       script: scriptPath,
@@ -183,10 +215,8 @@ const runScript = async (
     });
 
     scriptsActive = 0;
-    return ns.sleep(short);
+    return ns.sleep(skip);
   }
-
-  await ns.sleep(timeBeforeScriptCanRun > 0 ? timeBeforeScriptCanRun : short);
 
   for (let index = 0; index < servers.length; index++) {
     const currentServer = servers[index];
@@ -203,10 +233,10 @@ const runScript = async (
           : possibleThreadCount;
 
       if (threadCount > 0) {
-        if (!hasServerRunningsScripts(ns, currentServer)) {
+        if (!ns.scriptRunning(scriptPath, currentServer)) {
           scriptsActive += threadCount;
 
-          ns.exec(scriptPath, currentServer, threadCount, targetServer);
+          ns.exec(scriptPath, currentServer, threadCount, event.server);
         }
       }
 
@@ -215,13 +245,14 @@ const runScript = async (
 
         events.push({
           id: Math.random() + Date.now(),
-          server: targetServer,
+          server: event.server,
           status: onSuccessEvent.status,
           timeScriptsDone: Date.now() + onSuccessEvent.scriptCompletionTime,
           script: scriptPath,
           threads: scriptsActive,
         });
 
+        events = events.filter((currentEvent) => currentEvent.id !== event.id);
         scriptsActive = 0;
 
         break;
@@ -229,14 +260,37 @@ const runScript = async (
     }
   }
 
-  return ns.sleep(medium);
+  if (scriptsActive !== 0) {
+    await ns.sleep(long);
+
+    await runScript(
+      ns,
+      servers,
+      event,
+      scriptPath,
+      getThreadsNeeded,
+      timeBeforeScriptCanRun,
+      onSuccessEvent,
+      threadsNeeded
+    );
+  }
+
+  return ns.sleep(short);
 };
 
 const triggerAllServers = async (ns: NS, servers: string[]) => {
-  for (let index = 0; index < batchableServers.length; index++) {
-    const batchableServer = batchableServers[index];
+  const serversToTrigger = await batchableServers(ns);
+  for (let index = 0; index < serversToTrigger.length; index++) {
+    const batchableServer = serversToTrigger[index];
 
-    await weakenServer(ns, batchableServer, servers, 0);
+    await weakenServer(ns, servers, {
+      id: Math.random() + Date.now(),
+      server: batchableServer,
+      status: "needsGrowing",
+      timeScriptsDone: 0,
+      script: weakenScriptPath,
+      threads: 0,
+    });
   }
 
   return ns.sleep(short);
@@ -262,6 +316,7 @@ const triggerAllServers = async (ns: NS, servers: string[]) => {
  * @param ns The bitburner NS scope
  */
 export async function main(ns: NS): Promise<void> {
+  ns.disableLog("ALL");
   /**
    * Before batches can be run a server should always be at minimum security
    * level to simplify this process
@@ -274,11 +329,12 @@ export async function main(ns: NS): Promise<void> {
    */
 
   while (true) {
-    const servers = await getServers(ns, {
+    const ghostSevers = await getServers(ns, {
       includeHome: false,
       includeGhost: false,
       onlyGhost: true,
     });
+    const servers = ["home", ...ghostSevers];
 
     if (events.length === 0) {
       await triggerAllServers(ns, servers);
@@ -287,34 +343,20 @@ export async function main(ns: NS): Promise<void> {
         const event = events[index];
         switch (event.status) {
           case "hackable":
-            await hackServer(
-              ns,
-              event.server,
-              servers,
-              event.timeScriptsDone - Date.now()
-            );
+            await hackServer(ns, servers, event);
             break;
           case "needsGrowing": {
-            await growServer(ns, event.server, servers, event.timeScriptsDone);
+            await growServer(ns, servers, event);
             break;
           }
           case "fullyGrown":
           case "fullyHacked":
-            await weakenServer(
-              ns,
-              event.server,
-              servers,
-              event.timeScriptsDone,
-              event.status === "fullyGrown" ? "hackable" : "needsGrowing",
-              event.threads
-            );
+            await weakenServer(ns, servers, event);
             break;
           default:
             console.log("Unknown event given");
             break;
         }
-
-        events = events.filter((currentEvent) => currentEvent.id !== event.id);
 
         index++;
       }
