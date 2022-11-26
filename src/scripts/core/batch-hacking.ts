@@ -35,7 +35,14 @@ import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 import { medium, short, skip } from "/scripts/utils/timeoutTimes";
 
-const batchableServers: string[] = ["foodnstuff"];
+const batchableServers: string[] = [
+  "n00dles",
+  "foodnstuff",
+  "phantasy",
+  "joesguns",
+  "sigma-cosmetics",
+  "silver-helix",
+];
 
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 type BatchEvent = {
