@@ -212,6 +212,8 @@ const runScript = async (
   }
 
   if (scriptsActive !== 0) {
+    await ns.sleep(long);
+
     await runScript(
       ns,
       servers,
