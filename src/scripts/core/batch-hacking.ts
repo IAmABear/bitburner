@@ -275,7 +275,7 @@ const runScript = async (
     );
   }
 
-  return ns.sleep(medium);
+  return ns.sleep(short);
 };
 
 const triggerAllServers = async (ns: NS, servers: string[]) => {
