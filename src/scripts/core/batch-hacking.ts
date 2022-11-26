@@ -279,11 +279,12 @@ export async function main(ns: NS): Promise<void> {
    */
 
   while (true) {
-    const servers = await getServers(ns, {
+    const ghostSevers = await getServers(ns, {
       includeHome: false,
       includeGhost: false,
       onlyGhost: true,
     });
+    const servers = ["home", ...ghostSevers];
 
     if (events.length === 0) {
       await triggerAllServers(ns, servers);
