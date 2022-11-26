@@ -11,8 +11,8 @@ export async function main(ns: NS): Promise<void> {
     await ns.run("/scripts/hacking/server-auto-hack.js");
   }
 
-  if (!ns.isRunning("/scripts/auto-buy/auto-buy.js", "home")) {
-    await ns.run("/scripts/auto-buy/auto-buy.js");
+  if (!ns.isRunning("/scripts/servers/auto-buy.js", "home")) {
+    await ns.run("/scripts/servers/auto-buy.js");
   }
 
   const servers = await ns.getPurchasedServers();

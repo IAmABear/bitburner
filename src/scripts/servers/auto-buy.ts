@@ -1,7 +1,7 @@
 import { medium } from "/scripts/utils/timeoutTimes";
 
-const upgradeScriptPath = "/scripts/auto-buy/upgrade-servers.js";
-const buyScriptPath = "/scripts/auto-buy/buy-server.js";
+const upgradeScriptPath = "/scripts/servers/upgrade-servers.js";
+const buyScriptPath = "/scripts/servers/buy-server.js";
 
 export async function main(ns: NS): Promise<void> {
   let buyScriptsRunning = true;
