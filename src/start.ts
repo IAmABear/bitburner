@@ -5,14 +5,12 @@ import {
 } from "/scripts/utils/scriptPaths";
 
 export async function main(ns: NS): Promise<void> {
-  ns.tprint("Start");
-
-  if (!ns.isRunning("/scripts/core/server-auto-hack.js", "home")) {
-    await ns.run("/scripts/core/server-auto-hack.js");
+  if (!ns.isRunning("/scripts/hacking/server-auto-hack.js", "home")) {
+    await ns.run("/scripts/hacking/server-auto-hack.js");
   }
 
-  if (!ns.isRunning("/scripts/auto-buy/auto-buy.js", "home")) {
-    await ns.run("/scripts/auto-buy/auto-buy.js");
+  if (!ns.isRunning("/scripts/servers/auto-buy.js", "home")) {
+    await ns.run("/scripts/servers/auto-buy.js");
   }
 
   const servers = await ns.getPurchasedServers();
@@ -32,12 +30,12 @@ export async function main(ns: NS): Promise<void> {
   }
 
   if ((ns.args[0] as string) === "batch") {
-    if (!ns.isRunning("/scripts/core/batch-hackingjs", "home")) {
-      await ns.run("/scripts/core/batch-hacking.js");
+    if (!ns.isRunning("/scripts/hacking/batch-hackingjs", "home")) {
+      await ns.run("/scripts/hacking/batch-hacking.js");
     }
   } else {
-    if (!ns.isRunning("/scripts/core/hub.js", "home")) {
-      await ns.run("/scripts/core/hub.js");
+    if (!ns.isRunning("/scripts/hacking/hub.js", "home")) {
+      await ns.run("/scripts/hacking/hub.js");
     }
   }
 }
