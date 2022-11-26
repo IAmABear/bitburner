@@ -75,9 +75,6 @@ const batchableServers = async (ns: NS) => {
       const threadsNeededForFullWeaken =
         (server.minDifficulty * 2) / severWeakenEffect;
 
-      ns.tprint(
-        `threadsNeededForFullWeaken: ${threadsNeededForFullWeaken}; avaibleRam: ${avaibleRam}`
-      );
       if (threadsNeededForFullWeaken <= avaibleRam) {
         avaibleRam = avaibleRam - threadsNeededForFullWeaken;
         return serverAmount + 1;

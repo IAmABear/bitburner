@@ -5,8 +5,6 @@ import {
 } from "/scripts/utils/scriptPaths";
 
 export async function main(ns: NS): Promise<void> {
-  ns.tprint("Start");
-
   if (!ns.isRunning("/scripts/hacking/server-auto-hack.js", "home")) {
     await ns.run("/scripts/hacking/server-auto-hack.js");
   }
