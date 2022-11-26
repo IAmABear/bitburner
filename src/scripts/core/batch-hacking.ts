@@ -144,7 +144,7 @@ const runScript = async (
   },
   overflowThreadsNeeded?: number
 ) => {
-  if (timeBeforeScriptCanRun >= 30000) {
+  if (timeBeforeScriptCanRun >= short) {
     return await ns.sleep(skip);
   }
 
