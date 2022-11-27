@@ -43,7 +43,7 @@ const batchableServers = async (ns: NS) => {
   });
   const serversInfo = allServers.map((server: string) => ns.getServer(server));
   const withinHackingLevelRange = serversInfo
-    .filter((server: Server) => server.moneyMax !== 0)
+    .filter((server: Server) => server.moneyMax !== 0 || !server.hasAdminRights)
     .filter(
       (server: Server) =>
         server.requiredHackingSkill <= ns.getHackingLevel() / 3
@@ -275,8 +275,33 @@ const runScript = async (
   return ns.sleep(short);
 };
 
+let currentlyUsedBatchServers: string[] = [];
+
+const updateBatchableServers = async (ns: NS, servers: string[]) => {
+  const serversToTrigger = await batchableServers(ns);
+  const newServers = currentlyUsedBatchServers.filter(
+    (server: string) => !serversToTrigger.includes(server)
+  );
+
+  for (let index = 0; index < newServers.length; index++) {
+    const batchableServer = newServers[index];
+
+    await weakenServer(ns, servers, {
+      id: Math.random() + Date.now(),
+      server: batchableServer,
+      status: "needsGrowing",
+      timeScriptsDone: 0,
+      script: weakenScriptPath,
+      threads: 0,
+    });
+  }
+
+  return ns.sleep(short);
+};
+
 const triggerAllServers = async (ns: NS, servers: string[]) => {
   const serversToTrigger = await batchableServers(ns);
+  currentlyUsedBatchServers = serversToTrigger;
   for (let index = 0; index < serversToTrigger.length; index++) {
     const batchableServer = serversToTrigger[index];
 
@@ -358,6 +383,8 @@ export async function main(ns: NS): Promise<void> {
         index++;
       }
     }
+
+    await updateBatchableServers(ns, servers);
 
     await ns.sleep(short);
   }
