@@ -1,3 +1,4 @@
+import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import getServers from "/scripts/utils/getServers.js";
 import {
   growScriptPath,
@@ -5,6 +6,23 @@ import {
   hackScriptPath,
 } from "/scripts/utils/scriptPaths.js";
 import { short } from "/scripts/utils/timeoutTimes";
+
+const runScript = (
+  ns: NS,
+  currentServer: string,
+  scriptPath: string,
+  targetServer: string
+) => {
+  if (ns.scriptRunning(scriptPath, currentServer)) {
+    return;
+  }
+
+  const threadCount = getPossibleThreadCount(ns, currentServer, scriptPath);
+
+  if (threadCount > 0) {
+    ns.exec(scriptPath, currentServer, threadCount, targetServer);
+  }
+};
 
 /**
  * Initial centralized hacking hub for mass hacking.
@@ -27,28 +45,23 @@ export async function main(ns: NS): Promise<void> {
       includeGhost: false,
       mustHaveRootAccess: true,
     });
-    const filteredServers = targetServers.filter(
-      (server: string) => server !== "foodnstuff"
-    );
-    let avaibleServers = Object.assign([], filteredServers);
+    let avaibleServers = Object.assign([], targetServers);
 
     for (const serverIndex in servers) {
       if (avaibleServers.length === 0) {
-        avaibleServers = Object.assign([], filteredServers);
+        avaibleServers = Object.assign([], targetServers);
       }
 
       const currentServer = servers[serverIndex];
-      const isGhostServer = currentServer.includes("ghost-");
-      const targetServer = isGhostServer ? avaibleServers[0] : currentServer;
-      const moneyThresh = ns.getServerMaxMoney(targetServer) * 0.5;
-      const securityThresh = ns.getServerMinSecurityLevel(targetServer) + 5;
 
       if (!ns.serverExists(currentServer)) {
         continue;
       }
 
-      const serverMaxRam = ns.getServerMaxRam(currentServer);
-      const serverUsedRam = ns.getServerUsedRam(currentServer);
+      const isGhostServer = currentServer.includes("ghost-");
+      const targetServer = isGhostServer ? avaibleServers[0] : currentServer;
+      const moneyThresh = ns.getServerMaxMoney(targetServer) * 0.5;
+      const securityThresh = ns.getServerMinSecurityLevel(targetServer) + 5;
 
       const isWeakenThresholdReached =
         ns.getServerSecurityLevel(targetServer) > securityThresh;
@@ -56,58 +69,16 @@ export async function main(ns: NS): Promise<void> {
         ns.getServerMoneyAvailable(targetServer) < moneyThresh;
       const isHackThresholdReached = !isGrowThresholdReached;
 
-      if (
-        !ns.scriptRunning(hackScriptPath, currentServer) &&
-        isHackThresholdReached
-      ) {
-        const scriptRAM = ns.getScriptRam(hackScriptPath, currentServer);
-        const threadCount = Math.ceil(
-          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
-        );
-
-        if (
-          threadCount !== NaN &&
-          threadCount !== Infinity &&
-          threadCount > 0
-        ) {
-          ns.exec(hackScriptPath, currentServer, threadCount, targetServer);
-        }
+      if (isHackThresholdReached) {
+        runScript(ns, currentServer, hackScriptPath, targetServer);
       }
 
-      if (
-        !ns.scriptRunning(weakenScriptPath, currentServer) &&
-        isWeakenThresholdReached
-      ) {
-        const scriptRAM = ns.getScriptRam(weakenScriptPath, currentServer);
-        const threadCount = Math.floor(
-          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
-        );
-
-        if (
-          threadCount !== NaN &&
-          threadCount !== Infinity &&
-          threadCount > 0
-        ) {
-          ns.exec(weakenScriptPath, currentServer, threadCount, targetServer);
-        }
+      if (isWeakenThresholdReached) {
+        runScript(ns, currentServer, weakenScriptPath, targetServer);
       }
 
-      if (
-        !ns.scriptRunning(growScriptPath, currentServer) &&
-        isGrowThresholdReached
-      ) {
-        const scriptRAM = ns.getScriptRam(growScriptPath, currentServer);
-        const threadCount = Math.floor(
-          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
-        );
-
-        if (
-          threadCount !== NaN &&
-          threadCount !== Infinity &&
-          threadCount > 0
-        ) {
-          ns.exec(growScriptPath, currentServer, threadCount, targetServer);
-        }
+      if (isGrowThresholdReached) {
+        runScript(ns, currentServer, growScriptPath, targetServer);
       }
 
       avaibleServers.shift();
