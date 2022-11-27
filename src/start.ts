@@ -29,9 +29,16 @@ export async function main(ns: NS): Promise<void> {
     );
   }
 
-  if ((ns.args[0] as string) === "batch") {
+  if (
+    (ns.args[0].toLowerCase() as string) === "batch" ||
+    (ns.args[0].toLowerCase() as string) === "all"
+  ) {
     if (!ns.isRunning("/scripts/hacking/batch-hackingjs", "home")) {
       await ns.run("/scripts/hacking/batch-hacking.js");
+    }
+
+    if ((ns.args[0].toLowerCase() as string) === "all") {
+      await ns.run("/scripts/hacking/hub.js");
     }
   } else {
     if (!ns.isRunning("/scripts/hacking/hub.js", "home")) {
