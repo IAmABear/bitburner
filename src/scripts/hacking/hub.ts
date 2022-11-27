@@ -28,14 +28,11 @@ export async function main(ns: NS): Promise<void> {
       includeGhost: false,
       mustHaveRootAccess: true,
     });
-    const filteredServers = targetServers.filter(
-      (server: string) => server !== "foodnstuff"
-    );
-    let avaibleServers = Object.assign([], filteredServers);
+    let avaibleServers = Object.assign([], targetServers);
 
     for (const serverIndex in servers) {
       if (avaibleServers.length === 0) {
-        avaibleServers = Object.assign([], filteredServers);
+        avaibleServers = Object.assign([], targetServers);
       }
 
       const currentServer = servers[serverIndex];
