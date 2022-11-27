@@ -36,14 +36,15 @@ export async function main(ns: NS): Promise<void> {
       }
 
       const currentServer = servers[serverIndex];
-      const isGhostServer = currentServer.includes("ghost-");
-      const targetServer = isGhostServer ? avaibleServers[0] : currentServer;
-      const moneyThresh = ns.getServerMaxMoney(targetServer) * 0.5;
-      const securityThresh = ns.getServerMinSecurityLevel(targetServer) + 5;
 
       if (!ns.serverExists(currentServer)) {
         continue;
       }
+
+      const isGhostServer = currentServer.includes("ghost-");
+      const targetServer = isGhostServer ? avaibleServers[0] : currentServer;
+      const moneyThresh = ns.getServerMaxMoney(targetServer) * 0.5;
+      const securityThresh = ns.getServerMinSecurityLevel(targetServer) + 5;
 
       const isWeakenThresholdReached =
         ns.getServerSecurityLevel(targetServer) > securityThresh;
