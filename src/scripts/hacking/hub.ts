@@ -1,3 +1,4 @@
+import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import getServers from "/scripts/utils/getServers.js";
 import {
   growScriptPath,
@@ -47,9 +48,6 @@ export async function main(ns: NS): Promise<void> {
         continue;
       }
 
-      const serverMaxRam = ns.getServerMaxRam(currentServer);
-      const serverUsedRam = ns.getServerUsedRam(currentServer);
-
       const isWeakenThresholdReached =
         ns.getServerSecurityLevel(targetServer) > securityThresh;
       const isGrowThresholdReached =
@@ -60,16 +58,13 @@ export async function main(ns: NS): Promise<void> {
         !ns.scriptRunning(hackScriptPath, currentServer) &&
         isHackThresholdReached
       ) {
-        const scriptRAM = ns.getScriptRam(hackScriptPath, currentServer);
-        const threadCount = Math.ceil(
-          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
+        const threadCount = getPossibleThreadCount(
+          ns,
+          currentServer,
+          hackScriptPath
         );
 
-        if (
-          threadCount !== NaN &&
-          threadCount !== Infinity &&
-          threadCount > 0
-        ) {
+        if (threadCount > 0) {
           ns.exec(hackScriptPath, currentServer, threadCount, targetServer);
         }
       }
@@ -78,16 +73,13 @@ export async function main(ns: NS): Promise<void> {
         !ns.scriptRunning(weakenScriptPath, currentServer) &&
         isWeakenThresholdReached
       ) {
-        const scriptRAM = ns.getScriptRam(weakenScriptPath, currentServer);
-        const threadCount = Math.floor(
-          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
+        const threadCount = getPossibleThreadCount(
+          ns,
+          currentServer,
+          weakenScriptPath
         );
 
-        if (
-          threadCount !== NaN &&
-          threadCount !== Infinity &&
-          threadCount > 0
-        ) {
+        if (threadCount > 0) {
           ns.exec(weakenScriptPath, currentServer, threadCount, targetServer);
         }
       }
@@ -96,16 +88,13 @@ export async function main(ns: NS): Promise<void> {
         !ns.scriptRunning(growScriptPath, currentServer) &&
         isGrowThresholdReached
       ) {
-        const scriptRAM = ns.getScriptRam(growScriptPath, currentServer);
-        const threadCount = Math.floor(
-          Math.floor((serverMaxRam - serverUsedRam) / scriptRAM)
+        const threadCount = getPossibleThreadCount(
+          ns,
+          currentServer,
+          growScriptPath
         );
 
-        if (
-          threadCount !== NaN &&
-          threadCount !== Infinity &&
-          threadCount > 0
-        ) {
+        if (threadCount > 0) {
           ns.exec(growScriptPath, currentServer, threadCount, targetServer);
         }
       }
