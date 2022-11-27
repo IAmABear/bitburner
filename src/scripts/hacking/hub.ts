@@ -7,6 +7,23 @@ import {
 } from "/scripts/utils/scriptPaths.js";
 import { short } from "/scripts/utils/timeoutTimes";
 
+const runScript = (
+  ns: NS,
+  currentServer: string,
+  scriptPath: string,
+  targetServer: string
+) => {
+  if (ns.scriptRunning(scriptPath, currentServer)) {
+    return;
+  }
+
+  const threadCount = getPossibleThreadCount(ns, currentServer, scriptPath);
+
+  if (threadCount > 0) {
+    ns.exec(scriptPath, currentServer, threadCount, targetServer);
+  }
+};
+
 /**
  * Initial centralized hacking hub for mass hacking.
  * The goal of this hub is simply to weaken/grwo/hack
@@ -52,49 +69,16 @@ export async function main(ns: NS): Promise<void> {
         ns.getServerMoneyAvailable(targetServer) < moneyThresh;
       const isHackThresholdReached = !isGrowThresholdReached;
 
-      if (
-        !ns.scriptRunning(hackScriptPath, currentServer) &&
-        isHackThresholdReached
-      ) {
-        const threadCount = getPossibleThreadCount(
-          ns,
-          currentServer,
-          hackScriptPath
-        );
-
-        if (threadCount > 0) {
-          ns.exec(hackScriptPath, currentServer, threadCount, targetServer);
-        }
+      if (isHackThresholdReached) {
+        runScript(ns, currentServer, hackScriptPath, targetServer);
       }
 
-      if (
-        !ns.scriptRunning(weakenScriptPath, currentServer) &&
-        isWeakenThresholdReached
-      ) {
-        const threadCount = getPossibleThreadCount(
-          ns,
-          currentServer,
-          weakenScriptPath
-        );
-
-        if (threadCount > 0) {
-          ns.exec(weakenScriptPath, currentServer, threadCount, targetServer);
-        }
+      if (isWeakenThresholdReached) {
+        runScript(ns, currentServer, weakenScriptPath, targetServer);
       }
 
-      if (
-        !ns.scriptRunning(growScriptPath, currentServer) &&
-        isGrowThresholdReached
-      ) {
-        const threadCount = getPossibleThreadCount(
-          ns,
-          currentServer,
-          growScriptPath
-        );
-
-        if (threadCount > 0) {
-          ns.exec(growScriptPath, currentServer, threadCount, targetServer);
-        }
+      if (isGrowThresholdReached) {
+        runScript(ns, currentServer, growScriptPath, targetServer);
       }
 
       avaibleServers.shift();
