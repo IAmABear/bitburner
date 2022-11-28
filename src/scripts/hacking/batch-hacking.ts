@@ -351,12 +351,23 @@ export async function main(ns: NS): Promise<void> {
    */
 
   while (true) {
-    const ghostSevers = await getServers(ns, {
+    let servers = await getServers(ns, {
       includeHome: false,
       includeGhost: false,
       onlyGhost: true,
     });
-    const servers = ["home", ...ghostSevers];
+    if ((ns.args[0] as string) === "home" || (ns.args[0] as string) === "all") {
+      servers.push("home");
+    }
+
+    if ((ns.args[0] as string) === "all") {
+      const normalServers = await getServers(ns, {
+        includeHome: false,
+        includeGhost: false,
+      });
+
+      servers = [...servers, ...normalServers];
+    }
 
     if (events.length === 0) {
       await triggerAllServers(ns, servers);
