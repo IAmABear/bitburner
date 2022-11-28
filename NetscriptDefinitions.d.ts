@@ -1,14 +1,13 @@
-/**
- * @public
- */
+/** @public */
+export type ValuesFrom<T> = T[keyof T];
+
+/** @public */
 export interface HP {
   current: number;
   max: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface Skills {
   hacking: number;
   strength: number;
@@ -19,9 +18,7 @@ export interface Skills {
   intelligence: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface PossibleInfiltrationLocation {
   city: string;
   name: string;
@@ -33,24 +30,16 @@ export interface PossibleInfiltrationLocation {
  */
 type CodingContractData = any;
 
-/**
- * @public
- */
+/** @public */
 type PortData = string | number;
 
-/**
- * @public
- */
+/** @public */
 type ScriptArg = string | number | boolean;
 
-/**
- * @public
- */
+/** @public */
 type FilenameOrPID = number | string;
 
-/**
- * @public
- */
+/** @public */
 interface Player {
   hp: HP;
   skills: Skills;
@@ -72,9 +61,36 @@ interface Player {
   entropy: number;
 }
 
-/**
- * @public
- */
+/** @public */
+interface MoneySource {
+  bladeburner: number;
+  casino: number;
+  class: number;
+  codingcontract: number;
+  corporation: number;
+  crime: number;
+  gang: number;
+  hacking: number;
+  hacknet: number;
+  hacknet_expenses: number;
+  hospitalization: number;
+  infiltration: number;
+  sleeves: number;
+  stock: number;
+  total: number;
+  work: number;
+  servers: number;
+  other: number;
+  augmentations: number;
+}
+
+/** @public */
+interface MoneySources {
+  sinceInstall: MoneySource;
+  sinceStart: MoneySource;
+}
+
+/** @public */
 export interface Multipliers {
   /** Multiplier to hacking skill */
   hacking?: number;
@@ -138,9 +154,7 @@ export interface Multipliers {
   bladeburner_success_chance?: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface RunningScript {
   /** Arguments the script was called with */
   args: (string | number | boolean)[];
@@ -173,9 +187,7 @@ export interface RunningScript {
   threads: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface RecentScript extends RunningScript {
   /** Timestamp of when the script was killed */
   timeOfDeath: Date;
@@ -233,7 +245,8 @@ export interface CrimeStats {
  * @public
  */
 export interface BasicHGWOptions {
-  /** Number of threads to use for this function. Must be less than or equal to the number of threads the script is running with. */
+  /** Number of threads to use for this function.
+   * Must be less than or equal to the number of threads the script is running with. */
   threads?: number;
   /** Set to true this action will affect the stock market. */
   stock?: boolean;
@@ -259,17 +272,13 @@ export interface AugmentPair {
   cost: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export enum PositionTypes {
   Long = "L",
   Short = "S",
 }
 
-/**
- * @public
- */
+/** @public */
 export enum OrderTypes {
   LimitBuy = "Limit Buy Order",
   LimitSell = "Limit Sell Order",
@@ -360,7 +369,7 @@ export interface HacknetNodeConstants {
   BaseCost: number;
   /** Base cost per level */
   LevelBaseCost: number;
-  /** Base cost to incrase RAM */
+  /** Base cost to increase RAM */
   RamBaseCost: number;
   /** Base cost to increase cores */
   CoreBaseCost: number;
@@ -562,7 +571,8 @@ export interface BitNodeMultipliers {
   HackExpGain: number;
   /** Influences how quickly the player's hacking level (not experience) scales */
   HackingLevelMultiplier: number;
-  /** Influences how much money is produced by Hacknet Nodes and the hash rate of Hacknet Servers (unlocked in BitNode-9) */
+  /** Influences how much money is produced by Hacknet Nodes
+   *  and the hash rate of Hacknet Servers (unlocked in BitNode-9) */
   HacknetNodeMoney: number;
   /** Influences how much money it costs to upgrade your home computer's RAM */
   HomeComputerRamCost: number;
@@ -570,7 +580,8 @@ export interface BitNodeMultipliers {
   InfiltrationMoney: number;
   /** Influences how much rep the player can gain from factions when selling stolen documents and secrets */
   InfiltrationRep: number;
-  /** Influences how much money can be stolen from a server when the player performs a hack against it through the Terminal. */
+  /** Influences how much money can be stolen from a server when the player
+   *  performs a hack against it through the Terminal. */
   ManualHackMoney: number;
   /** Influence how much it costs to purchase a server */
   PurchasedServerCost: number;
@@ -633,9 +644,7 @@ export interface NodeStats {
   totalProduction: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface CharacterMult {
   /** Agility stat */
   agility: number;
@@ -673,9 +682,7 @@ export interface CharacterMult {
   workMoney: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface SleeveWorkGains {
   /** Hacking exp gained from work */
   workHackExpGain: number;
@@ -693,9 +700,7 @@ export interface SleeveWorkGains {
   workMoneyGain: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface SourceFileLvl {
   /** The number of the source file */
   n: number;
@@ -745,9 +750,7 @@ export interface GangGenInfo {
   wantedPenalty: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface GangOtherInfoObject {
   /** Gang power */
   power: number;
@@ -755,9 +758,7 @@ export interface GangOtherInfoObject {
   territory: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface GangOtherInfo {
   [key: string]: GangOtherInfoObject;
 }
@@ -818,9 +819,7 @@ export interface EquipmentStats {
   hack?: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface GangTerritory {
   /** Money gain impact on task scaling */
   money: number;
@@ -830,9 +829,7 @@ export interface GangTerritory {
   wanted: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface GangMemberInfo {
   /** Name of the gang member */
   name: string;
@@ -913,9 +910,7 @@ export interface GangMemberInfo {
   moneyGain: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface GangMemberAscension {
   /** Amount of respect lost from ascending */
   respect: number;
@@ -995,7 +990,7 @@ export interface NetscriptPort {
    *
    * @returns The data popped off the queue if it was full.
    */
-  write(value: string | number): null | string | number;
+  write(value: string | number): PortData | null;
 
   /**
    * Attempt to write data to the port.
@@ -1015,7 +1010,7 @@ export interface NetscriptPort {
    * If the port is empty, then the string “NULL PORT DATA” will be returned.
    * @returns the data read.
    */
-  read(): string | number;
+  read(): PortData;
 
   /**
    * Retrieve the first element from the port without removing it.
@@ -1027,7 +1022,7 @@ export interface NetscriptPort {
    * the port is empty, the string “NULL PORT DATA” will be returned.
    * @returns the data read
    */
-  peek(): string | number;
+  peek(): PortData;
 
   /**
    * Check if the port is full.
@@ -1105,7 +1100,7 @@ export interface TIX {
    * ```ts
    * // NS1
    * stock.getPrice("FSIG");
-   * 
+   *
    * // Choose the first stock symbol from the array of stock symbols.  Get the price
    * // of the corresponding stock.
    * var sym = stock.getSymbols()[0];
@@ -1116,7 +1111,7 @@ export interface TIX {
    * ```ts
    * // NS2
    * ns.stock.getPrice("FSIG");
-   * 
+   *
    * // Choose the first stock symbol from the array of stock symbols.  Get the price
    * // of the corresponding stock.
    * const sym = ns.stock.getSymbols()[0];
@@ -1332,7 +1327,7 @@ export interface TIX {
    * Cancel order for stocks.
    * @remarks
    * RAM cost: 2.5 GB
-   * Cancels an oustanding Limit or Stop order on the stock market.
+   * Cancels an outstanding Limit or Stop order on the stock market.
    *
    * The ability to use limit and stop orders is **not** immediately available to the player and
    * must be unlocked later on in the game.
@@ -1812,9 +1807,9 @@ export interface Singularity {
    * RAM cost: 3 GB * 16/4/1
    *
    *
-   * Returns an array with the name of all Factions you currently have oustanding invitations from.
+   * Returns an array with the name of all Factions you currently have outstanding invitations from.
    *
-   * @returns Array with the name of all Factions you currently have oustanding invitations from.
+   * @returns Array with the name of all Factions you currently have outstanding invitations from.
    */
   checkFactionInvitations(): string[];
 
@@ -2004,10 +1999,10 @@ export interface Singularity {
    * RAM cost: 5 GB * 16/4/1
    *
    *
-   * This function returns your chance of success at commiting the specified crime.
+   * This function returns your chance of success at committing the specified crime.
    *
    * @param crime - Name of crime.
-   * @returns Chance of success at commiting the specified crime.
+   * @returns Chance of success at committing the specified crime.
    */
   getCrimeChance(crime: string): number;
 
@@ -2078,7 +2073,7 @@ export interface Singularity {
 
   /**
    * Get the price and reputation of an augmentation.
-   * @deprecated use getAugmentationPrice getAugmentationRepCost
+   * @deprecated use getAugmentationPrice getAugmentationRepReq
    * @remarks
    * RAM cost: 5 GB * 16/4/1
    *
@@ -2656,7 +2651,7 @@ export interface Hacknet {
    * @param upgName - Name of the upgrade of Hacknet Node.
    * @param upgTarget - Object to which upgrade applies. Required for certain upgrades.
    * @param count - Number of upgrades to buy at once. Defaults to 1 if not specified.
-   * For compatability reasons, upgTarget must be specified, even if it is not used, in order to specify count.
+   * For compatibility reasons, upgTarget must be specified, even if it is not used, in order to specify count.
    * @returns True if the upgrade is successfully purchased, and false otherwise.
    */
   spendHashes(upgName: string, upgTarget?: string, count?: number): boolean;
@@ -3286,6 +3281,24 @@ export interface CodingContract {
    * @returns How many attempts are remaining for the contract.
    */
   getNumTriesRemaining(filename: string, host?: string): number;
+
+  /**
+   * Generate a dummy contract.
+   * @remarks
+   * RAM cost: 2 GB
+   *
+   * Generate a dummy contract on the home computer with no reward. Used to test various algorithms.
+   *
+   * @param type - Type of contract to generate
+   */
+  createDummyContract(type: string): void;
+
+  /**
+   * List all contract types.
+   * @remarks
+   * RAM cost: 2 GB
+   */
+  getContractTypes(): string[];
 }
 
 /**
@@ -3363,7 +3376,15 @@ export interface Gang {
    * @remarks
    * RAM cost: 1 GB
    *
-   * Returns boolean indicating whether a member can currently be recruited
+   * Returns a boolean indicating whether a member can currently be recruited.
+   *
+   * Once you have successfully created a gang by using the function
+   * {@link Gang.createGang | createGang}, you can immediately recruit a small
+   * number of members to your gang. After you have recruited the founding
+   * members, to recruit another member you must increase your respect. The
+   * more members you want to recruit, the more respect you require. If your
+   * gang has the maximum number of members, then this function would return
+   * false.
    *
    * @returns True if a member can currently be recruited, false otherwise.
    */
@@ -3634,8 +3655,46 @@ export interface Sleeve {
    *
    * Returns false if an invalid action is specified.
    *
-   * @param sleeveNumber - Index of the sleeve to start commiting crime.
-   * @param name - Name of the crime. Must be an exact match.
+   * You can set a sleeve to commit one of the following crimes. The crime names are not
+   * case sensitive. For example, you can pass in the crime name as `"Shoplift"`,
+   * `"shoplift"`, `"shopLift"`, or even `"SHOPLIFT"`.
+   *
+   * - Assassination
+   * - Bond forgery
+   * - Deal drugs
+   * - Grand theft auto
+   * - Heist
+   * - Homicide
+   * - Kidnap
+   * - Larceny
+   * - Mug
+   * - Rob store
+   * - Shoplift
+   * - Traffick arms
+   *
+   * @example
+   * ```ts
+   * // NS1
+   * // Assign the first 3 sleeves to commit various crimes.
+   * var crime = ["mug", "rob store", "shoplift"];
+   * for (var i = 0; i < crime.length; i++) {
+   *     tprintf("Sleeve %d commits crime: %s", i, crime[i]);
+   *     sleeve.setToCommitCrime(i, crime[i]);
+   * }
+   * ```
+   * @example
+   * ```ts
+   * // NS2
+   * // Assign the first 3 sleeves to commit various crimes.
+   * const crime = ["mug", "rob store", "shoplift"];
+   * for (let i = 0; i < crime.length; i++) {
+   *     ns.tprintf("Sleeve %d commits crime: %s", i, crime[i]);
+   *     ns.sleeve.setToCommitCrime(i, crime[i]);
+   * }
+   * ```
+   *
+   * @param sleeveNumber - Index of the sleeve to start committing crime. Sleeves are numbered starting from 0.
+   * @param name - Name of the crime. Must be an exact match. Refer to the list of crimes.
    * @returns True if this action was set successfully, false otherwise.
    */
   setToCommitCrime(sleeveNumber: number, name: string): boolean;
@@ -3858,9 +3917,7 @@ interface SkillsFormulas {
   calculateExp(skill: number, skillMult?: number): number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface WorkStats {
   money: number;
   reputation: number;
@@ -4170,9 +4227,7 @@ export interface Formulas {
   work: WorkFormulas;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface Fragment {
   id: number;
   shape: boolean[][];
@@ -4181,9 +4236,7 @@ export interface Fragment {
   limit: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface ActiveFragment {
   id: number;
   highestCharge: number;
@@ -4305,26 +4358,20 @@ interface Stanek {
   acceptGift(): boolean;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface InfiltrationReward {
   tradeRep: number;
   sellCash: number;
   SoARep: number;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface ILocation {
   city: string;
   name: string;
 }
 
-/**
- * @public
- */
+/** @public */
 export interface InfiltrationLocation {
   location: ILocation;
   reward: InfiltrationReward;
@@ -4476,54 +4523,55 @@ export interface NS {
    * @remarks RAM cost: 4 GB
    */
   readonly hacknet: Hacknet;
+
   /**
-   *
    * Namespace for bladeburner functions.
    * @remarks RAM cost: 0 GB
    */
   readonly bladeburner: Bladeburner;
+
   /**
-   *
    * Namespace for codingcontract functions.
    * @remarks RAM cost: 0 GB
    */
   readonly codingcontract: CodingContract;
+
   /**
-   *
    * Namespace for gang functions.
    * @remarks RAM cost: 0 GB
    */
   readonly gang: Gang;
+
   /**
-   *
    * Namespace for sleeve functions.
    * @remarks RAM cost: 0 GB
    */
   readonly sleeve: Sleeve;
+
   /**
-   *
    * Namespace for stock functions.
-   * @remarks
-   * RAM cost: 0 GB
+   * @remarks RAM cost: 0 GB
    */
   readonly stock: TIX;
+
   /**
-   *
    * Namespace for formulas functions.
-   * @remarks
-   * RAM cost: 0 GB
+   * @remarks RAM cost: 0 GB
    */
   readonly formulas: Formulas;
+
   /**
    * Namespace for stanek functions.
    * RAM cost: 0 GB
    */
   readonly stanek: Stanek;
+
   /**
    * Namespace for infiltration functions.
    * RAM cost: 0 GB
    */
   readonly infiltration: Infiltration;
+
   /**
    * Namespace for corporation functions.
    * RAM cost: 1022.4 GB
@@ -4544,8 +4592,7 @@ export interface NS {
 
   /**
    * Namespace for grafting functions.
-   * @remarks
-   * RAM cost: 0 GB
+   * @remarks RAM cost: 0 GB
    */
   readonly grafting: Grafting;
 
@@ -4873,7 +4920,7 @@ export interface NS {
    * print("WARNing! Here be dragons.");
    * print("INFO for your I's only (FYI).");
    * print("INFOrmation overload!");
-   * // Custom color coding. 
+   * // Custom color coding.
    * var cyan = "\u001b[36m";
    * var green = "\u001b[32m";
    * var red = "\u001b[31m";
@@ -4973,9 +5020,9 @@ export interface NS {
    * RAM cost: 0 GB
    *
    * - See {@link NS.print | print} for how to add color to your printed strings.
-   * 
+   *
    * - See {@link NS.printf | printf} for examples on formatted strings.
-   * 
+   *
    * - For more detail, see: https://github.com/alexei/sprintf.js
    *
    * @param format - Format of the message.
@@ -5184,8 +5231,43 @@ export interface NS {
    * node way from the specified target server. The hostnames in the returned
    * array are strings.
    *
-   * @param host - Optional, Hostname of the server to scan, default to current server.
-   * @returns Returns an string of hostnames.
+   * @example
+   * ```ts
+   * // NS1
+   * // All servers that are one hop from the current server.
+   * tprint("Neighbors of current server.");
+   * var neighbor = scan();
+   * for (var i = 0; i < neighbor.length; i++) {
+   *     tprint(neighbor[i]);
+   * }
+   * // All neighbors of n00dles.
+   * var target = "n00dles";
+   * neighbor = scan(target);
+   * tprintf("Neighbors of %s.", target);
+   * for (var i = 0; i < neighbor.length; i++) {
+   *     tprint(neighbor[i]);
+   * }
+   * ```
+   * @example
+   * ```ts
+   * // NS2
+   * // All servers that are one hop from the current server.
+   * ns.tprint("Neighbors of current server.");
+   * let neighbor = ns.scan();
+   * for (let i = 0; i < neighbor.length; i++) {
+   *     ns.tprint(neighbor[i]);
+   * }
+   * // All neighbors of n00dles.
+   * const target = "n00dles";
+   * neighbor = ns.scan(target);
+   * ns.tprintf("Neighbors of %s.", target);
+   * for (let i = 0; i < neighbor.length; i++) {
+   *     ns.tprint(neighbor[i]);
+   * }
+   * ```
+   *
+   * @param host - Optional. Hostname of the server to scan, default to current server.
+   * @returns Returns an array of hostnames.
    */
   scan(host?: string): string[];
 
@@ -5369,10 +5451,10 @@ export interface NS {
    * @remarks
    * RAM cost: 1.3 GB
    *
-   * Run a script as a separate process on a specified server. This is similar to the run function
+   * Run a script as a separate process on a specified server. This is similar to the function {@link NS.run | run}
    * except that it can be used to run a script on any server, instead of just the current server.
    *
-   * If the script was successfully started, then this functions returns the PID of that script.
+   * If the script was successfully started, then this function returns the PID of that script.
    * Otherwise, it returns 0.
    *
    * PID stands for Process ID. The PID is a unique identifier for each script.
@@ -5383,30 +5465,40 @@ export interface NS {
    * @example
    * ```ts
    * // NS1:
-   * //The simplest way to use the exec command is to call it with just the script name and the target server. The following example will try to run generic-hack.script on the foodnstuff server:
+   * // The simplest way to use the exec command is to call it with just the script name
+   * // and the target server. The following example will try to run generic-hack.script
+   * // on the foodnstuff server.
    * exec("generic-hack.script", "foodnstuff");
    *
-   * //The following example will try to run the script generic-hack.script on the joesguns server with 10 threads:
+   * // The following example will try to run the script generic-hack.script on the
+   * // joesguns server with 10 threads.
    * exec("generic-hack.script", "joesguns", 10);
    *
-   * //This last example will try to run the script foo.script on the foodnstuff server with 5 threads. It will also pass the number 1 and the string “test” in as arguments to the script:
+   * // This last example will try to run the script foo.script on the foodnstuff server
+   * // with 5 threads. It will also pass the number 1 and the string “test” in as
+   * // arguments to the script.
    * exec("foo.script", "foodnstuff", 5, 1, "test");
    * ```
-   * * @example
+   * @example
    * ```ts
    * // NS2:
-   * //The simplest way to use the exec command is to call it with just the script name and the target server. The following example will try to run generic-hack.script on the foodnstuff server:
+   * // The simplest way to use the exec command is to call it with just the script name
+   * // and the target server. The following example will try to run generic-hack.script
+   * // on the foodnstuff server.
    * ns.exec("generic-hack.script", "foodnstuff");
    *
-   * //The following example will try to run the script generic-hack.script on the joesguns server with 10 threads:
+   * // The following example will try to run the script generic-hack.script on the
+   * // joesguns server with 10 threads.
    * ns.exec("generic-hack.script", "joesguns", 10);
    *
-   * //This last example will try to run the script foo.script on the foodnstuff server with 5 threads. It will also pass the number 1 and the string “test” in as arguments to the script:
+   * // This last example will try to run the script foo.script on the foodnstuff server
+   * // with 5 threads. It will also pass the number 1 and the string “test” in as
+   * // arguments to the script.
    * ns.exec("foo.script", "foodnstuff", 5, 1, "test");
    * ```
    * @param script - Filename of script to execute.
    * @param host - Hostname of the `target server` on which to execute the script.
-   * @param numThreads - Optional thread count for new script. Set to 1 by default. Will be rounded to nearest integer.
+   * @param numThreads - Optional thread count for new script. Set to 1 by default. Will be rounded down to the nearest integer.
    * @param args - Additional arguments to pass into the new script that is being run. Note that if any arguments are being passed into the new script, then the third argument numThreads must be filled in with a value.
    * @returns Returns the PID of a successfully started script, and 0 otherwise.
    */
@@ -6073,6 +6165,39 @@ export interface NS {
   purchaseServer(hostname: string, ram: number): string;
 
   /**
+   * Get cost of upgrading a purchased server to the given ram.
+   * @remarks
+   * RAM cost: 0.1 GB
+   *
+   * @param hostname - Hostname of the server to upgrade.
+   * @param ram - Amount of RAM of the purchased server, in GB. Must be a power of 2 (2, 4, 8, 16, etc.). Maximum value of 1048576 (2^20).
+   * @returns The price to upgrade.
+   */
+  getPurchasedServerUpgradeCost(hostname: string, ram: number): number;
+
+  /**
+   * Upgrade a purchased servers ram.
+   * @remarks
+   * RAM cost: 0.25 GB
+   *
+   * @param hostname - Hostname of the server to upgrade.
+   * @param ram - Amount of RAM of the purchased server, in GB. Must be a power of 2 (2, 4, 8, 16, etc.). Maximum value of 1048576 (2^20).
+   * @returns True if the upgrade succeeded.
+   */
+  upgradePurchasedServer(hostname: string, ram: number): boolean;
+
+  /**
+   * Rename a purchased server.
+   * @remarks
+   * RAM cost: 2.00 GB
+   *
+   * @param hostname - current server hostname
+   * @param newName - new server hostname
+   * @returns True if the upgrade succeeded.
+   */
+  renamePurchasedServer(hostname: string, newName: string): boolean;
+
+  /**
    * Delete a purchased server.
    * @remarks
    * 2.25 GB
@@ -6130,7 +6255,7 @@ export interface NS {
    * @param data - Data to write.
    * @param mode - Defines the write mode.
    */
-  write(filename: string, data?: string[] | number | string, mode?: "w" | "a"): void;
+  write(filename: string, data?: string, mode?: "w" | "a"): void;
 
   /**
    * Attempt to write to a port.
@@ -6145,7 +6270,7 @@ export interface NS {
    * @param data - Data to write.
    * @returns True if the data is successfully written to the port, and false otherwise.
    */
-  tryWritePort(port: number, data: string | number): Promise<boolean>;
+  tryWritePort(port: number, data: string | number): boolean;
 
   /**
    * Read content of a file.
@@ -6192,7 +6317,7 @@ export interface NS {
    * @remarks
    * RAM cost: 0 GB
    *
-   * Deleta all data from the underlying queue.
+   * Delete all data from the underlying queue.
    *
    * @param handle - Port to clear.
    */
@@ -6434,8 +6559,8 @@ export interface NS {
    *
    * see: https://github.com/alexei/sprintf.js
    * @param format - String to format.
-   * @param args - Formating arguments.
-   * @returns Formated text.
+   * @param args - Formatting arguments.
+   * @returns Formatted text.
    */
   sprintf(format: string, ...args: any[]): string;
 
@@ -6446,8 +6571,8 @@ export interface NS {
    *
    * see: https://github.com/alexei/sprintf.js
    * @param format - String to format.
-   * @param args - Formating arguments.
-   * @returns Formated text.
+   * @param args - Formatting arguments.
+   * @returns Formatted text.
    */
   vsprintf(format: string, args: any[]): string;
 
@@ -6457,13 +6582,13 @@ export interface NS {
    * RAM cost: 0 GB
    *
    * Converts a number into a string with the specified formatter.
-   * This uses the numeraljs library, so the formatters must be compatible with that.
+   * This uses the numeral.js library, so the formatters must be compatible with that.
    * This is the same function that the game itself uses to display numbers.
    *
    * see: http://numeraljs.com/
    * @param n - Number to format.
    * @param format - Formatter.
-   * @returns Formated number.
+   * @returns Formatted number.
    */
   nFormat(n: number, format: string): string;
 
@@ -6483,20 +6608,88 @@ export interface NS {
    * @remarks
    * RAM cost: 0 GB
    *
-   * Prompts the player with a dialog box. If `options.type` is undefined or "boolean",
-   * the player is shown "Yes" and "No" prompts, which return true and false respectively.
-   * Passing a type of "text" will give the player a text field and a value of "select"
-   * will show a drop-down field. Choosing type "select" will require an array or object
-   * to be passed via the `options.choices` property.
-   * The script’s execution is halted until the player selects one of the options.
+   * Prompts the player with a dialog box. Here is an explanation of the various options.
+   *
+   * - `options.type` is not provided to the function. If `options.type` is left out and
+   *   only a string is passed to the function, then the default behavior is to create a
+   *   boolean dialog box.
+   *
+   * - `options.type` has value `undefined` or `"boolean"`. A boolean dialog box is
+   *   created. The player is shown "Yes" and "No" prompts, which return true and false
+   *   respectively. The script's execution is halted until the player presses either the
+   *   "Yes" or "No" button.
+   *
+   * - `options.type` has value `"text"`. The player is given a text field to enter
+   *   free-form text. The script's execution is halted until the player enters some text
+   *   and/or presses the "Confirm" button.
+   *
+   * - `options.type` has value `"select"`. The player is shown a drop-down field.
+   *   Choosing type `"select"` will require an array to be passed via the
+   *   `options.choices` property. The array can be an array of strings, an array of
+   *   numbers (not BigInt numbers), or a mixture of both numbers and strings. Any other
+   *   types of array elements will result in an error or an undefined/unexpected
+   *   behavior. The `options.choices` property will be ignored if `options.type` has a
+   *   value other than `"select"`. The script's execution is halted until the player
+   *   chooses one of the provided options and presses the "Confirm" button.
+   *
+   * @example
+   * ```ts
+   * // NS1
+   * // A Yes/No question. The default is to create a boolean dialog box.
+   * var queryA = "Do you enjoy Bitburner?";
+   * var resultA = prompt(queryA);
+   * tprint(queryA + " " + resultA);
+   *
+   * // Another Yes/No question. Can also create a boolean dialog box by explicitly
+   * // passing the option {"type": "boolean"}.
+   * var queryB = "Is programming fun?";
+   * var resultB = prompt(queryB, { type: "boolean" });
+   * tprint(queryB + " " + resultB);
+   *
+   * // Free-form text box.
+   * var resultC = prompt("Please enter your name.", { type: "text" });
+   * tprint("Hello, " + resultC + ".");
+   *
+   * // A drop-down list.
+   * var resultD = prompt("Please select your favorite fruit.", {
+   *     type: "select",
+   *     choices: ["Apple", "Banana", "Orange", "Pear", "Strawberry"]
+   * });
+   * tprint("Your favorite fruit is " + resultD.toLowerCase() + ".");
+   * ```
+   * @example
+   * ```ts
+   * // NS2
+   * // A Yes/No question. The default is to create a boolean dialog box.
+   * const queryA = "Do you enjoy Bitburner?";
+   * const resultA = await ns.prompt(queryA);
+   * ns.tprint(`${queryA} ${resultA}`);
+   *
+   * // Another Yes/No question. Can also create a boolean dialog box by explicitly
+   * // passing the option {"type": "boolean"}.
+   * const queryB = "Is programming fun?";
+   * const resultB = await ns.prompt(queryB, { type: "boolean" });
+   * ns.tprint(`${queryB} ${resultB}`);
+   *
+   * // Free-form text box.
+   * const resultC = await ns.prompt("Please enter your name.", { type: "text" });
+   * ns.tprint(`Hello, ${resultC}.`);
+   *
+   * // A drop-down list.
+   * const resultD = await ns.prompt("Please select your favorite fruit.", {
+   *     type: "select",
+   *     choices: ["Apple", "Banana", "Orange", "Pear", "Strawberry"]
+   * });
+   * ns.tprint(`Your favorite fruit is ${resultD.toLowerCase()}.`);
+   * ```
    *
    * @param txt - Text to appear in the prompt dialog box.
    * @param options - Options to modify the prompt the player is shown.
-   * @returns True if the player click “Yes”; false if the player clicks “No”; or the value entered by the player.
+   * @returns True if the player clicks “Yes”; false if the player clicks “No”; or the value entered by the player.
    */
   prompt(
     txt: string,
-    options?: { type?: "boolean" | "text" | "select" | undefined; choices?: string[] },
+    options?: { type?: "boolean" | "text" | "select"; choices?: string[] },
   ): Promise<boolean | string>;
 
   /**
@@ -6511,7 +6704,7 @@ export interface NS {
    * @param variant - Type of toast, must be one of success, info, warning, error. Defaults to success.
    * @param duration - Duration of toast in ms. Can also be `null` to create a persistent toast. Defaults to 2000
    */
-  toast(msg: string, variant?: ToastVariantValues, duration?: number | null): void;
+  toast(msg: string, variant?: ToastVariant, duration?: number | null): void;
 
   /**
    * Download a file from the internet.
@@ -6565,7 +6758,7 @@ export interface NS {
    * @remarks
    * RAM cost: 4 GB
    *
-   * Returns an object containing the current BitNode multipliers.
+   * Returns an object containing the current (or supplied) BitNode multipliers.
    * This function requires you to be in Bitnode 5 or have Source-File 5 in order to run.
    * The multipliers are returned in decimal forms (e.g. 1.5 instead of 150%).
    * The multipliers represent the difference between the current BitNode and
@@ -6591,7 +6784,7 @@ export interface NS {
    * ```
    * @returns Object containing the current BitNode multipliers.
    */
-  getBitNodeMultipliers(): BitNodeMultipliers;
+  getBitNodeMultipliers(n?: number, lvl?: number): BitNodeMultipliers;
 
   /**
    * Get information about the player.
@@ -6603,6 +6796,17 @@ export interface NS {
    * @returns Player info
    */
   getPlayer(): Player;
+
+  /**
+   * Get information about the sources of income for this run.
+   * @remarks
+   * RAM cost: 1.0 GB
+   *
+   * Returns an object with information on the income sources for this run
+   *
+   * @returns Money sources
+   */
+  getMoneySources(): MoneySources;
 
   /**
    * Add callback function when the script dies
@@ -6700,25 +6904,24 @@ export interface NS {
 }
 
 /** @public */
-export enum ToastVariant {
-  SUCCESS = "success",
-  WARNING = "warning",
-  ERROR = "error",
-  INFO = "info",
-}
+declare const enums = {
+  toast: {
+    SUCCESS: "success",
+    WARNING: "warning",
+    ERROR: "error",
+    INFO: "info",
+  },
+};
 
 /** @public */
-export type ToastVariantValues = `${ToastVariant}`;
+type ToastVariant = ValuesFrom<typeof enums.toast>;
 
 /** @public */
-export interface NSEnums {
-  toast: typeof ToastVariant;
-}
-
+export type NSEnums = typeof enums;
 /**
  * Corporation Office API
  * @remarks
- * Requires the Office API upgrade from your corporation.
+ * requires the Office API upgrade from your corporation.
  * @public
  */
 export interface OfficeAPI {
@@ -7229,7 +7432,7 @@ interface CorporationInfo {
   numShares: number;
   /** Cooldown until shares can be sold again */
   shareSaleCooldown: number;
-  /** Amount of aqcuirable shares. */
+  /** Amount of acquirable shares. */
   issuedShares: number;
   /** Price of the shares */
   sharePrice: number;
@@ -7453,7 +7656,7 @@ interface InvestmentOffer {
 
 /**
  * Interface Theme
- * @internal
+ * @public
  */
 interface UserInterfaceTheme {
   [key: string]: string | undefined;
@@ -7494,7 +7697,7 @@ interface UserInterfaceTheme {
 
 /**
  * Interface Styles
- * @internal
+ * @public
  */
 interface IStyleSettings {
   fontFamily: string;
@@ -7503,7 +7706,7 @@ interface IStyleSettings {
 
 /**
  * Game Information
- * @internal
+ * @public
  */
 interface GameInfo {
   version: string;
