@@ -43,7 +43,7 @@ const batchableServers = async (ns: NS) => {
   });
   const serversInfo = allServers.map((server: string) => ns.getServer(server));
   const withinHackingLevelRange = serversInfo
-    .filter((server: Server) => server.moneyMax !== 0 || !server.hasAdminRights)
+    .filter((server: Server) => server.moneyMax !== 0 && server.hasAdminRights)
     .filter(
       (server: Server) =>
         server.requiredHackingSkill <= ns.getHackingLevel() / 3
