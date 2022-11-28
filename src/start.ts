@@ -34,7 +34,9 @@ export async function main(ns: NS): Promise<void> {
     (ns.args[0] as string).toLowerCase() === "all"
   ) {
     if (!ns.isRunning("/scripts/hacking/batch-hackingjs", "home")) {
-      await ns.run("/scripts/hacking/batch-hacking.js");
+      const cliArgs = [...ns.args];
+      cliArgs.shift();
+      await ns.run("/scripts/hacking/batch-hacking.js", undefined, cliArgs);
     }
 
     if ((ns.args[0] as string).toLowerCase() === "all") {
