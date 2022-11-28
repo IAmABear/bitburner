@@ -24,20 +24,12 @@ export async function main(ns: NS): Promise<void> {
           ns.getServerMoneyAvailable("home")
       ) {
         await ns.killall(targetServer);
-        await ns.deleteServer(targetServer);
+        await ns.upgradePurchasedServer(targetServer, newTargetRam);
 
-        const newServerName = await ns.purchaseServer(
+        await ns.renamePurchasedServer(
+          targetServer,
           "ghost-" + newTargetRam,
           Number(newTargetRam)
-        );
-
-        if (!(await ns.serverExists(newServerName))) {
-          continue;
-        }
-
-        await ns.scp(
-          [hackScriptPath, growScriptPath, weakenScriptPath],
-          newServerName
         );
       }
 
