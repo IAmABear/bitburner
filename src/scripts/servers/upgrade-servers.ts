@@ -7,9 +7,10 @@ import { long } from "/scripts/utils/timeoutTimes";
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
-  const servers = await ns.getPurchasedServers();
 
-  while (servers.length > 0) {
+  while (true) {
+    const servers = await ns.getPurchasedServers();
+
     for (const serverIndex in servers) {
       const targetServer = servers[serverIndex];
       if (!(await ns.serverExists(targetServer))) {
