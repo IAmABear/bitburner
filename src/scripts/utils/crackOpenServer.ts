@@ -5,7 +5,8 @@ export default async (
 ): Promise<void> => {
   let openPortCount = 0;
 
-  if (ns.hasRootAccess(server) && checkIfRootAction) {
+  const hasRootAccess = ns.hasRootAccess(server);
+  if (hasRootAccess && checkIfRootAction) {
     return;
   }
 
@@ -41,7 +42,7 @@ export default async (
   // Can't do this yet due to missing the Source-File 4-1
   // ns.installBackdoor(server);
 
-  if (openPortCount >= ns.getServerNumPortsRequired(server)) {
+  if (!hasRootAccess && openPortCount >= ns.getServerNumPortsRequired(server)) {
     ns.nuke(server);
     ns.tprint(server + " is hacked and we now have root access.");
   }
