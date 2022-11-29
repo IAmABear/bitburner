@@ -1,6 +1,10 @@
 export default async (ns: NS, server: string): Promise<void> => {
   let openPortCount = 0;
 
+  if (ns.hasRootAccess(server)) {
+    return;
+  }
+
   /**
    * For now just install all the things
    */
