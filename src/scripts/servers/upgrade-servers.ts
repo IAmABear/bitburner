@@ -6,6 +6,7 @@ import {
 import { long } from "/scripts/utils/timeoutTimes";
 
 export async function main(ns: NS): Promise<void> {
+  ns.disableLog("ALL");
   const servers = await ns.getPurchasedServers();
 
   while (servers.length > 0) {
