@@ -59,7 +59,7 @@ const batchableServers = async (ns: NS) => {
     includeGhost: false,
     onlyGhost: true,
   });
-  const ghostServersInfo = ghostServers.map((server: string) =>
+  const ghostServersInfo = ["home", ...ghostServers].map((server: string) =>
     ns.getServer(server)
   );
   let avaibleRam: number = ghostServersInfo.reduce(
