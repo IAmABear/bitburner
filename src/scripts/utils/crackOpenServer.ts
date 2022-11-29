@@ -1,7 +1,11 @@
-export default async (ns: NS, server: string): Promise<void> => {
+export default async (
+  ns: NS,
+  server: string,
+  checkIfRootAction = true
+): Promise<void> => {
   let openPortCount = 0;
 
-  if (ns.hasRootAccess(server)) {
+  if (ns.hasRootAccess(server) && checkIfRootAction) {
     return;
   }
 
