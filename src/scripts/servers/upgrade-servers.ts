@@ -3,8 +3,9 @@ import {
   hackScriptPath,
   weakenScriptPath,
 } from "/scripts/utils/scriptPaths";
-import { long } from "/scripts/utils/timeoutTimes";
+import { long, short } from "/scripts/utils/timeoutTimes";
 
+let dynamicSleep = long;
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
 
@@ -25,6 +26,8 @@ export async function main(ns: NS): Promise<void> {
         ns.getPurchasedServerCost(newTargetRam) <
           ns.getServerMoneyAvailable("home")
       ) {
+        dynamicSleep = short;
+
         await ns.killall(targetServer);
         await ns.deleteServer(targetServer);
 
@@ -41,9 +44,11 @@ export async function main(ns: NS): Promise<void> {
           [hackScriptPath, growScriptPath, weakenScriptPath],
           newServerName
         );
+      } else {
+        dynamicSleep = long;
       }
     }
 
-    await ns.sleep(long);
+    await ns.sleep(dynamicSleep);
   }
 }
