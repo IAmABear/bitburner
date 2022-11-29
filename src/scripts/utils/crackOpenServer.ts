@@ -44,6 +44,6 @@ export default async (
 
   if (!hasRootAccess && openPortCount >= ns.getServerNumPortsRequired(server)) {
     ns.nuke(server);
-    ns.tprint(server + " is hacked and we now have root access.");
+    ns.print(server + " is hacked and we now have root access.");
   }
 };
