@@ -33,7 +33,7 @@ import {
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
+import { long, short, skip } from "/scripts/utils/timeoutTimes";
 import { Server } from "/../NetscriptDefinitions";
 
 const batchableServers = async (ns: NS) => {
