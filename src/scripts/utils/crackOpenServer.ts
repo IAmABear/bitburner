@@ -28,7 +28,7 @@ export default async (
     openPortCount++;
   }
 
-  if (ns.fileExists("relaySTMP.exe")) {
+  if (ns.fileExists("relaySMTP.exe")) {
     ns.relaysmtp(server);
     openPortCount++;
   }
