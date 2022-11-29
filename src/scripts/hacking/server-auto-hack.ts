@@ -1,55 +1,10 @@
+import crackOpenServer from "/scripts/utils/crackOpenServer";
 import {
   growScriptPath,
   weakenScriptPath,
   hackScriptPath,
 } from "/scripts/utils/scriptPaths.js";
 import { medium } from "/scripts/utils/timeoutTimes";
-
-async function crackOpenServer(ns: NS, server: string): Promise<void> {
-  const serverInfo = ns.getServer(server);
-  if (serverInfo.hasAdminRights) {
-    return;
-  }
-
-  let openPortCount = 0;
-
-  /**
-   * For now just install all the things
-   */
-
-  if (ns.fileExists("HTTPWorm.exe")) {
-    ns.httpworm(server);
-    openPortCount++;
-  }
-
-  if (ns.fileExists("BruteSSH.exe")) {
-    ns.brutessh(server);
-    openPortCount++;
-  }
-
-  if (ns.fileExists("FTPCrack.exe")) {
-    ns.ftpcrack(server);
-    openPortCount++;
-  }
-
-  if (ns.fileExists("relaySTMP.exe")) {
-    ns.relaysmtp(server);
-    openPortCount++;
-  }
-
-  if (ns.fileExists("SQLInject.exe")) {
-    ns.sqlinject(server);
-    openPortCount++;
-  }
-
-  // Can't do this yet due to missing the Source-File 4-1
-  // ns.installBackdoor(server);
-
-  if (openPortCount >= ns.getServerNumPortsRequired(server)) {
-    ns.nuke(server);
-    ns.tprint(server + " is hacked and we now have root access.");
-  }
-}
 
 async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {
   const res = await ns.scp(
