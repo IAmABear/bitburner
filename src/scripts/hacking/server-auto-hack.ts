@@ -18,6 +18,7 @@ async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {
 
 let currentHackingLevel = 0;
 export async function main(ns: NS): Promise<void> {
+  ns.disableLog("ALL");
   const servers = await scanServer(ns, "home");
 
   while (true) {
