@@ -40,8 +40,8 @@ export async function main(ns: NS): Promise<void> {
           newServerName
         );
       }
-
-      await ns.sleep(long);
     }
+
+    await ns.sleep(long);
   }
 }
