@@ -1,4 +1,5 @@
 import crackOpenServer from "/scripts/utils/crackOpenServer";
+import scanServer from "/scripts/utils/scanServer";
 import {
   growScriptPath,
   weakenScriptPath,
@@ -13,28 +14,6 @@ async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {
   );
 
   return res;
-}
-
-const scannedServers: string[] = [];
-
-async function scanServer(ns: NS, server: string) {
-  const serversFound = ns.scan(server);
-
-  for (const serverFoundIndex in serversFound) {
-    const serverFound = serversFound[serverFoundIndex];
-    if (
-      !scannedServers.includes(serverFound) &&
-      !serverFound.includes("ghost-")
-    ) {
-      if (!serverFound.includes("home")) {
-        scannedServers.push(serverFound);
-      }
-
-      await scanServer(ns, serverFound);
-    }
-  }
-
-  return scannedServers;
 }
 
 let currentHackingLevel = 0;
