@@ -1,8 +1,6 @@
+const batchHackingV1 = "/scripts/hacking/batch/batch-hacking-v1.js";
 export async function main(ns: NS): Promise<void> {
-  ns.exec(
-    "/scripts/hacking/batch/batch-hacking-v1.js",
-    "home",
-    undefined,
-    ...ns.args
-  );
+  if (!ns.isRunning(batchHackingV1, "home")) {
+    ns.exec(batchHackingV1, "home", undefined, ...ns.args);
+  }
 }
