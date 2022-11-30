@@ -30,6 +30,6 @@ export async function main(ns: NS): Promise<void> {
   }
 
   if (!ns.isRunning("/scripts/hacking/batch-hackingjs", "home")) {
-    await ns.run("/scripts/hacking/batch-hacking.js", "all");
+    await ns.run("/scripts/hacking/batch-hacking.js", undefined, "all");
   }
 }
