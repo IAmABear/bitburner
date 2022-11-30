@@ -3,13 +3,15 @@ import {
   hackScriptPath,
   weakenScriptPath,
 } from "/scripts/utils/scriptPaths";
-import { long } from "/scripts/utils/timeoutTimes";
+import { long, short } from "/scripts/utils/timeoutTimes";
 
+let dynamicSleep = long;
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
-  const servers = await ns.getPurchasedServers();
 
-  while (servers.length > 0) {
+  while (true) {
+    const servers = await ns.getPurchasedServers();
+
     for (const serverIndex in servers) {
       const targetServer = servers[serverIndex];
       if (!(await ns.serverExists(targetServer))) {
@@ -22,8 +24,11 @@ export async function main(ns: NS): Promise<void> {
       if (
         newTargetRam < maxPossibleRamServer &&
         ns.getPurchasedServerCost(newTargetRam) <
-          ns.getServerMoneyAvailable("home")
+          ns.getServerMoneyAvailable("home") &&
+        newTargetRam <= 17000
       ) {
+        dynamicSleep = short;
+
         await ns.killall(targetServer);
         await ns.deleteServer(targetServer);
 
@@ -40,9 +45,11 @@ export async function main(ns: NS): Promise<void> {
           [hackScriptPath, growScriptPath, weakenScriptPath],
           newServerName
         );
+      } else {
+        dynamicSleep = long;
       }
     }
 
-    await ns.sleep(long);
+    await ns.sleep(dynamicSleep);
   }
 }
