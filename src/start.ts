@@ -29,22 +29,7 @@ export async function main(ns: NS): Promise<void> {
     );
   }
 
-  if (
-    (ns.args[0] as string).toLowerCase() === "batch" ||
-    (ns.args[0] as string).toLowerCase() === "all"
-  ) {
-    if (!ns.isRunning("/scripts/hacking/batch-hackingjs", "home")) {
-      const cliArgs = [...ns.args];
-      cliArgs.shift();
-      await ns.run("/scripts/hacking/batch-hacking.js", undefined, ...cliArgs);
-    }
-
-    if ((ns.args[0] as string).toLowerCase() === "all") {
-      await ns.run("/scripts/hacking/hub.js");
-    }
-  } else {
-    if (!ns.isRunning("/scripts/hacking/hub.js", "home")) {
-      await ns.run("/scripts/hacking/hub.js");
-    }
+  if (!ns.isRunning("/scripts/hacking/batch-hackingjs", "home")) {
+    await ns.run("/scripts/hacking/batch-hacking.js", "all");
   }
 }
