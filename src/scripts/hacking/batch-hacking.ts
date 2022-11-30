@@ -7,8 +7,11 @@ import {
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import { long, short, skip } from "/scripts/utils/timeoutTimes";
+import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
 import { Server } from "/../NetscriptDefinitions";
+
+let executionTimeHacking = 0;
+let previousBatchResultsAbleToSupport = 1;
 
 const batchableServers = async (ns: NS) => {
   const allServers = await getServers(ns, {
@@ -57,8 +60,35 @@ const batchableServers = async (ns: NS) => {
       return serverAmount;
     }, 0) || 1;
 
-  if (withinHackingLevelRange.length >= serversAbleToSupport) {
+  const executionThreshold = medium + previousBatchResultsAbleToSupport * short;
+  if (executionTimeHacking >= executionThreshold) {
+    // Set new support
+    const slicedSupport = Math.ceil(previousBatchResultsAbleToSupport / 2);
+    previousBatchResultsAbleToSupport = slicedSupport;
+    withinHackingLevelRange.length = slicedSupport;
+
+    // Remove all events in the  queue with servers we no longer support
+    const newServerNames = withinHackingLevelRange.map(
+      (server) => server.hostname
+    );
+
+    events = events.filter((event) => newServerNames.includes(event.server));
+  } else if (
+    executionTimeHacking <= executionThreshold &&
+    previousBatchResultsAbleToSupport <= serversAbleToSupport
+  ) {
+    const uppedSupport = Math.ceil(
+      previousBatchResultsAbleToSupport + previousBatchResultsAbleToSupport / 2
+    );
+
+    previousBatchResultsAbleToSupport =
+      uppedSupport >= serversAbleToSupport
+        ? serversAbleToSupport
+        : uppedSupport;
+    withinHackingLevelRange.length = uppedSupport;
+  } else if (withinHackingLevelRange.length >= serversAbleToSupport) {
     withinHackingLevelRange.length = serversAbleToSupport;
+    previousBatchResultsAbleToSupport = serversAbleToSupport;
   }
 
   return withinHackingLevelRange.map((server: Server) => server.hostname);
@@ -166,7 +196,7 @@ const runScript = async (
     return await ns.sleep(skip);
   }
 
-  await ns.sleep(timeBeforeScriptCanRun > 0 ? timeBeforeScriptCanRun : short);
+  await ns.sleep(timeBeforeScriptCanRun >= 0 ? timeBeforeScriptCanRun : short);
 
   const threadsNeeded = overflowThreadsNeeded || getThreadsNeeded(ns, event);
 
@@ -182,6 +212,8 @@ const runScript = async (
       script: scriptPath,
       threads: 0,
     });
+
+    events = events.filter((currentEvent) => currentEvent.id !== event.id);
 
     scriptsActive = 0;
     return ns.sleep(skip);
@@ -210,8 +242,6 @@ const runScript = async (
       }
 
       if (scriptsActive >= threadsNeeded) {
-        ns.print("active scripts reached");
-
         events.push({
           id: Math.random() + Date.now(),
           server: event.server,
@@ -251,9 +281,11 @@ let currentlyUsedBatchServers: string[] = [];
 
 const updateBatchableServers = async (ns: NS, servers: string[]) => {
   const serversToTrigger = await batchableServers(ns);
-  const newServers = currentlyUsedBatchServers.filter(
-    (server: string) => !serversToTrigger.includes(server)
+
+  const newServers = serversToTrigger.filter(
+    (server: string) => !currentlyUsedBatchServers.includes(server)
   );
+  currentlyUsedBatchServers = serversToTrigger;
 
   for (let index = 0; index < newServers.length; index++) {
     const batchableServer = newServers[index];
@@ -311,6 +343,7 @@ export async function main(ns: NS): Promise<void> {
 
       servers = [...servers, ...normalServers];
     }
+    const startHacking = performance.now();
 
     if (events.length === 0) {
       await triggerAllServers(ns, servers);
@@ -343,6 +376,7 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
+    executionTimeHacking = performance.now() - startHacking;
     await updateBatchableServers(ns, servers);
 
     await ns.sleep(short);
