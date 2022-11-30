@@ -150,7 +150,9 @@ const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
     {
       status: "fullyGrown",
       scriptCompletionTime: growthTime,
-    }
+    },
+    0,
+    true
   );
 };
 
@@ -175,7 +177,9 @@ const hackServer = (ns: NS, servers: string[], event: BatchEvent) => {
     {
       status: "fullyHacked",
       scriptCompletionTime: hackTime,
-    }
+    },
+    0,
+    true
   );
 };
 
@@ -190,7 +194,8 @@ const runScript = async (
     status: BatchStatus;
     scriptCompletionTime: number;
   },
-  overflowThreadsNeeded?: number
+  overflowThreadsNeeded?: number,
+  runOnOneMachine?: boolean
 ) => {
   if (timeBeforeScriptCanRun >= short) {
     return await ns.sleep(skip);
@@ -233,7 +238,10 @@ const runScript = async (
           ? threadsNeeded - scriptsActive
           : possibleThreadCount;
 
-      if (threadCount > 0) {
+      if (
+        (!runOnOneMachine && threadCount > 0) ||
+        (runOnOneMachine && possibleThreadCount >= threadsNeeded)
+      ) {
         if (!ns.scriptRunning(scriptPath, currentServer)) {
           scriptsActive += threadCount;
 
@@ -270,8 +278,20 @@ const runScript = async (
       getThreadsNeeded,
       timeBeforeScriptCanRun,
       onSuccessEvent,
-      threadsNeeded
+      threadsNeeded,
+      runOnOneMachine
     );
+  }
+
+  if (runOnOneMachine) {
+    const eventStillActive = events.find(
+      (currentEvent) => currentEvent.id === event.id
+    );
+    if (eventStillActive) {
+      ns.tprint(
+        `${event.id}: ${event.server} couldn't run script on a single server`
+      );
+    }
   }
 
   return ns.sleep(short);
