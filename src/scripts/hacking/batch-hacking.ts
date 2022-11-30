@@ -303,25 +303,6 @@ const updateBatchableServers = async (ns: NS, servers: string[]) => {
   return ns.sleep(short);
 };
 
-const triggerAllServers = async (ns: NS, servers: string[]) => {
-  const serversToTrigger = await batchableServers(ns);
-  currentlyUsedBatchServers = serversToTrigger;
-  for (let index = 0; index < serversToTrigger.length; index++) {
-    const batchableServer = serversToTrigger[index];
-
-    await weakenServer(ns, servers, {
-      id: Math.random() + Date.now(),
-      server: batchableServer,
-      status: "needsGrowing",
-      timeScriptsDone: 0,
-      script: weakenScriptPath,
-      threads: 0,
-    });
-  }
-
-  return ns.sleep(short);
-};
-
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
 
@@ -346,7 +327,7 @@ export async function main(ns: NS): Promise<void> {
     const startHacking = performance.now();
 
     if (events.length === 0) {
-      await triggerAllServers(ns, servers);
+      await updateBatchableServers(ns, servers);
     } else {
       events = events.sort(
         (eventA: BatchEvent, eventB: BatchEvent) =>
