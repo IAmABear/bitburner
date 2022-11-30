@@ -312,14 +312,14 @@ export async function main(ns: NS): Promise<void> {
       servers = [...servers, ...normalServers];
     }
 
-    events = events.sort(
-      (eventA: BatchEvent, eventB: BatchEvent) =>
-        eventB.timeScriptsDone - eventA.timeScriptsDone
-    );
-
     if (events.length === 0) {
       await triggerAllServers(ns, servers);
     } else {
+      events = events.sort(
+        (eventA: BatchEvent, eventB: BatchEvent) =>
+          eventB.timeScriptsDone - eventA.timeScriptsDone
+      );
+
       for (let index = 0; index < events.length; index++) {
         const event = events[index];
         switch (event.status) {
