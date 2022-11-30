@@ -24,7 +24,8 @@ export async function main(ns: NS): Promise<void> {
       if (
         newTargetRam < maxPossibleRamServer &&
         ns.getPurchasedServerCost(newTargetRam) <
-          ns.getServerMoneyAvailable("home")
+          ns.getServerMoneyAvailable("home") &&
+        newTargetRam <= 9000
       ) {
         dynamicSleep = short;
 
