@@ -50,7 +50,7 @@ const batchableServers = async (ns: NS) => {
   const serversAbleToSupport =
     withinHackingLevelRange.reduce((serverAmount: number, server: Server) => {
       const threadsNeededForFullWeaken =
-        (server.minDifficulty * 2) / severWeakenEffect;
+        (server.minDifficulty + 50) / severWeakenEffect;
 
       if (threadsNeededForFullWeaken <= avaibleRam) {
         avaibleRam = avaibleRam - threadsNeededForFullWeaken;
