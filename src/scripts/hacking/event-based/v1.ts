@@ -50,7 +50,7 @@ const batchableServers = async (ns: NS) => {
   const serversAbleToSupport =
     withinHackingLevelRange.reduce((serverAmount: number, server: Server) => {
       const threadsNeededForFullWeaken =
-        (server.minDifficulty * 2) / severWeakenEffect;
+        (server.minDifficulty + 50) / severWeakenEffect;
 
       if (threadsNeededForFullWeaken <= avaibleRam) {
         avaibleRam = avaibleRam - threadsNeededForFullWeaken;
@@ -195,7 +195,8 @@ const runScript = async (
     scriptCompletionTime: number;
   },
   overflowThreadsNeeded?: number,
-  runOnOneMachine?: boolean
+  runOnOneMachine?: boolean,
+  retry = 0
 ) => {
   if (timeBeforeScriptCanRun >= short) {
     return await ns.sleep(skip);
@@ -240,7 +241,8 @@ const runScript = async (
 
       if (
         (!runOnOneMachine && threadCount > 0) ||
-        (runOnOneMachine && possibleThreadCount >= threadsNeeded)
+        (runOnOneMachine && possibleThreadCount >= threadsNeeded) ||
+        (runOnOneMachine && retry >= 3)
       ) {
         scriptsActive += threadCount;
 
@@ -291,9 +293,21 @@ const runScript = async (
     const eventStillActive = events.find(
       (currentEvent) => currentEvent.id === event.id
     );
+    ns.tprint(
+      `${event.server} runOnOneMachine: ${runOnOneMachine}; retry: ${retry}`
+    );
     if (eventStillActive) {
-      ns.print(
-        `${event.id}: ${event.server} couldn't run script on a single server`
+      await runScript(
+        ns,
+        servers,
+        event,
+        scriptPath,
+        getThreadsNeeded,
+        timeBeforeScriptCanRun,
+        onSuccessEvent,
+        threadsNeeded,
+        runOnOneMachine,
+        retry + 1
       );
     }
   }
