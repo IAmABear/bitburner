@@ -242,11 +242,15 @@ const runScript = async (
         (!runOnOneMachine && threadCount > 0) ||
         (runOnOneMachine && possibleThreadCount >= threadsNeeded)
       ) {
-        if (!ns.scriptRunning(scriptPath, currentServer)) {
-          scriptsActive += threadCount;
+        scriptsActive += threadCount;
 
-          ns.exec(scriptPath, currentServer, threadCount, event.server);
-        }
+        ns.exec(
+          scriptPath,
+          currentServer,
+          threadCount,
+          event.server,
+          (Math.random() + Date.now()).toString()
+        );
       }
 
       if (scriptsActive >= threadsNeeded) {
@@ -288,7 +292,7 @@ const runScript = async (
       (currentEvent) => currentEvent.id === event.id
     );
     if (eventStillActive) {
-      ns.tprint(
+      ns.print(
         `${event.id}: ${event.server} couldn't run script on a single server`
       );
     }
