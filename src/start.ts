@@ -1,3 +1,5 @@
+import { Server } from "/../NetscriptDefinitions";
+import getServers from "/scripts/utils/getServers";
 import {
   growScriptPath,
   hackScriptPath,
@@ -29,5 +31,26 @@ export async function main(ns: NS): Promise<void> {
     );
   }
 
-  await ns.run("/scripts/hacking/event-hacking.js", undefined, "all");
+  const allServers = await getServers(ns, {
+    includeHome: false,
+    includeGhost: true,
+  });
+  const serverInfo = [...allServers].map((server: string) =>
+    ns.getServer(server)
+  );
+  const avaibleRam: number = serverInfo.reduce(
+    (totalRam: number, server: Server) =>
+      totalRam + ns.getServer(server.hostname).maxRam,
+    0
+  );
+  ns.tprint(
+    `avaibleRam: ${avaibleRam}; ram needed: ${
+      ns.getScriptRam(growScriptPath) * 1000
+    }`
+  );
+  if (avaibleRam <= ns.getScriptRam(growScriptPath) * 10000) {
+    await ns.run("/scripts/hacking/hub.js", undefined, "all");
+  } else {
+    await ns.run("/scripts/hacking/event-hacking.js", undefined, "all");
+  }
 }
