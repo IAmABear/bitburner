@@ -37,8 +37,8 @@ export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
   while (true) {
     const servers = await getServers(ns, {
-      includeHome: false,
-      includeGhost: false,
+      includeHome: true,
+      includeGhost: true,
     });
     const targetServers = await getServers(ns, {
       includeHome: false,
