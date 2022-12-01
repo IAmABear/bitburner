@@ -13,10 +13,13 @@ export default (
   const serverMaxRam = ns.getServerMaxRam(server);
   const scriptRAM = ns.getScriptRam(script, server);
 
-  return Math.ceil(
+  const possibleThreadCount = Math.ceil(
     Math.floor(
       (serverMaxRam - (serverUsedRam || ns.getServerUsedRam(server))) /
         scriptRAM
     )
   );
+  return possibleThreadCount === Infinity || isNaN(possibleThreadCount)
+    ? 0
+    : possibleThreadCount;
 };
