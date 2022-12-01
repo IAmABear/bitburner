@@ -105,7 +105,6 @@ type BatchEvent = {
 };
 
 let events: BatchEvent[] = [];
-let scriptsActive = 0;
 
 const calculateThreadsNeededToWeaken = (ns: NS, event: BatchEvent) => {
   const predictedSecurity =
@@ -203,8 +202,10 @@ const runScript = async (
   }
 
   await ns.sleep(timeBeforeScriptCanRun >= 0 ? timeBeforeScriptCanRun : short);
-
-  const threadsNeeded = overflowThreadsNeeded || getThreadsNeeded(ns, event);
+  let scriptsActive = 0;
+  const threadsNeeded = overflowThreadsNeeded
+    ? overflowThreadsNeeded
+    : getThreadsNeeded(ns, event);
 
   // Fail-safe to avoid infinite triggers without actual results
   if (threadsNeeded <= 0) {
@@ -240,9 +241,10 @@ const runScript = async (
           : possibleThreadCount;
 
       if (
-        (!runOnOneMachine && threadCount > 0) ||
-        (runOnOneMachine && possibleThreadCount >= threadsNeeded) ||
-        (runOnOneMachine && retry >= 3)
+        threadCount > 0 &&
+        (!runOnOneMachine ||
+          (runOnOneMachine && possibleThreadCount >= threadsNeeded) ||
+          (runOnOneMachine && retry >= 3))
       ) {
         scriptsActive += threadCount;
 
@@ -284,8 +286,9 @@ const runScript = async (
       getThreadsNeeded,
       timeBeforeScriptCanRun,
       onSuccessEvent,
-      threadsNeeded,
-      runOnOneMachine
+      threadsNeeded - scriptsActive,
+      runOnOneMachine,
+      retry
     );
   }
 
@@ -293,9 +296,7 @@ const runScript = async (
     const eventStillActive = events.find(
       (currentEvent) => currentEvent.id === event.id
     );
-    ns.tprint(
-      `${event.server} runOnOneMachine: ${runOnOneMachine}; retry: ${retry}`
-    );
+
     if (eventStillActive) {
       await runScript(
         ns,
@@ -305,7 +306,7 @@ const runScript = async (
         getThreadsNeeded,
         timeBeforeScriptCanRun,
         onSuccessEvent,
-        threadsNeeded,
+        threadsNeeded - scriptsActive,
         runOnOneMachine,
         retry + 1
       );
