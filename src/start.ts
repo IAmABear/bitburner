@@ -29,5 +29,5 @@ export async function main(ns: NS): Promise<void> {
     );
   }
 
-  await ns.run("/scripts/hacking/batch-hacking.js", undefined, "all");
+  await ns.run("/scripts/hacking/event-hacking.js", undefined, "all");
 }
