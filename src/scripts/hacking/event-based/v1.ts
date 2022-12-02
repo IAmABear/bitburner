@@ -19,7 +19,7 @@ const batchableServers = async (ns: NS) => {
     includeGhost: false,
   });
   const serversInfo = allServers.map((server: string) => ns.getServer(server));
-  const withinHackingLevelRange = serversInfo
+  const idealServers = serversInfo
     .filter((server: Server) => server.moneyMax !== 0 && server.hasAdminRights)
     .filter(
       (server: Server) =>
@@ -30,6 +30,15 @@ const batchableServers = async (ns: NS) => {
         secondServer.moneyMax - firstServer.moneyMax &&
         secondServer.serverGrowth - firstServer.serverGrowth
     );
+
+  const withinHackingLevelRange =
+    idealServers.length > 0
+      ? idealServers
+      : [
+          serversInfo.find(
+            (server: Server) => server.hostname === "n00dles"
+          ) as Server,
+        ];
 
   const ghostServers = await getServers(ns, {
     includeHome: false,
@@ -82,9 +91,9 @@ const batchableServers = async (ns: NS) => {
     );
 
     previousBatchResultsAbleToSupport =
-      uppedSupport >= serversAbleToSupport
-        ? serversAbleToSupport
-        : uppedSupport;
+      uppedSupport <= serversAbleToSupport
+        ? uppedSupport
+        : serversAbleToSupport;
     withinHackingLevelRange.length = uppedSupport;
   } else if (withinHackingLevelRange.length >= serversAbleToSupport) {
     withinHackingLevelRange.length = serversAbleToSupport;
