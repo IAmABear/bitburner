@@ -9,11 +9,12 @@ import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
 import { Server } from "/../NetscriptDefinitions";
+import QueueManager from "/scripts/utils/queueManager";
 
 let executionTimeHacking = 0;
 let previousBatchResultsAbleToSupport = 1;
 
-const batchableServers = async (ns: NS) => {
+const batchableServers = async (ns: NS, queueManger: QueueManager) => {
   const allServers = await getServers(ns, {
     includeHome: false,
     includeGhost: false,
@@ -70,6 +71,7 @@ const batchableServers = async (ns: NS) => {
     }, 0) || 1;
 
   const executionThreshold = medium + previousBatchResultsAbleToSupport * short;
+
   if (executionTimeHacking >= executionThreshold) {
     // Set new support
     const slicedSupport = Math.ceil(previousBatchResultsAbleToSupport / 2);
@@ -81,7 +83,7 @@ const batchableServers = async (ns: NS) => {
       (server) => server.hostname
     );
 
-    events = events.filter((event) => newServerNames.includes(event.server));
+    queueManger.removeServersFromEvents(newServerNames);
   } else if (
     executionTimeHacking <= executionThreshold &&
     previousBatchResultsAbleToSupport <= serversAbleToSupport
@@ -113,8 +115,6 @@ type BatchEvent = {
   threads: number;
 };
 
-let events: BatchEvent[] = [];
-
 const calculateThreadsNeededToWeaken = (ns: NS, event: BatchEvent) => {
   const predictedSecurity =
     event.status === "hackable"
@@ -124,7 +124,12 @@ const calculateThreadsNeededToWeaken = (ns: NS, event: BatchEvent) => {
   return threadsNeededToWeaken(ns, event.server, predictedSecurity);
 };
 
-const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
+const weakenServer = (
+  ns: NS,
+  servers: string[],
+  event: BatchEvent,
+  queueManager: QueueManager
+) => {
   ns.print(`Running weaken on ${event.server}`);
 
   const serverWeakenTime = Math.ceil(ns.getWeakenTime(event.server));
@@ -139,11 +144,17 @@ const weakenServer = (ns: NS, servers: string[], event: BatchEvent) => {
     {
       status: event.status === "fullyGrown" ? "hackable" : "needsGrowing",
       scriptCompletionTime: serverWeakenTime,
-    }
+    },
+    queueManager
   );
 };
 
-const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
+const growServer = (
+  ns: NS,
+  servers: string[],
+  event: BatchEvent,
+  queueManager: QueueManager
+) => {
   ns.print(`Growin server ${event.server}`);
 
   const growthTime = Math.ceil(ns.getGrowTime(event.server));
@@ -159,6 +170,7 @@ const growServer = (ns: NS, servers: string[], event: BatchEvent) => {
       status: "fullyGrown",
       scriptCompletionTime: growthTime,
     },
+    queueManager,
     0,
     true
   );
@@ -170,7 +182,12 @@ const threadsNeededToHack = (ns: NS, event: BatchEvent) => {
   return Math.ceil(ns.hackAnalyzeThreads(event.server, targetMoneyHeist));
 };
 
-const hackServer = (ns: NS, servers: string[], event: BatchEvent) => {
+const hackServer = (
+  ns: NS,
+  servers: string[],
+  event: BatchEvent,
+  queueManager: QueueManager
+) => {
   ns.print(`Hacking server: ${event.server}`);
 
   const hackTime = Math.ceil(ns.getHackTime(event.server));
@@ -186,6 +203,7 @@ const hackServer = (ns: NS, servers: string[], event: BatchEvent) => {
       status: "fullyHacked",
       scriptCompletionTime: hackTime,
     },
+    queueManager,
     0,
     true
   );
@@ -202,6 +220,7 @@ const runScript = async (
     status: BatchStatus;
     scriptCompletionTime: number;
   },
+  queueManager: QueueManager,
   overflowThreadsNeeded?: number,
   runOnOneMachine?: boolean,
   retry = 0
@@ -220,7 +239,7 @@ const runScript = async (
   if (threadsNeeded <= 0) {
     ns.print("nothing needed");
 
-    events.push({
+    queueManager.addEvent({
       id: Math.random() + Date.now(),
       server: event.server,
       status: onSuccessEvent.status,
@@ -229,7 +248,7 @@ const runScript = async (
       threads: 0,
     });
 
-    events = events.filter((currentEvent) => currentEvent.id !== event.id);
+    queueManager.removeEvent(event.id);
 
     scriptsActive = 0;
     return ns.sleep(skip);
@@ -267,7 +286,7 @@ const runScript = async (
       }
 
       if (scriptsActive >= threadsNeeded) {
-        events.push({
+        queueManager.addEvent({
           id: Math.random() + Date.now(),
           server: event.server,
           status: onSuccessEvent.status,
@@ -276,7 +295,8 @@ const runScript = async (
           threads: scriptsActive,
         });
 
-        events = events.filter((currentEvent) => currentEvent.id !== event.id);
+        queueManager.removeEvent(event.id);
+
         scriptsActive = 0;
 
         break;
@@ -295,6 +315,7 @@ const runScript = async (
       getThreadsNeeded,
       timeBeforeScriptCanRun,
       onSuccessEvent,
+      queueManager,
       threadsNeeded - scriptsActive,
       runOnOneMachine,
       retry
@@ -302,9 +323,7 @@ const runScript = async (
   }
 
   if (runOnOneMachine) {
-    const eventStillActive = events.find(
-      (currentEvent) => currentEvent.id === event.id
-    );
+    const eventStillActive = queueManager.isEventActive(event.id);
 
     if (eventStillActive) {
       await runScript(
@@ -315,6 +334,7 @@ const runScript = async (
         getThreadsNeeded,
         timeBeforeScriptCanRun,
         onSuccessEvent,
+        queueManager,
         threadsNeeded - scriptsActive,
         runOnOneMachine,
         retry + 1
@@ -327,8 +347,12 @@ const runScript = async (
 
 let currentlyUsedBatchServers: string[] = [];
 
-const updateBatchableServers = async (ns: NS, servers: string[]) => {
-  const serversToTrigger = await batchableServers(ns);
+const updateBatchableServers = async (
+  ns: NS,
+  servers: string[],
+  queueManager: QueueManager
+) => {
+  const serversToTrigger = await batchableServers(ns, queueManager);
 
   const newServers = serversToTrigger.filter(
     (server: string) => !currentlyUsedBatchServers.includes(server)
@@ -338,14 +362,19 @@ const updateBatchableServers = async (ns: NS, servers: string[]) => {
   for (let index = 0; index < newServers.length; index++) {
     const batchableServer = newServers[index];
 
-    await weakenServer(ns, servers, {
-      id: Math.random() + Date.now(),
-      server: batchableServer,
-      status: "needsGrowing",
-      timeScriptsDone: 0,
-      script: weakenScriptPath,
-      threads: 0,
-    });
+    await weakenServer(
+      ns,
+      servers,
+      {
+        id: Math.random() + Date.now(),
+        server: batchableServer,
+        status: "needsGrowing",
+        timeScriptsDone: 0,
+        script: weakenScriptPath,
+        threads: 0,
+      },
+      queueManager
+    );
   }
 
   return ns.sleep(short);
@@ -353,6 +382,7 @@ const updateBatchableServers = async (ns: NS, servers: string[]) => {
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
+  const queueManager = new QueueManager();
 
   while (true) {
     let servers = await getServers(ns, {
@@ -372,29 +402,26 @@ export async function main(ns: NS): Promise<void> {
 
       servers = [...servers, ...normalServers];
     }
+
+    const events = queueManager.queue;
     const startHacking = performance.now();
 
     if (events.length === 0) {
-      await updateBatchableServers(ns, servers);
+      await updateBatchableServers(ns, servers, queueManager);
     } else {
-      events = events.sort(
-        (eventA: BatchEvent, eventB: BatchEvent) =>
-          eventB.timeScriptsDone - eventA.timeScriptsDone
-      );
-
       for (let index = 0; index < events.length; index++) {
         const event = events[index];
         switch (event.status) {
           case "hackable":
-            await hackServer(ns, servers, event);
+            await hackServer(ns, servers, event, queueManager);
             break;
           case "needsGrowing": {
-            await growServer(ns, servers, event);
+            await growServer(ns, servers, event, queueManager);
             break;
           }
           case "fullyGrown":
           case "fullyHacked":
-            await weakenServer(ns, servers, event);
+            await weakenServer(ns, servers, event, queueManager);
             break;
           default:
             console.log("Unknown event given");
@@ -406,7 +433,7 @@ export async function main(ns: NS): Promise<void> {
     }
 
     executionTimeHacking = performance.now() - startHacking;
-    await updateBatchableServers(ns, servers);
+    await updateBatchableServers(ns, servers, queueManager);
 
     await ns.sleep(short);
   }
