@@ -15,10 +15,12 @@ export async function main(ns: NS): Promise<void> {
       dynamicSleep = short;
       const targetServer = await ns.purchaseServer("ghost-" + ram, ram);
 
-      await ns.scp(
-        [hackScriptPath, growScriptPath, weakenScriptPath],
-        targetServer
-      );
+      if (targetServer) {
+        await ns.scp(
+          [hackScriptPath, growScriptPath, weakenScriptPath],
+          targetServer
+        );
+      }
     } else {
       dynamicSleep = long;
     }
