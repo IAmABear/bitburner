@@ -80,7 +80,7 @@ const batchableServers = async (ns: NS, queueManger: QueueManager) => {
     withinHackingLevelRange.reduce((serverAmount: number, server: Server) => {
       const optimalThreads = optimalThreadsFileContent[server.hostname];
       const threadsNeededForFullWeaken = optimalThreads
-        ? optimalThreads.totalThreads
+        ? optimalThreads.growThreads
         : (server.minDifficulty * 2) / severWeakenEffect;
 
       if (threadsNeededForFullWeaken <= avaibleRam) {
