@@ -38,23 +38,31 @@ const calculateGrowPercentageThreads = (
   }
 
   if (percentage < targetPercentage) {
-    return calculateGrowPercentageThreads(
-      ns,
-      playerInfo,
-      server,
-      targetPercentage,
-      threadsNeeded * 2
-    );
+    try {
+      return calculateGrowPercentageThreads(
+        ns,
+        playerInfo,
+        server,
+        targetPercentage,
+        Math.ceil(threadsNeeded * 2)
+      );
+    } catch (_error) {
+      return threadsNeeded;
+    }
   }
 
   if (percentage >= targetPercentage + threadOffset) {
-    return calculateGrowPercentageThreads(
-      ns,
-      playerInfo,
-      server,
-      targetPercentage,
-      threadsNeeded * 0.75
-    );
+    try {
+      return calculateGrowPercentageThreads(
+        ns,
+        playerInfo,
+        server,
+        targetPercentage,
+        Math.ceil(threadsNeeded * 0.75)
+      );
+    } catch (_error) {
+      return threadsNeeded;
+    }
   }
 
   return Math.ceil(threadsNeeded);
@@ -88,10 +96,7 @@ export async function main(ns: NS): Promise<void> {
   const playerInfo = ns.getPlayer();
 
   const results = serversWithMoney.reduce(
-    (allResults: { [x: string]: ThreadsNeeded }, currentServer, index) => {
-      if (index >= 7) {
-        return allResults;
-      }
+    (allResults: { [x: string]: ThreadsNeeded }, currentServer) => {
       const hackThreadPercentage = ns.formulas.hacking.hackPercent(
         {
           ...currentServer,
@@ -139,5 +144,9 @@ export async function main(ns: NS): Promise<void> {
     {}
   );
 
-  ns.write("optimal-threads.js", JSON.stringify(results), "w");
+  ns.write(
+    "optimalhreads.js",
+    JSON.stringify(`export default ${JSON.stringify(results)}`),
+    "w"
+  );
 }

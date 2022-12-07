@@ -1,44 +1,387 @@
-{
-	"n00dles": {
-		"hackThreads": 43,
-		"growThreads": 6,
-		"weakenThreads": 3,
-		"totalThreads": 52
-	},
-	"foodnstuff": {
-		"hackThreads": 44,
-		"growThreads": 2592,
-		"weakenThreads": 210,
-		"totalThreads": 2846
-	},
-	"sigma-cosmetics": {
-		"hackThreads": 45,
-		"growThreads": 1296,
-		"weakenThreads": 106,
-		"totalThreads": 1447
-	},
-	"zer0": {
-		"hackThreads": 50,
-		"growThreads": 324,
-		"weakenThreads": 28,
-		"totalThreads": 402
-	},
-	"silver-helix": {
-		"hackThreads": 55,
-		"growThreads": 512,
-		"weakenThreads": 44,
-		"totalThreads": 611
-	},
-	"joesguns": {
-		"hackThreads": 46,
-		"growThreads": 648,
-		"weakenThreads": 54,
-		"totalThreads": 748
-	},
-	"hong-fang-tea": {
-		"hackThreads": 46,
-		"growThreads": 648,
-		"weakenThreads": 54,
-		"totalThreads": 748
-	}
-}
+export default {
+  n00dles: {
+    hackThreads: 17,
+    growThreads: 3,
+    weakenThreads: 1,
+    totalThreads: 21,
+  },
+  foodnstuff: {
+    hackThreads: 18,
+    growThreads: 1536,
+    weakenThreads: 124,
+    totalThreads: 1678,
+  },
+  "sigma-cosmetics": {
+    hackThreads: 18,
+    growThreads: 768,
+    weakenThreads: 63,
+    totalThreads: 849,
+  },
+  zer0: {
+    hackThreads: 19,
+    growThreads: 192,
+    weakenThreads: 17,
+    totalThreads: 228,
+  },
+  joesguns: {
+    hackThreads: 18,
+    growThreads: 384,
+    weakenThreads: 32,
+    totalThreads: 434,
+  },
+  "hong-fang-tea": {
+    hackThreads: 18,
+    growThreads: 384,
+    weakenThreads: 32,
+    totalThreads: 434,
+  },
+  "harakiri-sushi": {
+    hackThreads: 18,
+    growThreads: 192,
+    weakenThreads: 17,
+    totalThreads: 227,
+  },
+  "nectar-net": {
+    hackThreads: 19,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 297,
+  },
+  "neo-net": {
+    hackThreads: 19,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 297,
+  },
+  "max-hardware": {
+    hackThreads: 19,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 297,
+  },
+  phantasy: {
+    hackThreads: 19,
+    growThreads: 192,
+    weakenThreads: 17,
+    totalThreads: 228,
+  },
+  "the-hub": {
+    hackThreads: 23,
+    growThreads: 192,
+    weakenThreads: 17,
+    totalThreads: 232,
+  },
+  "johnson-ortho": {
+    hackThreads: 25,
+    growThreads: 384,
+    weakenThreads: 32,
+    totalThreads: 441,
+  },
+  "rothman-uni": {
+    hackThreads: 25,
+    growThreads: 384,
+    weakenThreads: 32,
+    totalThreads: 441,
+  },
+  "rho-construction": {
+    hackThreads: 26,
+    growThreads: 324,
+    weakenThreads: 27,
+    totalThreads: 377,
+  },
+  "alpha-ent": {
+    hackThreads: 28,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 306,
+  },
+  "galactic-cyber": {
+    hackThreads: 34,
+    growThreads: 192,
+    weakenThreads: 17,
+    totalThreads: 243,
+  },
+  omnia: {
+    hackThreads: 39,
+    growThreads: 384,
+    weakenThreads: 33,
+    totalThreads: 456,
+  },
+  "univ-energy": {
+    hackThreads: 39,
+    growThreads: 256,
+    weakenThreads: 23,
+    totalThreads: 318,
+  },
+  infocomm: {
+    hackThreads: 39,
+    growThreads: 288,
+    weakenThreads: 25,
+    totalThreads: 352,
+  },
+  "titan-labs": {
+    hackThreads: 37,
+    growThreads: 324,
+    weakenThreads: 28,
+    totalThreads: 389,
+  },
+  fulcrumtech: {
+    hackThreads: 52,
+    growThreads: 256,
+    weakenThreads: 23,
+    totalThreads: 331,
+  },
+  stormtech: {
+    hackThreads: 42,
+    growThreads: 256,
+    weakenThreads: 23,
+    totalThreads: 321,
+  },
+  "4sigma": {
+    hackThreads: 38,
+    growThreads: 192,
+    weakenThreads: 17,
+    totalThreads: 247,
+  },
+  blade: {
+    hackThreads: 43,
+    growThreads: 324,
+    weakenThreads: 28,
+    totalThreads: 395,
+  },
+  megacorp: {
+    hackThreads: 61,
+    growThreads: 256,
+    weakenThreads: 23,
+    totalThreads: 340,
+  },
+  "zeus-med": {
+    hackThreads: 37,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 315,
+  },
+  "global-pharm": {
+    hackThreads: 37,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 315,
+  },
+  "crush-fitness": {
+    hackThreads: 23,
+    growThreads: 384,
+    weakenThreads: 32,
+    totalThreads: 439,
+  },
+  "omega-net": {
+    hackThreads: 21,
+    growThreads: 216,
+    weakenThreads: 19,
+    totalThreads: 256,
+  },
+  computek: {
+    hackThreads: 26,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 304,
+  },
+  syscore: {
+    hackThreads: 30,
+    growThreads: 288,
+    weakenThreads: 25,
+    totalThreads: 343,
+  },
+  "lexo-corp": {
+    hackThreads: 32,
+    growThreads: 288,
+    weakenThreads: 25,
+    totalThreads: 345,
+  },
+  aerocorp: {
+    hackThreads: 39,
+    growThreads: 384,
+    weakenThreads: 33,
+    totalThreads: 456,
+  },
+  unitalife: {
+    hackThreads: 36,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 314,
+  },
+  defcomm: {
+    hackThreads: 42,
+    growThreads: 384,
+    weakenThreads: 33,
+    totalThreads: 459,
+  },
+  "snap-fitness": {
+    hackThreads: 30,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 308,
+  },
+  deltaone: {
+    hackThreads: 37,
+    growThreads: 384,
+    weakenThreads: 33,
+    totalThreads: 454,
+  },
+  icarus: {
+    hackThreads: 40,
+    growThreads: 256,
+    weakenThreads: 23,
+    totalThreads: 319,
+  },
+  "taiyang-digital": {
+    hackThreads: 38,
+    growThreads: 288,
+    weakenThreads: 25,
+    totalThreads: 351,
+  },
+  microdyne: {
+    hackThreads: 35,
+    growThreads: 192,
+    weakenThreads: 17,
+    totalThreads: 244,
+  },
+  helios: {
+    hackThreads: 39,
+    growThreads: 384,
+    weakenThreads: 33,
+    totalThreads: 456,
+  },
+  omnitek: {
+    hackThreads: 48,
+    growThreads: 256,
+    weakenThreads: 23,
+    totalThreads: 327,
+  },
+  "b-and-a": {
+    hackThreads: 45,
+    growThreads: 288,
+    weakenThreads: 25,
+    totalThreads: 358,
+  },
+  nwo: {
+    hackThreads: 48,
+    growThreads: 324,
+    weakenThreads: 28,
+    totalThreads: 400,
+  },
+  fulcrumassets: {
+    hackThreads: 53,
+    growThreads: 24576,
+    weakenThreads: 1969,
+    totalThreads: 26598,
+  },
+  "kuai-gong": {
+    hackThreads: 55,
+    growThreads: 256,
+    weakenThreads: 23,
+    totalThreads: 334,
+  },
+  clarkinc: {
+    hackThreads: 38,
+    growThreads: 192,
+    weakenThreads: 17,
+    totalThreads: 247,
+  },
+  "powerhouse-fitness": {
+    hackThreads: 40,
+    growThreads: 256,
+    weakenThreads: 23,
+    totalThreads: 319,
+  },
+  ecorp: {
+    hackThreads: 60,
+    growThreads: 256,
+    weakenThreads: 23,
+    totalThreads: 339,
+  },
+  "applied-energetics": {
+    hackThreads: 36,
+    growThreads: 288,
+    weakenThreads: 25,
+    totalThreads: 349,
+  },
+  vitalife: {
+    hackThreads: 40,
+    growThreads: 384,
+    weakenThreads: 33,
+    totalThreads: 457,
+  },
+  "zb-def": {
+    hackThreads: 32,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 310,
+  },
+  "nova-med": {
+    hackThreads: 33,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 311,
+  },
+  solaris: {
+    hackThreads: 37,
+    growThreads: 288,
+    weakenThreads: 25,
+    totalThreads: 350,
+  },
+  "aevum-police": {
+    hackThreads: 28,
+    growThreads: 512,
+    weakenThreads: 43,
+    totalThreads: 583,
+  },
+  "iron-gym": {
+    hackThreads: 20,
+    growThreads: 384,
+    weakenThreads: 32,
+    totalThreads: 436,
+  },
+  "silver-helix": {
+    hackThreads: 20,
+    growThreads: 256,
+    weakenThreads: 22,
+    totalThreads: 298,
+  },
+  netlink: {
+    hackThreads: 29,
+    growThreads: 384,
+    weakenThreads: 32,
+    totalThreads: 445,
+  },
+  "zb-institute": {
+    hackThreads: 33,
+    growThreads: 216,
+    weakenThreads: 19,
+    totalThreads: 268,
+  },
+  "summit-uni": {
+    hackThreads: 26,
+    growThreads: 384,
+    weakenThreads: 32,
+    totalThreads: 442,
+  },
+  "millenium-fitness": {
+    hackThreads: 26,
+    growThreads: 384,
+    weakenThreads: 32,
+    totalThreads: 442,
+  },
+  catalyst: {
+    hackThreads: 27,
+    growThreads: 288,
+    weakenThreads: 25,
+    totalThreads: 340,
+  },
+} as {
+  [id: string]: {
+    hackThreads: number;
+    growThreads: number;
+    weakenThreads: number;
+    totalThreads: number;
+  };
+};
