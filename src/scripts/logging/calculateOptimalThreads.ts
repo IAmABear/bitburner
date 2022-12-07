@@ -13,7 +13,7 @@ const growThreadSecurityIncrease = 0.004;
 const hackThreadSecurityIncrease = 0.002;
 const weakenThreadSecutiryDecrease = 0.05;
 
-const threadOffset = 0.1;
+const threadOffset = 0.4;
 const calculateGrowPercentageThreads = (
   ns: NS,
   playerInfo: Player,
@@ -37,7 +37,7 @@ const calculateGrowPercentageThreads = (
     return 1;
   }
 
-  if (percentage <= targetPercentage - threadOffset) {
+  if (percentage < targetPercentage) {
     return calculateGrowPercentageThreads(
       ns,
       playerInfo,
