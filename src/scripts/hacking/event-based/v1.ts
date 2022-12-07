@@ -302,6 +302,7 @@ const runScript = async (
           currentServer,
           threadCount,
           event.server,
+          0,
           (Math.random() + Date.now()).toString()
         );
       }

@@ -1,3 +1,8 @@
 export async function main(ns: NS): Promise<number> {
-  return await ns.weaken(ns.args[0] as string);
+  if (ns.args[1] as number) {
+    await ns.sleep(ns.args[1] as number);
+    return await ns.weaken(ns.args[0] as string);
+  } else {
+    return await ns.weaken(ns.args[0] as string);
+  }
 }
