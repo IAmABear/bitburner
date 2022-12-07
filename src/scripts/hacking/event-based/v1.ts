@@ -67,7 +67,6 @@ const batchableServers = async (ns: NS, queueManger: QueueManager) => {
     if (content === "") {
       return {};
     }
-    ns.tprint(content);
 
     return JSON.parse(content);
   };
