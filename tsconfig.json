@@ -4,6 +4,7 @@
     "global.d.ts",
     "src/**/*",
   ],
+  "exclude": ["src/optimalThreads.ts"],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",
