@@ -13,6 +13,13 @@ import QueueManager from "/scripts/utils/queueManager";
 
 let executionTimeHacking = 0;
 let previousBatchResultsAbleToSupport = 1;
+const optimalThreadsFilename = "optimal-threads.js";
+type ThreadsNeeded = {
+  hackThreads: number;
+  weakenThreads: number;
+  growThreads: number;
+  totalThreads: number;
+};
 
 const batchableServers = async (ns: NS, queueManger: QueueManager) => {
   const allServers = await getServers(ns, {
@@ -55,12 +62,27 @@ const batchableServers = async (ns: NS, queueManger: QueueManager) => {
     0
   );
   const severWeakenEffect = 0.05;
+  const getFileContents = (fileName: string) => {
+    const content = ns.read(fileName);
+    if (content === "") {
+      return {};
+    }
+    ns.tprint(content);
+
+    return JSON.parse(content);
+  };
+  const optimalThreadsFileContent: { [x: string]: ThreadsNeeded } =
+    ns.fileExists(optimalThreadsFilename)
+      ? getFileContents(optimalThreadsFilename)
+      : {};
 
   // For now we'll just check what is needed to weaken the secutiry twice its base
   const serversAbleToSupport =
     withinHackingLevelRange.reduce((serverAmount: number, server: Server) => {
-      const threadsNeededForFullWeaken =
-        (server.minDifficulty * 2) / severWeakenEffect;
+      const optimalThreads = optimalThreadsFileContent[server.hostname];
+      const threadsNeededForFullWeaken = optimalThreads
+        ? optimalThreads.totalThreads
+        : (server.minDifficulty * 2) / severWeakenEffect;
 
       if (threadsNeededForFullWeaken <= avaibleRam) {
         avaibleRam = avaibleRam - threadsNeededForFullWeaken;
