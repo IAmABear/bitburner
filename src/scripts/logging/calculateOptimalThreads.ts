@@ -127,7 +127,7 @@ export async function main(ns: NS): Promise<void> {
       return {
         ...allResults,
         ...{
-          [currentServer.hostname]: {
+          [currentServer.hostname.toString()]: {
             hackThreads,
             growThreads,
             weakenThreads,
