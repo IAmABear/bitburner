@@ -1,5 +1,5 @@
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
-type Event = {
+export type QueueEvent = {
   id: number;
   server: string;
   status: BatchStatus;
@@ -9,36 +9,36 @@ type Event = {
 };
 
 export default class EventManager {
-  queue: Event[];
+  queue: QueueEvent[];
 
   constructor() {
     this.queue = [];
   }
 
-  get getQueue(): Event[] {
+  get getQueue(): QueueEvent[] {
     return this.queue.sort(
-      (eventA: Event, eventB: Event) =>
+      (eventA: QueueEvent, eventB: QueueEvent) =>
         eventB.timeScriptsDone - eventA.timeScriptsDone
     );
   }
 
-  addEvent(event: Event): void {
+  addEvent(event: QueueEvent): void {
     this.queue.push(event);
   }
 
   removeEvent(eventId: number): void {
-    this.queue = this.queue.filter((event: Event) => event.id !== eventId);
+    this.queue = this.queue.filter((event: QueueEvent) => event.id !== eventId);
   }
 
   removeServersFromEvents(servers: string[]): void {
     this.queue = this.queue.filter(
-      (event: Event) => !servers.includes(event.server)
+      (event: QueueEvent) => !servers.includes(event.server)
     );
   }
 
   isEventActive(eventId: number): boolean {
     return (
-      this.queue.find((event: Event) => event.id === eventId) !== undefined
+      this.queue.find((event: QueueEvent) => event.id === eventId) !== undefined
     );
   }
 }
