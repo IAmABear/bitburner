@@ -47,7 +47,7 @@ const calculateGrowPercentageThreads = (
         Math.ceil(threadsNeeded * 2)
       );
     } catch (_error) {
-      return threadsNeeded;
+      return threadsNeeded + 1;
     }
   }
 
@@ -61,7 +61,7 @@ const calculateGrowPercentageThreads = (
         Math.ceil(threadsNeeded * 0.75)
       );
     } catch (_error) {
-      return threadsNeeded;
+      return threadsNeeded + 1;
     }
   }
 
