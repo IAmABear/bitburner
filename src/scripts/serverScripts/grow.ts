@@ -1,3 +1,8 @@
 export async function main(ns: NS): Promise<number> {
-  return await ns.grow(ns.args[0] as string);
+  if ((ns.args[1] as number) > 0) {
+    await ns.sleep(ns.args[1] as number);
+    return await ns.grow(ns.args[0] as string);
+  } else {
+    return await ns.grow(ns.args[0] as string);
+  }
 }

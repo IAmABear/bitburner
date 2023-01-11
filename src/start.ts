@@ -1,5 +1,3 @@
-import { Server } from "/../NetscriptDefinitions";
-import getServers from "/scripts/utils/getServers";
 import {
   growScriptPath,
   hackScriptPath,

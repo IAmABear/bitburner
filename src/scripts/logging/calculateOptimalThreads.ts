@@ -11,7 +11,7 @@ type ThreadsNeeded = {
 const targetMoneyPercentage = 0.5;
 const growThreadSecurityIncrease = 0.004;
 const hackThreadSecurityIncrease = 0.002;
-const weakenThreadSecutiryDecrease = 0.05;
+const weakenThreadsecurityDecrease = 0.05;
 
 const threadOffset = 0.4;
 const calculateGrowPercentageThreads = (
@@ -31,30 +31,35 @@ const calculateGrowPercentageThreads = (
   );
 
   if (percentage === Infinity) {
-    ns.tprint(
-      `serverName: ${server.hostname} targetPercentage: ${targetPercentage}; percentage: ${percentage}; threadsNeeded: ${threadsNeeded}`
-    );
     return 1;
   }
 
   if (percentage < targetPercentage) {
-    return calculateGrowPercentageThreads(
-      ns,
-      playerInfo,
-      server,
-      targetPercentage,
-      threadsNeeded * 2
-    );
+    try {
+      return calculateGrowPercentageThreads(
+        ns,
+        playerInfo,
+        server,
+        targetPercentage,
+        Math.ceil(threadsNeeded * 2)
+      );
+    } catch (_error) {
+      return threadsNeeded + 1;
+    }
   }
 
   if (percentage >= targetPercentage + threadOffset) {
-    return calculateGrowPercentageThreads(
-      ns,
-      playerInfo,
-      server,
-      targetPercentage,
-      threadsNeeded * 0.75
-    );
+    try {
+      return calculateGrowPercentageThreads(
+        ns,
+        playerInfo,
+        server,
+        targetPercentage,
+        Math.ceil(threadsNeeded * 0.75)
+      );
+    } catch (_error) {
+      return threadsNeeded + 1;
+    }
   }
 
   return Math.ceil(threadsNeeded);
@@ -88,10 +93,7 @@ export async function main(ns: NS): Promise<void> {
   const playerInfo = ns.getPlayer();
 
   const results = serversWithMoney.reduce(
-    (allResults: { [x: string]: ThreadsNeeded }, currentServer, index) => {
-      if (index >= 7) {
-        return allResults;
-      }
+    (allResults: { [x: string]: ThreadsNeeded }, currentServer) => {
       const hackThreadPercentage = ns.formulas.hacking.hackPercent(
         {
           ...currentServer,
@@ -121,13 +123,13 @@ export async function main(ns: NS): Promise<void> {
       const weakenThreads = Math.ceil(
         (hackThreads * hackThreadSecurityIncrease +
           growThreads * growThreadSecurityIncrease) /
-          weakenThreadSecutiryDecrease
+          weakenThreadsecurityDecrease
       );
 
       return {
         ...allResults,
         ...{
-          [currentServer.hostname]: {
+          [currentServer.hostname.toString()]: {
             hackThreads,
             growThreads,
             weakenThreads,
@@ -139,5 +141,9 @@ export async function main(ns: NS): Promise<void> {
     {}
   );
 
-  ns.write("optimal-threads.js", JSON.stringify(results), "w");
+  ns.write(
+    "optimalhreads.js",
+    JSON.stringify(`export default ${JSON.stringify(results)}`),
+    "w"
+  );
 }
