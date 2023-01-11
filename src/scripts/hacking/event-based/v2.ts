@@ -74,7 +74,6 @@ const runScript = (
   scriptPath: string,
   timeBeforeScriptCanRun: number,
   onSuccessEvent: { status: BatchStatus; scriptCompletionTime: number }
-  // runsOnOneMachine?: boolean
 ) => {
   let foundValidServer = false;
   const threadsNeeded = getThreads(ns, event);
