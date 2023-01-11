@@ -13,7 +13,7 @@ import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
 
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 
-const batchableServers = ["the-hub"];
+const batchableServers = ["joesguns"];
 const growThreadSecurityIncrease = 0.004;
 const weakenThreadsecurityDecrease = 0.05;
 
@@ -77,6 +77,9 @@ const runScript = (
 ) => {
   let foundValidServer = false;
   const threadsNeeded = getThreads(ns, event);
+  // Fail-safe when the script time is negative
+  const scriptTimeoutBeforeRunning =
+    timeBeforeScriptCanRun < 0 ? 0 : timeBeforeScriptCanRun;
 
   // Fail-safe to avoid infinite triggers without actual results
   if (threadsNeeded <= 0) {
@@ -88,7 +91,7 @@ const runScript = (
       status: onSuccessEvent.status,
       timeScriptsDone:
         Date.now() +
-        timeBeforeScriptCanRun +
+        scriptTimeoutBeforeRunning +
         onSuccessEvent.scriptCompletionTime +
         short,
       script: scriptPath,
@@ -114,7 +117,7 @@ const runScript = (
         workerServer,
         threadsNeeded,
         event.server,
-        timeBeforeScriptCanRun,
+        scriptTimeoutBeforeRunning,
         (Math.random() + Date.now()).toString()
       );
 
@@ -125,7 +128,7 @@ const runScript = (
         status: onSuccessEvent.status,
         timeScriptsDone:
           Date.now() +
-          timeBeforeScriptCanRun +
+          scriptTimeoutBeforeRunning +
           onSuccessEvent.scriptCompletionTime +
           short,
         script: scriptPath,
