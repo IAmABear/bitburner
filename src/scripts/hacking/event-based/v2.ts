@@ -9,7 +9,7 @@ import {
 } from "/scripts/utils/scriptPaths";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
-import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
+import { long, short, skip } from "/scripts/utils/timeoutTimes";
 
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 
