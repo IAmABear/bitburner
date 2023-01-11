@@ -17,7 +17,7 @@ export default async (
   const scannedServers: string[] = [];
 
   async function scanServer(
-    ns: any,
+    ns: NS,
     server: string,
     { includeGhost, includeHome }: Options
   ) {
