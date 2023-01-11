@@ -75,7 +75,7 @@ const batchableServers = async (ns: NS, queueManger: QueueManager) => {
       ? getFileContents(optimalThreadsFilename)
       : {};
 
-  // For now we'll just check what is needed to weaken the secutiry twice its base
+  // For now we'll just check what is needed to weaken the security twice its base
   const serversAbleToSupport =
     withinHackingLevelRange.reduce((serverAmount: number, server: Server) => {
       const optimalThreads = optimalThreadsFileContent[server.hostname];

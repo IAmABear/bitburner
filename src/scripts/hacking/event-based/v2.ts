@@ -9,13 +9,13 @@ import {
 } from "/scripts/utils/scriptPaths";
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
-import { short, skip } from "/scripts/utils/timeoutTimes";
+import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
 
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 
-const batchableServers = ["joesguns"];
+const batchableServers = ["the-hub"];
 const growThreadSecurityIncrease = 0.004;
-const weakenThreadSecutiryDecrease = 0.05;
+const weakenThreadsecurityDecrease = 0.05;
 
 const getWorkerServers = async (
   ns: NS,
@@ -52,15 +52,15 @@ const getThreads = (ns: NS, event: QueueEvent): number => {
   }
 
   if (event.status === "hackable") {
-    return optimalThreads[event.server].hackThreads;
+    return Math.floor(optimalThreads[event.server].hackThreads / 4);
   }
 
   if (event.status === "needsGrowing") {
-    return optimalThreads[event.server].growThreads;
+    return Math.ceil(optimalThreads[event.server].growThreads);
   }
 
   if (event.status === "fullyGrown" || event.status === "fullyHacked") {
-    return optimalThreads[event.server].weakenThreads;
+    return Math.ceil(optimalThreads[event.server].weakenThreads);
   }
   ns.tprint(`${event.status} returning 0?`);
   return 0;
@@ -90,7 +90,8 @@ const runScript = (
       timeScriptsDone:
         Date.now() +
         timeBeforeScriptCanRun +
-        onSuccessEvent.scriptCompletionTime,
+        onSuccessEvent.scriptCompletionTime +
+        short,
       script: scriptPath,
       threads: 0,
     });
@@ -118,6 +119,7 @@ const runScript = (
         (Math.random() + Date.now()).toString()
       );
 
+      queueManager.removeEvent(event.id);
       queueManager.addEvent({
         id: Math.random() + Date.now(),
         server: event.server,
@@ -130,8 +132,6 @@ const runScript = (
         script: scriptPath,
         threads: 0,
       });
-
-      queueManager.removeEvent(event.id);
 
       foundValidServer = true;
       break;
@@ -157,8 +157,9 @@ const prepServers = (
     });
     const threadsNeededToCompensateGrowSecurity = Math.ceil(
       (threadsNeededToGrowToMax * growThreadSecurityIncrease) /
-        weakenThreadSecutiryDecrease
+        weakenThreadsecurityDecrease
     );
+
     let initialWeakenDone = 0;
     let initialGrowDone = 0;
 
@@ -176,7 +177,7 @@ const prepServers = (
 
       if (
         workerServerPossibleThreadCount >= threadsNeededToWeakenToMin &&
-        !initialWeakenDone
+        initialWeakenDone === 0
       ) {
         if (threadsNeededToWeakenToMin > 0) {
           ns.exec(
@@ -188,7 +189,7 @@ const prepServers = (
             (Math.random() + Date.now()).toString()
           );
         }
-        initialWeakenDone = Date.now() + weakenTime;
+        initialWeakenDone = Date.now() + weakenTime + long;
       }
 
       if (
@@ -208,25 +209,25 @@ const prepServers = (
             (Math.random() + Date.now()).toString()
           );
         }
+
         initialGrowDone =
           timeTillScriptCanRun <= 0
-            ? Date.now() + growthTime
-            : timeTillScriptCanRun + growthTime + short;
+            ? Date.now() + growthTime + short
+            : Date.now() + timeTillScriptCanRun + growthTime + short;
       }
 
       if (
         initialGrowDone &&
         workerServerPossibleThreadCount >= threadsNeededToCompensateGrowSecurity
       ) {
-        const timeTillScriptCanRun = initialGrowDone - Date.now() - weakenTime;
-
+        const timeTillScriptCanRun = initialGrowDone - Date.now() + short;
         if (threadsNeededToCompensateGrowSecurity > 0) {
           ns.exec(
             weakenScriptPath,
             workerServer,
             threadsNeededToCompensateGrowSecurity,
             batchableServer,
-            timeTillScriptCanRun <= 0 ? 0 + short : timeTillScriptCanRun,
+            timeTillScriptCanRun,
             (Math.random() + Date.now()).toString()
           );
         }
@@ -236,9 +237,7 @@ const prepServers = (
           server: batchableServer,
           status: "hackable",
           timeScriptsDone:
-            timeTillScriptCanRun <= 0
-              ? Date.now() + weakenTime
-              : initialGrowDone + weakenTime + short,
+            Date.now() + timeTillScriptCanRun + weakenTime + long,
           script: weakenScriptPath,
           threads: 0,
         });
@@ -253,17 +252,18 @@ export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
 
   const queueManager = new QueueManger();
-  const workerServers = await getWorkerServers(ns, {
-    includeHome:
-      (ns.args[0] as string) === "home" || (ns.args[0] as string) === "all",
-    includeHackableServers: (ns.args[0] as string) === "all",
-  });
-  prepServers(ns, workerServers, queueManager);
 
   while (true) {
     const events = queueManager.queue;
 
-    ns.print(events);
+    const workerServers = await getWorkerServers(ns, {
+      includeHome:
+        (ns.args[0] as string) === "home" || (ns.args[0] as string) === "all",
+      includeHackableServers: (ns.args[0] as string) === "all",
+    });
+    if (events.length === 0) {
+      prepServers(ns, workerServers, queueManager);
+    }
 
     for (let index = 0; index < events.length; index++) {
       const event = events[index];

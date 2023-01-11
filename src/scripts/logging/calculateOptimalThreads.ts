@@ -11,7 +11,7 @@ type ThreadsNeeded = {
 const targetMoneyPercentage = 0.5;
 const growThreadSecurityIncrease = 0.004;
 const hackThreadSecurityIncrease = 0.002;
-const weakenThreadSecutiryDecrease = 0.05;
+const weakenThreadsecurityDecrease = 0.05;
 
 const threadOffset = 0.4;
 const calculateGrowPercentageThreads = (
@@ -31,9 +31,6 @@ const calculateGrowPercentageThreads = (
   );
 
   if (percentage === Infinity) {
-    ns.tprint(
-      `serverName: ${server.hostname} targetPercentage: ${targetPercentage}; percentage: ${percentage}; threadsNeeded: ${threadsNeeded}`
-    );
     return 1;
   }
 
@@ -126,7 +123,7 @@ export async function main(ns: NS): Promise<void> {
       const weakenThreads = Math.ceil(
         (hackThreads * hackThreadSecurityIncrease +
           growThreads * growThreadSecurityIncrease) /
-          weakenThreadSecutiryDecrease
+          weakenThreadsecurityDecrease
       );
 
       return {
