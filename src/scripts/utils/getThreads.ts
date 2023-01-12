@@ -1,4 +1,5 @@
 import optimalThreads from "/optimalThreads";
+import { QueueEvent } from "/scripts/utils/queueManager";
 
 export default (ns: NS, event: QueueEvent): number => {
   const serverThreads = optimalThreads[event.server];
