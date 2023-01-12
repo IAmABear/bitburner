@@ -24,7 +24,7 @@ const runScript = (
   scriptPath: string,
   timeBeforeScriptCanRun: number,
   onSuccessEvent: { status: BatchStatus; scriptCompletionTime: number },
-  queueManager: QueueManger
+  queueManager?: QueueManger
 ) => {
   let foundValidServer = false;
   const threadsNeeded = getThreads(ns, event);
@@ -36,20 +36,22 @@ const runScript = (
   if (threadsNeeded <= 0) {
     ns.print("nothing needed");
 
-    queueManager.addEvent({
-      id: Math.random() + Date.now(),
-      server: event.server,
-      status: onSuccessEvent.status,
-      timeScriptsDone:
-        Date.now() +
-        scriptTimeoutBeforeRunning +
-        onSuccessEvent.scriptCompletionTime +
-        short,
-      script: scriptPath,
-      threads: 0,
-    });
+    if (queueManager) {
+      queueManager.addEvent({
+        id: Math.random() + Date.now(),
+        server: event.server,
+        status: onSuccessEvent.status,
+        timeScriptsDone:
+          Date.now() +
+          scriptTimeoutBeforeRunning +
+          onSuccessEvent.scriptCompletionTime +
+          short,
+        script: scriptPath,
+        threads: 0,
+      });
 
-    queueManager.removeEvent(event.id);
+      queueManager.removeEvent(event.id);
+    }
 
     return true;
   }
@@ -72,19 +74,21 @@ const runScript = (
         (Math.random() + Date.now()).toString()
       );
 
-      queueManager.removeEvent(event.id);
-      queueManager.addEvent({
-        id: Math.random() + Date.now(),
-        server: event.server,
-        status: onSuccessEvent.status,
-        timeScriptsDone:
-          Date.now() +
-          scriptTimeoutBeforeRunning +
-          onSuccessEvent.scriptCompletionTime +
-          short,
-        script: scriptPath,
-        threads: 0,
-      });
+      if (queueManager) {
+        queueManager.removeEvent(event.id);
+        queueManager.addEvent({
+          id: Math.random() + Date.now(),
+          server: event.server,
+          status: onSuccessEvent.status,
+          timeScriptsDone:
+            Date.now() +
+            scriptTimeoutBeforeRunning +
+            onSuccessEvent.scriptCompletionTime +
+            short,
+          script: scriptPath,
+          threads: 0,
+        });
+      }
 
       foundValidServer = true;
       break;
