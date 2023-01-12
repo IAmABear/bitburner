@@ -21,10 +21,10 @@ const runScript = (
   ns: NS,
   workerServers: string[],
   event: QueueEvent,
-  queueManager: QueueManger,
   scriptPath: string,
   timeBeforeScriptCanRun: number,
-  onSuccessEvent: { status: BatchStatus; scriptCompletionTime: number }
+  onSuccessEvent: { status: BatchStatus; scriptCompletionTime: number },
+  queueManager: QueueManger
 ) => {
   let foundValidServer = false;
   const threadsNeeded = getThreads(ns, event);
@@ -235,13 +235,13 @@ export async function main(ns: NS): Promise<void> {
             ns,
             workerServers,
             event,
-            queueManager,
             hackScriptPath,
             event.timeScriptsDone - Date.now() - hackTime,
             {
               status: "fullyHacked",
               scriptCompletionTime: hackTime,
-            }
+            },
+            queueManager
           );
           if (!res) {
             break;
@@ -254,13 +254,13 @@ export async function main(ns: NS): Promise<void> {
             ns,
             workerServers,
             event,
-            queueManager,
             growScriptPath,
             event.timeScriptsDone - Date.now() - growthTime,
             {
               status: "fullyGrown",
               scriptCompletionTime: growthTime,
-            }
+            },
+            queueManager
           );
           if (res) {
             break;
@@ -273,14 +273,14 @@ export async function main(ns: NS): Promise<void> {
             ns,
             workerServers,
             event,
-            queueManager,
             weakenScriptPath,
             event.timeScriptsDone - Date.now() - serverWeakenTime,
             {
               status:
                 event.status === "fullyGrown" ? "hackable" : "needsGrowing",
               scriptCompletionTime: serverWeakenTime,
-            }
+            },
+            queueManager
           );
         }
         if (!res) {
