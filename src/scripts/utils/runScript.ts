@@ -3,7 +3,11 @@ import QueueManger, { QueueEvent } from "/scripts/utils/queueManager";
 import { short } from "/scripts/utils/timeoutTimes";
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 
-type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
+export type BatchStatus =
+  | "hackable"
+  | "fullyGrown"
+  | "fullyHacked"
+  | "needsGrowing";
 
 export default (
   ns: NS,
