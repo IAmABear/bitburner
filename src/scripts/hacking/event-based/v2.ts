@@ -1,6 +1,5 @@
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
-
-import QueueManger, { QueueEvent } from "/scripts/utils/queueManager";
+import QueueManger from "/scripts/utils/queueManager";
 import {
   growScriptPath,
   hackScriptPath,
@@ -9,94 +8,11 @@ import {
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import { long, short, skip } from "/scripts/utils/timeoutTimes";
-import getThreads from "/scripts/utils/getThreads";
 import getWorkerServers from "/scripts/utils/getWorkerServers";
-
-type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
+import runScript from "/scripts/utils/runScript";
 
 const growThreadSecurityIncrease = 0.004;
 const weakenThreadsecurityDecrease = 0.05;
-
-const runScript = (
-  ns: NS,
-  workerServers: string[],
-  event: QueueEvent,
-  scriptPath: string,
-  timeBeforeScriptCanRun: number,
-  onSuccessEvent: { status: BatchStatus; scriptCompletionTime: number },
-  queueManager?: QueueManger
-) => {
-  let foundValidServer = false;
-  const threadsNeeded = getThreads(ns, event);
-  // Fail-safe when the script time is negative
-  const scriptTimeoutBeforeRunning =
-    timeBeforeScriptCanRun < 0 ? 0 : timeBeforeScriptCanRun;
-
-  // Fail-safe to avoid infinite triggers without actual results
-  if (threadsNeeded <= 0) {
-    ns.print("nothing needed");
-
-    if (queueManager) {
-      queueManager.addEvent({
-        id: Math.random() + Date.now(),
-        server: event.server,
-        status: onSuccessEvent.status,
-        timeScriptsDone:
-          Date.now() +
-          scriptTimeoutBeforeRunning +
-          onSuccessEvent.scriptCompletionTime +
-          short,
-        script: scriptPath,
-        threads: 0,
-      });
-
-      queueManager.removeEvent(event.id);
-    }
-
-    return true;
-  }
-
-  for (let index = 0; index < workerServers.length; index++) {
-    const workerServer = workerServers[index];
-    const workerServerPossibleThreadCount = getPossibleThreadCount(
-      ns,
-      workerServer,
-      scriptPath
-    );
-
-    if (workerServerPossibleThreadCount >= threadsNeeded) {
-      ns.exec(
-        scriptPath,
-        workerServer,
-        threadsNeeded,
-        event.server,
-        scriptTimeoutBeforeRunning,
-        (Math.random() + Date.now()).toString()
-      );
-
-      if (queueManager) {
-        queueManager.removeEvent(event.id);
-        queueManager.addEvent({
-          id: Math.random() + Date.now(),
-          server: event.server,
-          status: onSuccessEvent.status,
-          timeScriptsDone:
-            Date.now() +
-            scriptTimeoutBeforeRunning +
-            onSuccessEvent.scriptCompletionTime +
-            short,
-          script: scriptPath,
-          threads: 0,
-        });
-      }
-
-      foundValidServer = true;
-      break;
-    }
-  }
-
-  return foundValidServer;
-};
 
 const prepServer = (
   ns: NS,
