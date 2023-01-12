@@ -23,88 +23,89 @@ export async function main(ns: NS): Promise<void> {
         server
       );
     });
-  } else {
-    const queueManager = new QueueManger();
-    const targetServer = ns.args[1] as string;
 
-    while (true) {
-      const events = queueManager.queue;
+    return;
+  }
 
-      const workerServers = await getWorkerServers(ns, {
-        includeHome:
-          (ns.args[0] as string) === "home" || (ns.args[0] as string) === "all",
-        includeHackableServers: (ns.args[0] as string) === "all",
-      });
-      if (events.length === 0) {
-        void prepServer(ns, targetServer, workerServers, queueManager);
-      }
+  const queueManager = new QueueManger();
+  const targetServer = ns.args[1] as string;
 
-      for (let index = 0; index < events.length; index++) {
-        const event = events[index];
+  while (true) {
+    const events = queueManager.queue;
 
-        let res = false;
-        if (event.status === "hackable") {
-          const hackTime = Math.ceil(ns.getHackTime(event.server));
+    const workerServers = await getWorkerServers(ns, {
+      includeHome:
+        (ns.args[0] as string) === "home" || (ns.args[0] as string) === "all",
+      includeHackableServers: (ns.args[0] as string) === "all",
+    });
+    if (events.length === 0) {
+      void prepServer(ns, targetServer, workerServers, queueManager);
+    }
 
-          res = runScript(
-            ns,
-            workerServers,
-            event,
-            hackScriptPath,
-            event.timeScriptsDone - Date.now() - hackTime,
-            {
-              status: "fullyHacked",
-              scriptCompletionTime: hackTime,
-            },
-            queueManager
-          );
-          if (!res) {
-            break;
-          }
-        }
-        if (event.status === "needsGrowing") {
-          const growthTime = Math.ceil(ns.getGrowTime(event.server));
+    for (let index = 0; index < events.length; index++) {
+      const event = events[index];
 
-          res = runScript(
-            ns,
-            workerServers,
-            event,
-            growScriptPath,
-            event.timeScriptsDone - Date.now() - growthTime,
-            {
-              status: "fullyGrown",
-              scriptCompletionTime: growthTime,
-            },
-            queueManager
-          );
-          if (res) {
-            break;
-          }
-        }
-        if (event.status === "fullyGrown" || event.status === "fullyHacked") {
-          const serverWeakenTime = Math.ceil(ns.getWeakenTime(event.server));
+      let res = false;
+      if (event.status === "hackable") {
+        const hackTime = Math.ceil(ns.getHackTime(event.server));
 
-          res = runScript(
-            ns,
-            workerServers,
-            event,
-            weakenScriptPath,
-            event.timeScriptsDone - Date.now() - serverWeakenTime,
-            {
-              status:
-                event.status === "fullyGrown" ? "hackable" : "needsGrowing",
-              scriptCompletionTime: serverWeakenTime,
-            },
-            queueManager
-          );
-        }
+        res = runScript(
+          ns,
+          workerServers,
+          event,
+          hackScriptPath,
+          event.timeScriptsDone - Date.now() - hackTime,
+          {
+            status: "fullyHacked",
+            scriptCompletionTime: hackTime,
+          },
+          queueManager
+        );
         if (!res) {
           break;
         }
-        index++;
       }
+      if (event.status === "needsGrowing") {
+        const growthTime = Math.ceil(ns.getGrowTime(event.server));
 
-      await ns.sleep(skip);
+        res = runScript(
+          ns,
+          workerServers,
+          event,
+          growScriptPath,
+          event.timeScriptsDone - Date.now() - growthTime,
+          {
+            status: "fullyGrown",
+            scriptCompletionTime: growthTime,
+          },
+          queueManager
+        );
+        if (res) {
+          break;
+        }
+      }
+      if (event.status === "fullyGrown" || event.status === "fullyHacked") {
+        const serverWeakenTime = Math.ceil(ns.getWeakenTime(event.server));
+
+        res = runScript(
+          ns,
+          workerServers,
+          event,
+          weakenScriptPath,
+          event.timeScriptsDone - Date.now() - serverWeakenTime,
+          {
+            status: event.status === "fullyGrown" ? "hackable" : "needsGrowing",
+            scriptCompletionTime: serverWeakenTime,
+          },
+          queueManager
+        );
+      }
+      if (!res) {
+        break;
+      }
+      index++;
     }
+
+    await ns.sleep(skip);
   }
 }
