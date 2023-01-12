@@ -13,7 +13,6 @@ import { long, short, skip } from "/scripts/utils/timeoutTimes";
 
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 
-const batchableServers = ["joesguns"];
 const growThreadSecurityIncrease = 0.004;
 const weakenThreadsecurityDecrease = 0.05;
 
@@ -145,107 +144,100 @@ const runScript = (
 
 const prepServers = (
   ns: NS,
+  batchableServer: string,
   workerServers: string[],
   queueManager: QueueManger
 ) => {
-  for (let index = 0; index < batchableServers.length; index++) {
-    const batchableServer = batchableServers[index];
-    const threadsNeededToWeakenToMin = threadsNeededToWeaken(
+  const threadsNeededToWeakenToMin = threadsNeededToWeaken(ns, batchableServer);
+  const threadsNeededToGrowToMax = threadsNeededToGrow(ns, {
+    server: batchableServer,
+  });
+  const threadsNeededToCompensateGrowSecurity = Math.ceil(
+    (threadsNeededToGrowToMax * growThreadSecurityIncrease) /
+      weakenThreadsecurityDecrease
+  );
+
+  let initialWeakenDone = 0;
+  let initialGrowDone = 0;
+
+  for (let index = 0; index < workerServers.length; index++) {
+    const workerServer = workerServers[index];
+
+    const growthTime = Math.ceil(ns.getGrowTime(batchableServer));
+    const weakenTime = Math.ceil(ns.getWeakenTime(batchableServer));
+
+    const workerServerPossibleThreadCount = getPossibleThreadCount(
       ns,
-      batchableServer
-    );
-    const threadsNeededToGrowToMax = threadsNeededToGrow(ns, {
-      server: batchableServer,
-    });
-    const threadsNeededToCompensateGrowSecurity = Math.ceil(
-      (threadsNeededToGrowToMax * growThreadSecurityIncrease) /
-        weakenThreadsecurityDecrease
+      workerServer,
+      weakenScriptPath
     );
 
-    let initialWeakenDone = 0;
-    let initialGrowDone = 0;
+    if (
+      workerServerPossibleThreadCount >= threadsNeededToWeakenToMin &&
+      initialWeakenDone === 0
+    ) {
+      if (threadsNeededToWeakenToMin > 0) {
+        ns.exec(
+          weakenScriptPath,
+          workerServer,
+          threadsNeededToWeakenToMin,
+          batchableServer,
+          0,
+          (Math.random() + Date.now()).toString()
+        );
+      }
+      initialWeakenDone = Date.now() + weakenTime + long;
+    }
 
-    for (let index = 0; index < workerServers.length; index++) {
-      const workerServer = workerServers[index];
+    if (
+      initialWeakenDone &&
+      workerServerPossibleThreadCount >= threadsNeededToGrowToMax
+    ) {
+      const timeTillScriptCanRun = initialWeakenDone - Date.now() - growthTime;
 
-      const growthTime = Math.ceil(ns.getGrowTime(batchableServer));
-      const weakenTime = Math.ceil(ns.getWeakenTime(batchableServer));
-
-      const workerServerPossibleThreadCount = getPossibleThreadCount(
-        ns,
-        workerServer,
-        weakenScriptPath
-      );
-
-      if (
-        workerServerPossibleThreadCount >= threadsNeededToWeakenToMin &&
-        initialWeakenDone === 0
-      ) {
-        if (threadsNeededToWeakenToMin > 0) {
-          ns.exec(
-            weakenScriptPath,
-            workerServer,
-            threadsNeededToWeakenToMin,
-            batchableServer,
-            0,
-            (Math.random() + Date.now()).toString()
-          );
-        }
-        initialWeakenDone = Date.now() + weakenTime + long;
+      if (threadsNeededToGrowToMax > 0) {
+        ns.exec(
+          growScriptPath,
+          workerServer,
+          threadsNeededToGrowToMax,
+          batchableServer,
+          timeTillScriptCanRun,
+          (Math.random() + Date.now()).toString()
+        );
       }
 
-      if (
-        initialWeakenDone &&
-        workerServerPossibleThreadCount >= threadsNeededToGrowToMax
-      ) {
-        const timeTillScriptCanRun =
-          initialWeakenDone - Date.now() - growthTime;
+      initialGrowDone =
+        timeTillScriptCanRun <= 0
+          ? Date.now() + growthTime + short
+          : Date.now() + timeTillScriptCanRun + growthTime + short;
+    }
 
-        if (threadsNeededToGrowToMax > 0) {
-          ns.exec(
-            growScriptPath,
-            workerServer,
-            threadsNeededToGrowToMax,
-            batchableServer,
-            timeTillScriptCanRun,
-            (Math.random() + Date.now()).toString()
-          );
-        }
-
-        initialGrowDone =
-          timeTillScriptCanRun <= 0
-            ? Date.now() + growthTime + short
-            : Date.now() + timeTillScriptCanRun + growthTime + short;
+    if (
+      initialGrowDone &&
+      workerServerPossibleThreadCount >= threadsNeededToCompensateGrowSecurity
+    ) {
+      const timeTillScriptCanRun = initialGrowDone - Date.now() + short;
+      if (threadsNeededToCompensateGrowSecurity > 0) {
+        ns.exec(
+          weakenScriptPath,
+          workerServer,
+          threadsNeededToCompensateGrowSecurity,
+          batchableServer,
+          timeTillScriptCanRun,
+          (Math.random() + Date.now()).toString()
+        );
       }
 
-      if (
-        initialGrowDone &&
-        workerServerPossibleThreadCount >= threadsNeededToCompensateGrowSecurity
-      ) {
-        const timeTillScriptCanRun = initialGrowDone - Date.now() + short;
-        if (threadsNeededToCompensateGrowSecurity > 0) {
-          ns.exec(
-            weakenScriptPath,
-            workerServer,
-            threadsNeededToCompensateGrowSecurity,
-            batchableServer,
-            timeTillScriptCanRun,
-            (Math.random() + Date.now()).toString()
-          );
-        }
+      queueManager.addEvent({
+        id: Math.random() + Date.now(),
+        server: batchableServer,
+        status: "hackable",
+        timeScriptsDone: Date.now() + timeTillScriptCanRun + weakenTime + long,
+        script: weakenScriptPath,
+        threads: 0,
+      });
 
-        queueManager.addEvent({
-          id: Math.random() + Date.now(),
-          server: batchableServer,
-          status: "hackable",
-          timeScriptsDone:
-            Date.now() + timeTillScriptCanRun + weakenTime + long,
-          script: weakenScriptPath,
-          threads: 0,
-        });
-
-        break;
-      }
+      break;
     }
   }
 };
@@ -253,84 +245,99 @@ const prepServers = (
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
 
-  const queueManager = new QueueManger();
-
-  while (true) {
-    const events = queueManager.queue;
-
-    const workerServers = await getWorkerServers(ns, {
-      includeHome:
-        (ns.args[0] as string) === "home" || (ns.args[0] as string) === "all",
-      includeHackableServers: (ns.args[0] as string) === "all",
+  if (ns.args.length === 1) {
+    const batchableServers = ["joesguns", "zer0"];
+    batchableServers.forEach((server: string) => {
+      ns.exec(
+        "/scripts/hacking/event-based/v2.js",
+        "home",
+        undefined,
+        ...ns.args,
+        server
+      );
     });
-    if (events.length === 0) {
-      prepServers(ns, workerServers, queueManager);
-    }
+  } else {
+    const queueManager = new QueueManger();
+    const targetServer = ns.args[1] as string;
 
-    for (let index = 0; index < events.length; index++) {
-      const event = events[index];
+    while (true) {
+      const events = queueManager.queue;
 
-      let res = false;
-      if (event.status === "hackable") {
-        const hackTime = Math.ceil(ns.getHackTime(event.server));
+      const workerServers = await getWorkerServers(ns, {
+        includeHome:
+          (ns.args[0] as string) === "home" || (ns.args[0] as string) === "all",
+        includeHackableServers: (ns.args[0] as string) === "all",
+      });
+      if (events.length === 0) {
+        prepServers(ns, targetServer, workerServers, queueManager);
+      }
 
-        res = runScript(
-          ns,
-          workerServers,
-          event,
-          queueManager,
-          hackScriptPath,
-          event.timeScriptsDone - Date.now() - hackTime,
-          {
-            status: "fullyHacked",
-            scriptCompletionTime: hackTime,
+      for (let index = 0; index < events.length; index++) {
+        const event = events[index];
+
+        let res = false;
+        if (event.status === "hackable") {
+          const hackTime = Math.ceil(ns.getHackTime(event.server));
+
+          res = runScript(
+            ns,
+            workerServers,
+            event,
+            queueManager,
+            hackScriptPath,
+            event.timeScriptsDone - Date.now() - hackTime,
+            {
+              status: "fullyHacked",
+              scriptCompletionTime: hackTime,
+            }
+          );
+          if (!res) {
+            break;
           }
-        );
+        }
+        if (event.status === "needsGrowing") {
+          const growthTime = Math.ceil(ns.getGrowTime(event.server));
+
+          res = runScript(
+            ns,
+            workerServers,
+            event,
+            queueManager,
+            growScriptPath,
+            event.timeScriptsDone - Date.now() - growthTime,
+            {
+              status: "fullyGrown",
+              scriptCompletionTime: growthTime,
+            }
+          );
+          if (res) {
+            break;
+          }
+        }
+        if (event.status === "fullyGrown" || event.status === "fullyHacked") {
+          const serverWeakenTime = Math.ceil(ns.getWeakenTime(event.server));
+
+          res = runScript(
+            ns,
+            workerServers,
+            event,
+            queueManager,
+            weakenScriptPath,
+            event.timeScriptsDone - Date.now() - serverWeakenTime,
+            {
+              status:
+                event.status === "fullyGrown" ? "hackable" : "needsGrowing",
+              scriptCompletionTime: serverWeakenTime,
+            }
+          );
+        }
         if (!res) {
           break;
         }
+        index++;
       }
-      if (event.status === "needsGrowing") {
-        const growthTime = Math.ceil(ns.getGrowTime(event.server));
 
-        res = runScript(
-          ns,
-          workerServers,
-          event,
-          queueManager,
-          growScriptPath,
-          event.timeScriptsDone - Date.now() - growthTime,
-          {
-            status: "fullyGrown",
-            scriptCompletionTime: growthTime,
-          }
-        );
-        if (res) {
-          break;
-        }
-      }
-      if (event.status === "fullyGrown" || event.status === "fullyHacked") {
-        const serverWeakenTime = Math.ceil(ns.getWeakenTime(event.server));
-
-        res = runScript(
-          ns,
-          workerServers,
-          event,
-          queueManager,
-          weakenScriptPath,
-          event.timeScriptsDone - Date.now() - serverWeakenTime,
-          {
-            status: event.status === "fullyGrown" ? "hackable" : "needsGrowing",
-            scriptCompletionTime: serverWeakenTime,
-          }
-        );
-      }
-      if (!res) {
-        break;
-      }
-      index++;
+      await ns.sleep(skip);
     }
-
-    await ns.sleep(skip);
   }
 }
