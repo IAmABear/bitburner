@@ -142,7 +142,7 @@ const runScript = (
   return foundValidServer;
 };
 
-const prepServers = (
+const prepServer = (
   ns: NS,
   batchableServer: string,
   workerServers: string[],
@@ -269,7 +269,7 @@ export async function main(ns: NS): Promise<void> {
         includeHackableServers: (ns.args[0] as string) === "all",
       });
       if (events.length === 0) {
-        prepServers(ns, targetServer, workerServers, queueManager);
+        prepServer(ns, targetServer, workerServers, queueManager);
       }
 
       for (let index = 0; index < events.length; index++) {
