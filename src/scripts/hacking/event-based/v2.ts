@@ -18,7 +18,7 @@ const prepServer = (
   ns: NS,
   batchableServer: string,
   workerServers: string[],
-  queueManager: QueueManger
+  queueManager?: QueueManger
 ) => {
   const threadsNeededToWeakenToMin = threadsNeededToWeaken(ns, batchableServer);
   const threadsNeededToGrowToMax = threadsNeededToGrow(ns, {
@@ -100,14 +100,17 @@ const prepServer = (
         );
       }
 
-      queueManager.addEvent({
-        id: Math.random() + Date.now(),
-        server: batchableServer,
-        status: "hackable",
-        timeScriptsDone: Date.now() + timeTillScriptCanRun + weakenTime + long,
-        script: weakenScriptPath,
-        threads: 0,
-      });
+      if (queueManager) {
+        queueManager.addEvent({
+          id: Math.random() + Date.now(),
+          server: batchableServer,
+          status: "hackable",
+          timeScriptsDone:
+            Date.now() + timeTillScriptCanRun + weakenTime + long,
+          script: weakenScriptPath,
+          threads: 0,
+        });
+      }
 
       break;
     }
