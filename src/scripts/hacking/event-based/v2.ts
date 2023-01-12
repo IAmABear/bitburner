@@ -1,5 +1,5 @@
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
-import getServers from "/scripts/utils/getServers";
+
 import QueueManger, { QueueEvent } from "/scripts/utils/queueManager";
 import {
   growScriptPath,
@@ -9,37 +9,13 @@ import {
 import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
 import { long, short, skip } from "/scripts/utils/timeoutTimes";
+import getThreads from "/scripts/utils/getThreads";
+import getWorkerServers from "/scripts/utils/getWorkerServers";
 
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 
 const growThreadSecurityIncrease = 0.004;
 const weakenThreadsecurityDecrease = 0.05;
-
-const getWorkerServers = async (
-  ns: NS,
-  { includeHome = false, includeHackableServers = false }
-) => {
-  let servers = await getServers(ns, {
-    includeHome: false,
-    includeGhost: true,
-    onlyGhost: true,
-  });
-
-  if (includeHome) {
-    servers.push("home");
-  }
-
-  if (includeHackableServers) {
-    const normalServers = await getServers(ns, {
-      includeHome: false,
-      includeGhost: false,
-    });
-
-    servers = [...servers, ...normalServers];
-  }
-
-  return servers;
-};
 
 const runScript = (
   ns: NS,
