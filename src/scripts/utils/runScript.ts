@@ -66,6 +66,21 @@ export default (
         (Math.random() + Date.now()).toString()
       );
 
+      // Enable the following the log the events to display them.
+      // ns.write(
+      //   "run-script-events.js",
+      //   JSON.stringify({
+      //     id: (Math.random() + Date.now()).toString(),
+      //     content: scriptPath.split("/scripts/serverScripts/")[1],
+      //     start:
+      //       Date.now() +
+      //       scriptTimeoutBeforeRunning +
+      //       onSuccessEvent.scriptCompletionTime +
+      //       short,
+      //   }),
+      //   "a"
+      // );
+
       if (queueManager) {
         queueManager.removeEvent(event.id);
         queueManager.addEvent({
