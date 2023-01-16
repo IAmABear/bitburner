@@ -8,7 +8,9 @@ export async function main(ns: NS): Promise<void> {
 
   while (buyScriptsRunning) {
     if (ns.getPurchasedServers().length === ns.getPurchasedServerLimit()) {
-      ns.run(upgradeScriptPath);
+      if (!ns.isRunning(upgradeScriptPath, "home")) {
+        ns.run(upgradeScriptPath);
+      }
 
       if (ns.isRunning(buyScriptPath, "home")) {
         ns.scriptKill(buyScriptPath, "home");
