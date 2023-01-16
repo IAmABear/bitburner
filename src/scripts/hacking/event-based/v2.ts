@@ -43,7 +43,7 @@ export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
 
   if (ns.args.length === 1) {
-    const batchableServers = ["joesguns", "zer0"];
+    const batchableServers = ["joesguns"];
     batchableServers.forEach((server: string) => {
       ns.exec(
         "/scripts/hacking/event-based/v2.js",
