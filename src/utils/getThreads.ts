@@ -1,7 +1,7 @@
 import optimalThreads from "/optimalThreads";
 import { QueueEvent } from "/utils/queueManager";
 
-export default (ns: NS, event: QueueEvent): number => {
+const getBasicThreadCalculation = (ns: NS, event: QueueEvent) => {
   const serverThreads = optimalThreads[event.server];
 
   if (!serverThreads) {
@@ -20,6 +20,12 @@ export default (ns: NS, event: QueueEvent): number => {
   if (event.status === "fullyGrown" || event.status === "fullyHacked") {
     return Math.ceil(optimalThreads[event.server].weakenThreads);
   }
+
   ns.tprint(`${event.status} returning 0?`);
+
   return 0;
+};
+
+export default (ns: NS, event: QueueEvent): number => {
+  return getBasicThreadCalculation(ns, event);
 };
