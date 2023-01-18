@@ -90,12 +90,18 @@ export async function main(ns: NS): Promise<void> {
             ) <
             ns.getServerMoneyAvailable("home")
         ) {
-          ns.exec(preparingToUpgradeScriptPath, targetServer);
-          serversReadyForUpgrade.push({
-            hostname: targetServer,
-            newRam: newTargetRam,
-            upgradeCost,
-          });
+          try {
+            ns.exec(preparingToUpgradeScriptPath, targetServer);
+            serversReadyForUpgrade.push({
+              hostname: targetServer,
+              newRam: newTargetRam,
+              upgradeCost,
+            });
+          } catch (e) {
+            ns.print(
+              `Couldnt target ${targetServer} for upgrade due to an error`
+            );
+          }
         } else {
           dynamicSleep = long;
         }
