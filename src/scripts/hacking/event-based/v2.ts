@@ -8,6 +8,7 @@ import { medium, skip } from "/scripts/utils/timeoutTimes";
 import getWorkerServers from "/scripts/utils/getWorkerServers";
 import runScript, { BatchStatus } from "/scripts/utils/runScript";
 import prepServer from "/scripts/utils/prepServer";
+import serversToHack from "/scripts/utils/serversToHack";
 
 const getCompletionStatus = (
   ns: NS,
@@ -42,23 +43,15 @@ const getCompletionStatus = (
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
 
-  if (ns.args.length === 1) {
-    const batchableServers = ["zer0"];
-    batchableServers.forEach((server: string) => {
-      ns.exec(
-        "/scripts/hacking/event-based/v2.js",
-        "home",
-        undefined,
-        ...ns.args,
-        server
-      );
-    });
+  const queueManager = new QueueManger();
+  const targatableServers = await serversToHack(ns);
 
+  if (targatableServers.length === 0) {
+    ns.tprint("No valid hackable servers found.");
     return;
   }
 
-  const queueManager = new QueueManger();
-  const targetServer = ns.args[1] as string;
+  const targetServer = targatableServers[0];
 
   while (true) {
     const events = queueManager.queue;
@@ -69,7 +62,7 @@ export async function main(ns: NS): Promise<void> {
       includeHackableServers: (ns.args[0] as string) === "all",
     });
     if (events.length === 0) {
-      void prepServer(ns, targetServer, workerServers, queueManager);
+      void prepServer(ns, targetServer.hostname, workerServers, queueManager);
       await ns.sleep(medium);
     } else {
       for (let index = 0; index < events.length; index++) {
