@@ -1,5 +1,3 @@
-import { long } from "/scripts/utils/timeoutTimes";
-
 /**
  * The sole purpose for this script is to run indefinetly so we know the server
  * has been targeted for an upgrade. This is done to avoid killing servers which
@@ -8,8 +6,8 @@ import { long } from "/scripts/utils/timeoutTimes";
  *
  * @param ns The NetScript object
  */
-export async function main(ns: NS): Promise<number> {
+export async function main(ns: NS): Promise<void> {
   while (true) {
-    await ns.sleep(long);
+    await ns.sleep(10000);
   }
 }

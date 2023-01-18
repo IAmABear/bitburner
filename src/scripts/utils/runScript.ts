@@ -2,6 +2,7 @@ import getThreads from "/scripts/utils/getThreads";
 import QueueManger, { QueueEvent } from "/scripts/utils/queueManager";
 import { short } from "/scripts/utils/timeoutTimes";
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
+import { preparingToUpgradeScriptPath } from "/scripts/utils/scriptPaths";
 
 export type BatchStatus =
   | "hackable"
@@ -56,7 +57,10 @@ export default (
       scriptPath
     );
 
-    if (workerServerPossibleThreadCount >= threadsNeeded) {
+    if (
+      workerServerPossibleThreadCount >= threadsNeeded &&
+      !ns.scriptRunning(preparingToUpgradeScriptPath, workerServer)
+    ) {
       ns.exec(
         scriptPath,
         workerServer,
