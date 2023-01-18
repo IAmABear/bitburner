@@ -1,4 +1,4 @@
-const eventHackingV1 = "/scripts/hacking/event-based/v1.js";
+const hubHacking = "/scripts/hacking/hub.js";
 const eventHackingV2 = "/scripts/hacking/event-based/v2.js";
 
 export async function main(ns: NS): Promise<void> {
@@ -14,12 +14,12 @@ export async function main(ns: NS): Promise<void> {
         break;
       }
     } else {
-      if (!ns.isRunning(eventHackingV1, "home")) {
+      if (!ns.isRunning(hubHacking, "home")) {
         if (ns.isRunning(eventHackingV2, "home")) {
           ns.kill(eventHackingV2, "home");
         }
 
-        ns.exec(eventHackingV1, "home", undefined, ...ns.args);
+        ns.exec(hubHacking, "home", undefined, ...ns.args);
       }
     }
   }
