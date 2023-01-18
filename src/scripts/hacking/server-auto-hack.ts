@@ -4,12 +4,18 @@ import {
   growScriptPath,
   weakenScriptPath,
   hackScriptPath,
+  preparingToUpgradeScriptPath,
 } from "/scripts/utils/scriptPaths.js";
 import { medium } from "/scripts/utils/timeoutTimes";
 
 async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {
   const res = await ns.scp(
-    [hackScriptPath, growScriptPath, weakenScriptPath],
+    [
+      hackScriptPath,
+      growScriptPath,
+      weakenScriptPath,
+      preparingToUpgradeScriptPath,
+    ],
     server
   );
 
