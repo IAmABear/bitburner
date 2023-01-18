@@ -14,3 +14,8 @@ The following settings are needed in a `bitburner-sync.json` file on the root le
   "serverUrl": "127.0.0.1"
 }
 ```
+
+## Resources
+
+- [Bitburner official guide](https://github.com/quacksouls/bitburner/tree/main/doc/guide)
+- [Bitburner API](https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.ns.md)
