@@ -24,8 +24,11 @@ export default async (
       includeHome: false,
       includeGhost: false,
     });
+    const serversWithAdminRights = normalServers.filter(
+      (server: string) => ns.getServer(server).hasAdminRights
+    );
 
-    servers = [...servers, ...normalServers];
+    servers = [...servers, ...serversWithAdminRights];
   }
 
   return servers;
