@@ -98,19 +98,6 @@ export async function main(ns: NS): Promise<void> {
           });
         } else {
           dynamicSleep = long;
-
-          const currentServers = await ns.getPurchasedServers();
-          const allServerRams = await currentServers.map((server) =>
-            ns.getServerMaxRam(server)
-          );
-
-          // Check if we still have servers under a certain RAM threshold.
-          // If not kill the upgrade script to free up RAM.
-          if (allServerRams.find((serverRAM) => serverRAM <= 100000)) {
-            continue;
-          } else {
-            break;
-          }
         }
       }
     }
