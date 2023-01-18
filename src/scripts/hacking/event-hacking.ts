@@ -5,7 +5,7 @@ const eventHackingV2 = "/scripts/hacking/event-based/v2.js";
 
 export async function main(ns: NS): Promise<void> {
   while (true) {
-    if (ns.getHackingLevel() >= 20) {
+    if (ns.getHackingLevel() >= 20 && ns.getServer("home").maxRam >= 2048) {
       if (!ns.isRunning(eventHackingV2, "home")) {
         if (ns.isRunning(hubHacking, "home")) {
           ns.kill(hubHacking, "home");
