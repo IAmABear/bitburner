@@ -20,10 +20,6 @@ export async function main(ns: NS): Promise<void> {
       }
     } else {
       if (!ns.isRunning(hubHacking, "home")) {
-        if (ns.isRunning(eventHackingV2, "home")) {
-          ns.kill(eventHackingV2, "home");
-        }
-
         ns.exec(hubHacking, "home", undefined, ...ns.args);
       }
     }
