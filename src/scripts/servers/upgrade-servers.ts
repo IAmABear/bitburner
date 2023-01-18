@@ -4,7 +4,7 @@ import {
   preparingToUpgradeScriptPath,
   weakenScriptPath,
 } from "/scripts/utils/scriptPaths";
-import { long, short } from "/scripts/utils/timeoutTimes";
+import { long, short, skip } from "/scripts/utils/timeoutTimes";
 
 type ServerReadyForUpgrade = {
   hostname: string;
@@ -103,7 +103,7 @@ export async function main(ns: NS): Promise<void> {
             );
           }
         } else {
-          dynamicSleep = long;
+          dynamicSleep = serversReadyForUpgrade.length > 0 ? skip : long;
         }
       }
     }
