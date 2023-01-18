@@ -23,6 +23,12 @@ export default async (ns: NS, returnAmount = 1): Promise<Server[]> => {
         serverA.moneyMax / serverA.minDifficulty
     );
 
+  // The following server is really nice for early game although it might not
+  // have the highest return.
+  if (playerInfo.skills.hacking <= 500) {
+    hackableServers.unshift(ns.getServer("joesguns"));
+  }
+
   hackableServers.length = returnAmount;
 
   return hackableServers;
