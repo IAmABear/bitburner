@@ -35,5 +35,9 @@ export async function main(ns: NS): Promise<void> {
     );
   }
 
-  await ns.run("/scripts/hacking/event-hacking.js", undefined, "all");
+  if (ns.getServer("home").maxRam <= 3200) {
+    await ns.run("/scripts/hacking/event-based/v1.js", undefined, "all");
+  } else {
+    await ns.run("/scripts/hacking/event-hacking.js", undefined, "all");
+  }
 }
