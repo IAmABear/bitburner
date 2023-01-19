@@ -1,6 +1,7 @@
 import {
   growScriptPath,
   hackScriptPath,
+  preparingToUpgradeScriptPath,
   weakenScriptPath,
 } from "/scripts/utils/scriptPaths";
 import { long, short } from "/scripts/utils/timeoutTimes";
@@ -17,7 +18,12 @@ export async function main(ns: NS): Promise<void> {
 
       if (targetServer) {
         await ns.scp(
-          [hackScriptPath, growScriptPath, weakenScriptPath],
+          [
+            hackScriptPath,
+            growScriptPath,
+            weakenScriptPath,
+            preparingToUpgradeScriptPath,
+          ],
           targetServer
         );
       }
