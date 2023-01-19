@@ -13,8 +13,6 @@ export async function main(ns: NS): Promise<void> {
     });
     if (
       ns.getHackingLevel() >= 20 &&
-      ns.getServer("home").maxRam >= 3200 &&
-      ns.getPurchasedServers().length >= 20 &&
       ghostServers.filter(
         (server: string) => ns.getServer(server).maxRam >= 1024
       ).length > 2
