@@ -4,7 +4,7 @@ import {
   preparingToUpgradeScriptPath,
   weakenScriptPath,
 } from "/scripts/utils/scriptPaths";
-import { long, short } from "/scripts/utils/timeoutTimes";
+import { long, skip } from "/scripts/utils/timeoutTimes";
 
 let dynamicSleep = long;
 export async function main(ns: NS): Promise<void> {
@@ -13,7 +13,7 @@ export async function main(ns: NS): Promise<void> {
 
   while ((await ns.getPurchasedServerLimit()) >= i) {
     if (ns.getPurchasedServerCost(ram) < ns.getServerMoneyAvailable("home")) {
-      dynamicSleep = short;
+      dynamicSleep = skip;
       const targetServer = await ns.purchaseServer("ghost-" + ram, ram);
 
       if (targetServer) {
