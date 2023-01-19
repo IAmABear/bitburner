@@ -1,3 +1,4 @@
+import getServers from "/scripts/utils/getServers";
 import { long } from "/scripts/utils/timeoutTimes";
 
 const eventHackingV1 = "/scripts/hacking/event-based/v1.js";
@@ -5,10 +6,18 @@ const eventHackingV2 = "/scripts/hacking/event-based/v2.js";
 
 export async function main(ns: NS): Promise<void> {
   while (true) {
+    const ghostServers = await getServers(ns, {
+      includeGhost: true,
+      onlyGhost: true,
+      includeHome: false,
+    });
     if (
       ns.getHackingLevel() >= 20 &&
       ns.getServer("home").maxRam >= 3200 &&
-      ns.getPurchasedServers().length >= 20
+      ns.getPurchasedServers().length >= 20 &&
+      ghostServers.filter(
+        (server: string) => ns.getServer(server).maxRam >= 1024
+      ).length > 2
     ) {
       if (!ns.isRunning(eventHackingV2, "home", ...ns.args)) {
         if (ns.isRunning(eventHackingV1, "home", ...ns.args)) {
