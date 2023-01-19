@@ -354,7 +354,8 @@ let currentlyUsedBatchServers: string[] = [];
 const updateBatchableServers = async (
   ns: NS,
   servers: string[],
-  queueManager: QueueManager
+  queueManager: QueueManager,
+  forceRun?: boolean
 ) => {
   const serversToTrigger = await batchableServers(ns, queueManager);
 
@@ -363,8 +364,10 @@ const updateBatchableServers = async (
   );
   currentlyUsedBatchServers = serversToTrigger;
 
-  for (let index = 0; index < newServers.length; index++) {
-    const batchableServer = newServers[index];
+  const newlyToTriggerServers = forceRun ? serversToTrigger : newServers;
+
+  for (let index = 0; index < newlyToTriggerServers.length; index++) {
+    const batchableServer = newlyToTriggerServers[index];
 
     await weakenServer(
       ns,
@@ -411,7 +414,7 @@ export async function main(ns: NS): Promise<void> {
     const startHacking = performance.now();
 
     if (events.length === 0) {
-      await updateBatchableServers(ns, servers, queueManager);
+      await updateBatchableServers(ns, servers, queueManager, true);
     } else {
       for (let index = 0; index < events.length; index++) {
         const event = events[index];
