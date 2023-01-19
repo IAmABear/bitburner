@@ -6,8 +6,9 @@ const eventHackingV2 = "/scripts/hacking/event-based/v2.js";
 export async function main(ns: NS): Promise<void> {
   while (true) {
     if (
-      (ns.getHackingLevel() >= 20 && ns.getServer("home").maxRam >= 2048) ||
-      (ns.getHackingLevel() >= 20 && ns.getPurchasedServers().length >= 20)
+      ns.getHackingLevel() >= 20 &&
+      ns.getServer("home").maxRam >= 3200 &&
+      ns.getPurchasedServers().length >= 20
     ) {
       if (!ns.isRunning(eventHackingV2, "home")) {
         if (ns.isRunning(eventHackingV1, "home")) {
