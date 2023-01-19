@@ -10,6 +10,7 @@ import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
 import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
 import { Server } from "/../NetscriptDefinitions";
 import QueueManager from "/scripts/utils/queueManager";
+import serversToHack from "/scripts/utils/serversToHack";
 
 let executionTimeHacking = 0;
 let previousBatchResultsAbleToSupport = 1;
@@ -22,31 +23,10 @@ type ThreadsNeeded = {
 };
 
 const batchableServers = async (ns: NS, queueManger: QueueManager) => {
-  const allServers = await getServers(ns, {
-    includeHome: false,
-    includeGhost: false,
-  });
-  const serversInfo = allServers.map((server: string) => ns.getServer(server));
-  const idealServers = serversInfo
-    .filter((server: Server) => server.moneyMax !== 0 && server.hasAdminRights)
-    .filter(
-      (server: Server) =>
-        server.requiredHackingSkill <= ns.getHackingLevel() / 3
-    )
-    .sort(
-      (firstServer: Server, secondServer: Server) =>
-        secondServer.moneyMax - firstServer.moneyMax &&
-        secondServer.serverGrowth - firstServer.serverGrowth
-    );
+  const idealServers = await serversToHack(ns, 1);
 
   const withinHackingLevelRange =
-    idealServers.length > 0
-      ? idealServers
-      : [
-          serversInfo.find(
-            (server: Server) => server.hostname === "n00dles"
-          ) as Server,
-        ];
+    idealServers.length > 0 ? idealServers : [ns.getServer("n00dles")];
 
   const ghostServers = await getServers(ns, {
     includeHome: false,
