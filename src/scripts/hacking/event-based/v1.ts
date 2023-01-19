@@ -103,7 +103,9 @@ const batchableServers = async (ns: NS, queueManger: QueueManager) => {
     previousBatchResultsAbleToSupport = serversAbleToSupport;
   }
 
-  return withinHackingLevelRange.map((server: Server) => server.hostname);
+  return withinHackingLevelRange
+    .map((server: Server) => server.hostname)
+    .filter((serverName: string) => serverName);
 };
 
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
