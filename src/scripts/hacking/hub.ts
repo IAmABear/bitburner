@@ -58,7 +58,8 @@ export async function main(ns: NS): Promise<void> {
         continue;
       }
 
-      const isGhostServer = currentServer.includes("ghost-");
+      const isGhostServer =
+        currentServer.includes("ghost-") || currentServer.includes("home");
       const targetServer = isGhostServer ? avaibleServers[0] : currentServer;
       const moneyThresh = ns.getServerMaxMoney(targetServer) * 0.5;
       const securityThresh = ns.getServerMinSecurityLevel(targetServer) + 5;
