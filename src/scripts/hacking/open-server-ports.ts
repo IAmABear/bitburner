@@ -9,7 +9,7 @@ export async function main(ns: NS): Promise<void> {
     const server = servers[i];
 
     if (ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(server)) {
-      await crackOpenServer(ns, server, false);
+      await crackOpenServer(ns, server);
     }
   }
 }
