@@ -1,14 +1,13 @@
 import getWorkerServers from "/scripts/utils/getWorkerServers";
-import serversToHack from "/scripts/utils/serversToHack";
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
 
   const scriptPath = ns.args[0] as string;
-  const targatableServers = await serversToHack(ns);
+  const targatableServer = ns.args[1] as string;
 
-  if (targatableServers.length === 0) {
+  if (!targatableServer) {
     ns.tprint("No valid hackable servers found.");
     return;
   }
@@ -30,7 +29,7 @@ export async function main(ns: NS): Promise<void> {
       scriptPath,
       workerServer,
       workerServerPossibleThreadCount,
-      targatableServers[0].hostname,
+      targatableServer,
       0,
       (Math.random() + Date.now()).toString()
     );
