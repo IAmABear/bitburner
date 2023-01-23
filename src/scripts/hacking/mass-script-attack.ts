@@ -1,5 +1,6 @@
 import getWorkerServers from "/scripts/utils/getWorkerServers";
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
+import { short } from "/scripts/utils/timeoutTimes";
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
@@ -12,26 +13,32 @@ export async function main(ns: NS): Promise<void> {
     return;
   }
 
-  const workerServers = await getWorkerServers(ns, {
-    includeHome:
-      (ns.args[0] as string) === "home" || (ns.args[0] as string) === "all",
-    includeHackableServers: (ns.args[0] as string) === "all",
-  });
+  while (true) {
+    const workerServers = await getWorkerServers(ns, {
+      includeHome:
+        (ns.args[2] as string) === "home" || (ns.args[2] as string) === "all",
+      includeHackableServers: (ns.args[2] as string) === "all",
+    });
 
-  workerServers.forEach((workerServer: string) => {
-    const workerServerPossibleThreadCount = getPossibleThreadCount(
-      ns,
-      workerServer,
-      scriptPath
-    );
+    workerServers.forEach((workerServer: string) => {
+      const workerServerPossibleThreadCount = getPossibleThreadCount(
+        ns,
+        workerServer,
+        scriptPath
+      );
 
-    ns.exec(
-      scriptPath,
-      workerServer,
-      workerServerPossibleThreadCount,
-      targatableServer,
-      0,
-      (Math.random() + Date.now()).toString()
-    );
-  });
+      if (workerServerPossibleThreadCount) {
+        ns.exec(
+          scriptPath,
+          workerServer,
+          workerServerPossibleThreadCount,
+          targatableServer,
+          0,
+          (Math.random() + Date.now()).toString()
+        );
+      }
+    });
+
+    await ns.sleep(short);
+  }
 }
