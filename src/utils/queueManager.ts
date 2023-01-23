@@ -1,3 +1,5 @@
+import { Player, Server } from "/../NetscriptDefinitions";
+
 type BatchStatus = "hackable" | "fullyGrown" | "fullyHacked" | "needsGrowing";
 export type QueueEvent = {
   id: number;
@@ -6,6 +8,10 @@ export type QueueEvent = {
   timeScriptsDone: number;
   script: string;
   threads: number;
+  effects?: {
+    serverStateAfterExecution: Server;
+    playerStateAfterExecution: Player;
+  };
 };
 
 export default class EventManager {

@@ -1,7 +1,8 @@
-import getThreads from "/utils/getThreads";
-import QueueManger, { QueueEvent } from "/utils/queueManager";
+import getThreads from "utils/getThreads";
+import QueueManger, { QueueEvent } from "utils/queueManager";
 import config from "config";
-import getPossibleThreadCount from "/utils/getPossibleThreadCount";
+import getPossibleThreadCount from "utils/getPossibleThreadCount";
+import calculateEffects from "utils/calculateEffects";
 
 export type BatchStatus =
   | "hackable"
@@ -40,6 +41,7 @@ export default (
           config.timeouts.short,
         script: scriptPath,
         threads: 0,
+        effects: event.effects,
       });
 
       queueManager.removeEvent(event.id);
@@ -100,6 +102,9 @@ export default (
             config.timeouts.short,
           script: scriptPath,
           threads: 0,
+          effects: ns.fileExists("Formulas.exe")
+            ? calculateEffects(ns, scriptPath, threadsNeeded, event)
+            : undefined,
         });
       }
 
