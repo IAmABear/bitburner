@@ -8,10 +8,10 @@ export async function main(ns: NS): Promise<void> {
 
   const gangInfo = ns.gang.getGangInformation();
   ns.print(gangInfo);
-<<<<<<< HEAD
-=======
-  const preferredTaskType = ns.args[0] as string;
->>>>>>> 2daf83c (Fix gang check if hacking or not)
+
+  if (ns.scriptRunning("/scripts/gangs/recruit", "home")) {
+    ns.exec("/scripts/gangs/recruit", "home");
+  }
 
   const tasks = ns.gang
     .getTaskNames()
