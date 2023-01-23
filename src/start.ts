@@ -6,8 +6,8 @@ import {
 } from "/scripts/utils/scriptPaths";
 
 export async function main(ns: NS): Promise<void> {
-  if (!ns.isRunning("/scripts/hacking/server-auto-hack.js", "home")) {
-    await ns.run("/scripts/hacking/server-auto-hack.js");
+  if (!ns.isRunning("/scripts/servers/server-auto-hack.js", "home")) {
+    await ns.run("/scripts/servers/server-auto-hack.js");
   }
 
   if (!ns.isRunning("/scripts/servers/auto-buy.js", "home")) {
