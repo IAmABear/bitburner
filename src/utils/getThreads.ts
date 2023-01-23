@@ -10,15 +10,15 @@ const getBasicThreadCalculation = (ns: NS, event: QueueEvent) => {
   }
 
   if (event.status === "hackable") {
-    return Math.floor(optimalThreads[event.server].hackThreads / 4);
+    return Math.floor(serverThreads.hackThreads / 4);
   }
 
   if (event.status === "needsGrowing") {
-    return Math.ceil(optimalThreads[event.server].growThreads);
+    return Math.ceil(serverThreads.growThreads);
   }
 
   if (event.status === "fullyGrown" || event.status === "fullyHacked") {
-    return Math.ceil(optimalThreads[event.server].weakenThreads);
+    return Math.ceil(serverThreads.weakenThreads);
   }
 
   ns.tprint(`${event.status} returning 0?`);
