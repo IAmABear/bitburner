@@ -1,11 +1,6 @@
 import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
 import getServers from "/scripts/utils/getServers.js";
-import {
-  growScriptPath,
-  weakenScriptPath,
-  hackScriptPath,
-} from "/scripts/utils/scriptPaths.js";
-import { short } from "/scripts/utils/timeoutTimes";
+import config from "config";
 
 const runScript = (
   ns: NS,
@@ -71,20 +66,35 @@ export async function main(ns: NS): Promise<void> {
       const isHackThresholdReached = !isGrowThresholdReached;
 
       if (isHackThresholdReached) {
-        runScript(ns, currentServer, hackScriptPath, targetServer);
+        runScript(
+          ns,
+          currentServer,
+          config.scriptPaths.hackScriptPath,
+          targetServer
+        );
       }
 
       if (isWeakenThresholdReached) {
-        runScript(ns, currentServer, weakenScriptPath, targetServer);
+        runScript(
+          ns,
+          currentServer,
+          config.scriptPaths.weakenScriptPath,
+          targetServer
+        );
       }
 
       if (isGrowThresholdReached) {
-        runScript(ns, currentServer, growScriptPath, targetServer);
+        runScript(
+          ns,
+          currentServer,
+          config.scriptPaths.growScriptPath,
+          targetServer
+        );
       }
 
       avaibleServers.shift();
 
-      await ns.sleep(short);
+      await ns.sleep(config.timeouts.short);
     }
   }
 }

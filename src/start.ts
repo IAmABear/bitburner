@@ -1,9 +1,4 @@
-import {
-  growScriptPath,
-  hackScriptPath,
-  preparingToUpgradeScriptPath,
-  weakenScriptPath,
-} from "/scripts/utils/scriptPaths";
+import config from "config";
 
 export async function main(ns: NS): Promise<void> {
   if (!ns.isRunning("/scripts/servers/server-auto-hack.js", "home")) {
@@ -26,10 +21,10 @@ export async function main(ns: NS): Promise<void> {
 
     await ns.scp(
       [
-        hackScriptPath,
-        growScriptPath,
-        weakenScriptPath,
-        preparingToUpgradeScriptPath,
+        config.scriptPaths.hackScriptPath,
+        config.scriptPaths.growScriptPath,
+        config.scriptPaths.weakenScriptPath,
+        config.scriptPaths.preparingToUpgradeScriptPath,
       ],
       targetServer
     );

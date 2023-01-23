@@ -1,20 +1,14 @@
 import crackOpenServer from "/scripts/utils/crackOpenServer";
 import scanServer from "/scripts/utils/scanServer";
-import {
-  growScriptPath,
-  weakenScriptPath,
-  hackScriptPath,
-  preparingToUpgradeScriptPath,
-} from "/scripts/utils/scriptPaths.js";
-import { medium } from "/scripts/utils/timeoutTimes";
+import config from "config";
 
 async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {
   const res = await ns.scp(
     [
-      hackScriptPath,
-      growScriptPath,
-      weakenScriptPath,
-      preparingToUpgradeScriptPath,
+      config.scriptPaths.hackScriptPath,
+      config.scriptPaths.growScriptPath,
+      config.scriptPaths.weakenScriptPath,
+      config.scriptPaths.preparingToUpgradeScriptPath,
     ],
     server
   );
@@ -43,6 +37,6 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    await ns.sleep(medium);
+    await ns.sleep(config.timeouts.medium);
   }
 }

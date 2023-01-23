@@ -1,10 +1,4 @@
-import {
-  growScriptPath,
-  hackScriptPath,
-  preparingToUpgradeScriptPath,
-  weakenScriptPath,
-} from "/scripts/utils/scriptPaths";
-import { long, short, skip } from "/scripts/utils/timeoutTimes";
+import config from "config";
 
 type ServerReadyForUpgrade = {
   hostname: string;
@@ -12,7 +6,7 @@ type ServerReadyForUpgrade = {
   upgradeCost: number;
 };
 
-let dynamicSleep = long;
+let dynamicSleep = config.timeouts.long;
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
   let serversReadyForUpgrade: ServerReadyForUpgrade[] = [];
@@ -33,9 +27,18 @@ export async function main(ns: NS): Promise<void> {
 
         if (
           serverReadyForUpgrade &&
-          !ns.scriptRunning(hackScriptPath, serverReadyForUpgrade.hostname) &&
-          !ns.scriptRunning(weakenScriptPath, serverReadyForUpgrade.hostname) &&
-          !ns.scriptRunning(growScriptPath, serverReadyForUpgrade.hostname)
+          !ns.scriptRunning(
+            config.scriptPaths.hackScriptPath,
+            serverReadyForUpgrade.hostname
+          ) &&
+          !ns.scriptRunning(
+            config.scriptPaths.weakenScriptPath,
+            serverReadyForUpgrade.hostname
+          ) &&
+          !ns.scriptRunning(
+            config.scriptPaths.growScriptPath,
+            serverReadyForUpgrade.hostname
+          )
         ) {
           if (ns.serverExists(serverReadyForUpgrade.hostname)) {
             await ns.killall(serverReadyForUpgrade.hostname);
@@ -52,10 +55,10 @@ export async function main(ns: NS): Promise<void> {
 
             await ns.scp(
               [
-                hackScriptPath,
-                growScriptPath,
-                weakenScriptPath,
-                preparingToUpgradeScriptPath,
+                config.scriptPaths.hackScriptPath,
+                config.scriptPaths.growScriptPath,
+                config.scriptPaths.weakenScriptPath,
+                config.scriptPaths.preparingToUpgradeScriptPath,
               ],
               newServerName
             );
@@ -66,7 +69,7 @@ export async function main(ns: NS): Promise<void> {
               server.hostname !== serverReadyForUpgrade.hostname
           );
 
-          dynamicSleep = short;
+          dynamicSleep = config.timeouts.short;
         }
       }
     } else {
@@ -103,7 +106,10 @@ export async function main(ns: NS): Promise<void> {
             );
           }
         } else {
-          dynamicSleep = serversReadyForUpgrade.length > 0 ? skip : long;
+          dynamicSleep =
+            serversReadyForUpgrade.length > 0
+              ? config.timeouts.skip
+              : config.timeouts.long;
         }
       }
     }

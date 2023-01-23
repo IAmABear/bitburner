@@ -1,5 +1,5 @@
 import getServers from "/scripts/utils/getServers";
-import { long } from "/scripts/utils/timeoutTimes";
+import config from "config";
 
 const eventHackingV1 = "/scripts/hacking/event-based/v1.js";
 const eventHackingV2 = "/scripts/hacking/event-based/v2.js";
@@ -32,6 +32,6 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    await ns.sleep(long);
+    await ns.sleep(config.timeouts.long);
   }
 }

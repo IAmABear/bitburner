@@ -1,4 +1,4 @@
-import { medium } from "/scripts/utils/timeoutTimes";
+import config from "config";
 
 const upgradeScriptPath = "/scripts/servers/upgrade-servers.js";
 const buyScriptPath = "/scripts/servers/buy-server.js";
@@ -21,6 +21,6 @@ export async function main(ns: NS): Promise<void> {
       ns.run(buyScriptPath);
     }
 
-    await ns.sleep(medium);
+    await ns.sleep(config.timeouts.medium);
   }
 }

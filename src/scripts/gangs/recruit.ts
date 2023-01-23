@@ -1,4 +1,4 @@
-import { long, short } from "/scripts/utils/timeoutTimes";
+import config from "config";
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
@@ -6,6 +6,10 @@ export async function main(ns: NS): Promise<void> {
   while (true) {
     ns.gang.recruitMember(`ghost-${Date.now()}`);
 
-    await ns.sleep(ns.gang.getMemberNames().length < 12 ? short : long);
+    await ns.sleep(
+      ns.gang.getMemberNames().length < 12
+        ? config.timeouts.short
+        : config.timeouts.long
+    );
   }
 }

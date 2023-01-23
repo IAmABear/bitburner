@@ -1,5 +1,5 @@
 import { GangTaskStats } from "/../NetscriptDefinitions";
-import { long } from "/scripts/utils/timeoutTimes";
+import config from "config";
 
 const levelThreshold = 300;
 
@@ -51,6 +51,6 @@ export async function main(ns: NS): Promise<void> {
       }
     });
 
-    await ns.sleep(long);
+    await ns.sleep(config.timeouts.long);
   }
 }
