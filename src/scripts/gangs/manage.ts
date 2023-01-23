@@ -52,10 +52,7 @@ export async function main(ns: NS): Promise<void> {
           isCriminalGang(gangType) ? "Train Combat" : "Train Hacking"
         );
       } else {
-        ns.gang.setMemberTask(
-          member,
-          isCriminalGang(gangType) ? prefferedTask.name : "Train Hacking"
-        );
+        ns.gang.setMemberTask(member, prefferedTask.name);
       }
     });
 
