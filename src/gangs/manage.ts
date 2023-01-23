@@ -8,6 +8,7 @@ export async function main(ns: NS): Promise<void> {
 
   const gangInfo = ns.gang.getGangInformation();
   ns.print(gangInfo);
+
   const tasks = ns.gang
     .getTaskNames()
     .map((taskName: string) => ns.gang.getTaskStats(taskName))
