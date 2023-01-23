@@ -1,23 +1,18 @@
 import { GangTaskStats } from "/../NetscriptDefinitions";
 import { long } from "/scripts/utils/timeoutTimes";
 
-const isCriminalGang = (type: string) => type === "criminal";
-const isHackingGang = (type: string) => type === "hacking";
 const levelThreshold = 300;
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
 
-  const gangType =
-    (ns.args[0] as string) !== "hacking" ? "criminal" : "hacking";
-  const preferredTaskType =
-    (ns.args[1] as string) !== "money" ? "respect" : "money";
+  const gangInfo = ns.gang.getGangInformation();
 
   const tasks = ns.gang
     .getTaskNames()
     .map((taskName: string) => ns.gang.getTaskStats(taskName))
     .filter((task: GangTaskStats) =>
-      isCriminalGang(gangType) ? task.isCombat : task.isHacking
+      gangInfo.isHacking ? task.isHacking : task.isCombat
     );
 
   while (true) {
@@ -37,19 +32,19 @@ export async function main(ns: NS): Promise<void> {
 
       if (
         ascResult &&
-        ((isCriminalGang(gangType) && ascResult.str >= 1.25) ||
-          (isHackingGang(gangType) && ascResult.hack >= 1.25))
+        ((gangInfo.isHacking && ascResult.str >= 1.25) ||
+          (gangInfo.isHacking && ascResult.hack >= 1.25))
       ) {
         ns.gang.ascendMember(member);
       }
 
       if (
-        (isCriminalGang(gangType) && memberInfo.str <= levelThreshold) ||
-        (isHackingGang(gangType) && memberInfo.hack <= levelThreshold)
+        (gangInfo.isHacking && memberInfo.str <= levelThreshold) ||
+        (gangInfo.isHacking && memberInfo.hack <= levelThreshold)
       ) {
         ns.gang.setMemberTask(
           member,
-          isCriminalGang(gangType) ? "Train Combat" : "Train Hacking"
+          gangInfo.isHacking ? "Train Combat" : "Train Hacking"
         );
       } else {
         ns.gang.setMemberTask(member, prefferedTask.name);
