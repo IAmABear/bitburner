@@ -142,7 +142,7 @@ export async function main(ns: NS): Promise<void> {
   );
 
   ns.write(
-    "optimalhreads.js",
+    "optimalThreads.js",
     JSON.stringify(`export default ${JSON.stringify(results)}`),
     "w"
   );
