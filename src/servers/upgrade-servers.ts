@@ -10,12 +10,14 @@ type ServerReadyForUpgrade = {
 let dynamicSleep = config.timeouts.long;
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
+  if ((ns.args[0] as string) === "") {
+    ns.tprint("No servers given to upgrade, exiting...");
+  }
+  const servers: string[] = (ns.args[0] as string).split(",");
   let serversReadyForUpgrade: ServerReadyForUpgrade[] = [];
 
   while (true) {
-    const servers = await ns.getPurchasedServers();
-    ns.print(serversReadyForUpgrade.length);
-    if (serversReadyForUpgrade.length > 0) {
+    if (serversReadyForUpgrade.length) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for (const serverReadyForUpgradeIndex in serversReadyForUpgrade) {
         const serverReadyForUpgrade =
@@ -28,6 +30,7 @@ export async function main(ns: NS): Promise<void> {
 
         if (
           serverReadyForUpgrade &&
+          ns.serverExists(serverReadyForUpgrade.hostname) &&
           !ns.scriptRunning(
             config.scriptPaths.hackScriptPath,
             serverReadyForUpgrade.hostname
@@ -41,38 +44,37 @@ export async function main(ns: NS): Promise<void> {
             serverReadyForUpgrade.hostname
           )
         ) {
-          if (ns.serverExists(serverReadyForUpgrade.hostname)) {
-            await ns.killall(serverReadyForUpgrade.hostname);
-            await ns.deleteServer(serverReadyForUpgrade.hostname);
+          ns.killall(serverReadyForUpgrade.hostname);
+          if (
+            ns.upgradePurchasedServer(
+              serverReadyForUpgrade.hostname,
+              serverReadyForUpgrade.newRam
+            )
+          ) {
+            ns.print(
+              `Upraded ${serverReadyForUpgrade.hostname} to ${serverReadyForUpgrade.newRam} ram.`
+            );
+            await copyScriptFilesToServer(ns, serverReadyForUpgrade.hostname);
 
-            const newServerName = await ns.purchaseServer(
-              "ghost-" + serverReadyForUpgrade.newRam,
-              Number(serverReadyForUpgrade.newRam)
+            serversReadyForUpgrade = serversReadyForUpgrade.filter(
+              (server: ServerReadyForUpgrade) =>
+                server.hostname !== serverReadyForUpgrade.hostname
             );
 
-            if (!(await ns.serverExists(newServerName))) {
-              continue;
-            }
-
-            await copyScriptFilesToServer(ns, newServerName);
+            dynamicSleep = config.timeouts.short;
+          } else {
+            ns.print(`Upgrade of ${serverReadyForUpgrade.hostname} failed.`);
           }
-
-          serversReadyForUpgrade = serversReadyForUpgrade.filter(
-            (server: ServerReadyForUpgrade) =>
-              server.hostname !== serverReadyForUpgrade.hostname
-          );
-
-          dynamicSleep = config.timeouts.short;
         }
       }
     } else {
       for (const serverIndex in servers) {
         const targetServer = servers[serverIndex];
-        if (!(await ns.serverExists(targetServer))) {
+        if (!ns.serverExists(targetServer)) {
           continue;
         }
-        const targetServerCurrentRam = await ns.getServerMaxRam(targetServer);
-        const maxPossibleRamServer = await ns.getPurchasedServerMaxRam();
+        const targetServerCurrentRam = ns.getServerMaxRam(targetServer);
+        const maxPossibleRamServer = ns.getPurchasedServerMaxRam();
         const newTargetRam = targetServerCurrentRam * 2;
 
         const upgradeCost = ns.getPurchasedServerCost(newTargetRam);

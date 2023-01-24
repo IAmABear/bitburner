@@ -11,4 +11,8 @@ export default {
     hackScriptPath: "/serverScripts/hack.js",
     preparingToUpgradeScriptPath: "/serverScripts/preparing-to-upgrade.js",
   },
+  namingConventions: {
+    ghostServersPrefix: "ghost",
+    gangMember: "banger",
+  },
 };

@@ -1,3 +1,4 @@
+import config from "config";
 const scannedServers: string[] = [];
 
 const scanServer = async (ns: NS, server: string): Promise<string[]> => {
@@ -7,7 +8,7 @@ const scanServer = async (ns: NS, server: string): Promise<string[]> => {
     const serverFound = serversFound[serverFoundIndex];
     if (
       !scannedServers.includes(serverFound) &&
-      !serverFound.includes("ghost-")
+      !serverFound.includes(config.namingConventions.ghostServersPrefix)
     ) {
       if (!serverFound.includes("home")) {
         scannedServers.push(serverFound);
