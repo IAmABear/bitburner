@@ -44,7 +44,7 @@ export async function main(ns: NS): Promise<void> {
             serverReadyForUpgrade.hostname
           )
         ) {
-          await ns.killall(serverReadyForUpgrade.hostname);
+          ns.killall(serverReadyForUpgrade.hostname);
           if (
             ns.upgradePurchasedServer(
               serverReadyForUpgrade.hostname,
@@ -70,11 +70,11 @@ export async function main(ns: NS): Promise<void> {
     } else {
       for (const serverIndex in servers) {
         const targetServer = servers[serverIndex];
-        if (!(await ns.serverExists(targetServer))) {
+        if (!ns.serverExists(targetServer)) {
           continue;
         }
-        const targetServerCurrentRam = await ns.getServerMaxRam(targetServer);
-        const maxPossibleRamServer = await ns.getPurchasedServerMaxRam();
+        const targetServerCurrentRam = ns.getServerMaxRam(targetServer);
+        const maxPossibleRamServer = ns.getPurchasedServerMaxRam();
         const newTargetRam = targetServerCurrentRam * 2;
 
         const upgradeCost = ns.getPurchasedServerCost(newTargetRam);
