@@ -1,6 +1,6 @@
-import getWorkerServers from "/scripts/utils/getWorkerServers";
-import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
-import { short } from "/scripts/utils/timeoutTimes";
+import getWorkerServers from "/utils/getWorkerServers";
+import getPossibleThreadCount from "/utils/getPossibleThreadCount";
+import config from "config";
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
@@ -39,6 +39,6 @@ export async function main(ns: NS): Promise<void> {
       }
     });
 
-    await ns.sleep(short);
+    await ns.sleep(config.timeouts.short);
   }
 }

@@ -1,5 +1,5 @@
 import { Player, Server } from "/../NetscriptDefinitions";
-import getServers from "/scripts/utils/getServers";
+import getServers from "/utils/getServers";
 
 type ThreadsNeeded = {
   hackThreads: number;

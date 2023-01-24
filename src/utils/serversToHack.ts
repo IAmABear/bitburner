@@ -1,5 +1,5 @@
 import { Server } from "/../NetscriptDefinitions";
-import getServers from "/scripts/utils/getServers";
+import getServers from "/utils/getServers";
 
 export default async (ns: NS, returnAmount = 1): Promise<Server[]> => {
   const playerInfo = ns.getPlayer();

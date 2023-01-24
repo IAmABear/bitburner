@@ -1,14 +1,9 @@
-import QueueManger, { QueueEvent } from "/scripts/utils/queueManager";
-import {
-  growScriptPath,
-  hackScriptPath,
-  weakenScriptPath,
-} from "/scripts/utils/scriptPaths";
-import { medium, skip } from "/scripts/utils/timeoutTimes";
-import getWorkerServers from "/scripts/utils/getWorkerServers";
-import runScript, { BatchStatus } from "/scripts/utils/runScript";
-import prepServer from "/scripts/utils/prepServer";
-import serversToHack from "/scripts/utils/serversToHack";
+import QueueManger, { QueueEvent } from "/utils/queueManager";
+import config from "/config";
+import getWorkerServers from "/utils/getWorkerServers";
+import runScript, { BatchStatus } from "/utils/runScript";
+import prepServer from "/utils/prepServer";
+import serversToHack from "/utils/serversToHack";
 
 const getCompletionStatus = (
   ns: NS,
@@ -20,21 +15,21 @@ const getCompletionStatus = (
       return {
         status: "fullyHacked",
         scriptCompletionTime: Math.ceil(ns.getHackTime(event.server)),
-        script: hackScriptPath,
+        script: config.scriptPaths.hackScriptPath,
       };
       break;
     case "needsGrowing":
       return {
         status: "fullyGrown",
         scriptCompletionTime: Math.ceil(ns.getGrowTime(event.server)),
-        script: growScriptPath,
+        script: config.scriptPaths.growScriptPath,
       };
       break;
     default:
       return {
         status: event.status === "fullyGrown" ? "hackable" : "needsGrowing",
         scriptCompletionTime: Math.ceil(ns.getWeakenTime(event.server)),
-        script: weakenScriptPath,
+        script: config.scriptPaths.weakenScriptPath,
       };
       break;
   }
@@ -63,7 +58,7 @@ export async function main(ns: NS): Promise<void> {
     });
     if (events.length === 0) {
       void prepServer(ns, targetServer.hostname, workerServers, queueManager);
-      await ns.sleep(medium);
+      await ns.sleep(config.timeouts.medium);
     } else {
       for (let index = 0; index < events.length; index++) {
         const event = events[index];
@@ -89,6 +84,6 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    await ns.sleep(skip);
+    await ns.sleep(config.timeouts.skip);
   }
 }

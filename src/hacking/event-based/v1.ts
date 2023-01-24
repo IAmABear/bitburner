@@ -1,16 +1,11 @@
-import getServers from "/scripts/utils/getServers.js";
-import {
-  growScriptPath,
-  weakenScriptPath,
-  hackScriptPath,
-} from "/scripts/utils/scriptPaths.js";
-import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
-import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
-import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import { long, medium, short, skip } from "/scripts/utils/timeoutTimes";
+import getServers from "/utils/getServers.js";
+import getPossibleThreadCount from "/utils/getPossibleThreadCount";
+import threadsNeededToWeaken from "/utils/threadsNeededToWeaken";
+import threadsNeededToGrow from "/utils/threadsNeededToGrow";
+import config from "config";
 import { Server } from "/../NetscriptDefinitions";
-import QueueManager from "/scripts/utils/queueManager";
-import serversToHack from "/scripts/utils/serversToHack";
+import QueueManager from "/utils/queueManager";
+import serversToHack from "/utils/serversToHack";
 
 let executionTimeHacking = 0;
 let previousBatchResultsAbleToSupport = 1;
@@ -71,7 +66,9 @@ const batchableServers = async (ns: NS, queueManger: QueueManager) => {
       return serverAmount;
     }, 0) || 1;
 
-  const executionThreshold = medium + previousBatchResultsAbleToSupport * short;
+  const executionThreshold =
+    config.timeouts.medium +
+    previousBatchResultsAbleToSupport * config.timeouts.short;
 
   if (executionTimeHacking >= executionThreshold) {
     // Set new support
@@ -141,9 +138,9 @@ const weakenServer = (
     ns,
     servers,
     event,
-    weakenScriptPath,
+    config.scriptPaths.weakenScriptPath,
     calculateThreadsNeededToWeaken,
-    event.timeScriptsDone - Date.now() + short,
+    event.timeScriptsDone - Date.now() + config.timeouts.short,
     {
       status: event.status === "fullyGrown" ? "hackable" : "needsGrowing",
       scriptCompletionTime: serverWeakenTime,
@@ -166,9 +163,9 @@ const growServer = (
     ns,
     servers,
     event,
-    growScriptPath,
+    config.scriptPaths.growScriptPath,
     threadsNeededToGrow,
-    event.timeScriptsDone - Date.now() + short,
+    event.timeScriptsDone - Date.now() + config.timeouts.short,
     {
       status: "fullyGrown",
       scriptCompletionTime: growthTime,
@@ -199,9 +196,9 @@ const hackServer = (
     ns,
     servers,
     event,
-    hackScriptPath,
+    config.scriptPaths.hackScriptPath,
     threadsNeededToHack,
-    event.timeScriptsDone - Date.now() - hackTime + short,
+    event.timeScriptsDone - Date.now() - hackTime + config.timeouts.short,
     {
       status: "fullyHacked",
       scriptCompletionTime: hackTime,
@@ -228,11 +225,13 @@ const runScript = async (
   runOnOneMachine?: boolean,
   retry = 0
 ) => {
-  if (timeBeforeScriptCanRun >= short) {
-    return await ns.sleep(skip);
+  if (timeBeforeScriptCanRun >= config.timeouts.short) {
+    return await ns.sleep(config.timeouts.skip);
   }
 
-  await ns.sleep(timeBeforeScriptCanRun >= 0 ? timeBeforeScriptCanRun : short);
+  await ns.sleep(
+    timeBeforeScriptCanRun >= 0 ? timeBeforeScriptCanRun : config.timeouts.short
+  );
   let scriptsActive = 0;
   const threadsNeeded = overflowThreadsNeeded
     ? overflowThreadsNeeded
@@ -254,7 +253,7 @@ const runScript = async (
     queueManager.removeEvent(event.id);
 
     scriptsActive = 0;
-    return ns.sleep(skip);
+    return ns.sleep(config.timeouts.skip);
   }
 
   for (let index = 0; index < servers.length; index++) {
@@ -309,7 +308,7 @@ const runScript = async (
   }
 
   if (scriptsActive !== 0) {
-    await ns.sleep(long);
+    await ns.sleep(config.timeouts.long);
 
     await runScript(
       ns,
@@ -346,7 +345,7 @@ const runScript = async (
     }
   }
 
-  return ns.sleep(short);
+  return ns.sleep(config.timeouts.short);
 };
 
 let currentlyUsedBatchServers: string[] = [];
@@ -377,14 +376,14 @@ const updateBatchableServers = async (
         server: batchableServer,
         status: "needsGrowing",
         timeScriptsDone: 0,
-        script: weakenScriptPath,
+        script: config.scriptPaths.weakenScriptPath,
         threads: 0,
       },
       queueManager
     );
   }
 
-  return ns.sleep(short);
+  return ns.sleep(config.timeouts.short);
 };
 
 export async function main(ns: NS): Promise<void> {
@@ -442,6 +441,6 @@ export async function main(ns: NS): Promise<void> {
     executionTimeHacking = performance.now() - startHacking;
     await updateBatchableServers(ns, servers, queueManager);
 
-    await ns.sleep(short);
+    await ns.sleep(config.timeouts.short);
   }
 }

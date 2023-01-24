@@ -1,9 +1,8 @@
-import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
-import QueueManger from "/scripts/utils/queueManager";
-import { growScriptPath, weakenScriptPath } from "/scripts/utils/scriptPaths";
-import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
-import { long, short } from "/scripts/utils/timeoutTimes";
+import getPossibleThreadCount from "/utils/getPossibleThreadCount";
+import QueueManger from "/utils/queueManager";
+import threadsNeededToGrow from "/utils/threadsNeededToGrow";
+import threadsNeededToWeaken from "/utils/threadsNeededToWeaken";
+import config from "config";
 
 const growThreadSecurityIncrease = 0.004;
 const weakenThreadsecurityDecrease = 0.05;
@@ -35,7 +34,7 @@ export default (
     const workerServerPossibleThreadCount = getPossibleThreadCount(
       ns,
       workerServer,
-      weakenScriptPath
+      config.scriptPaths.weakenScriptPath
     );
 
     if (
@@ -44,7 +43,7 @@ export default (
     ) {
       if (threadsNeededToWeakenToMin > 0) {
         ns.exec(
-          weakenScriptPath,
+          config.scriptPaths.weakenScriptPath,
           workerServer,
           threadsNeededToWeakenToMin,
           batchableServer,
@@ -52,7 +51,7 @@ export default (
           (Math.random() + Date.now()).toString()
         );
       }
-      initialWeakenDone = Date.now() + weakenTime + long;
+      initialWeakenDone = Date.now() + weakenTime + config.timeouts.long;
     }
 
     if (
@@ -63,7 +62,7 @@ export default (
 
       if (threadsNeededToGrowToMax > 0) {
         ns.exec(
-          growScriptPath,
+          config.scriptPaths.growScriptPath,
           workerServer,
           threadsNeededToGrowToMax,
           batchableServer,
@@ -74,18 +73,22 @@ export default (
 
       initialGrowDone =
         timeTillScriptCanRun <= 0
-          ? Date.now() + growthTime + short
-          : Date.now() + timeTillScriptCanRun + growthTime + short;
+          ? Date.now() + growthTime + config.timeouts.short
+          : Date.now() +
+            timeTillScriptCanRun +
+            growthTime +
+            config.timeouts.short;
     }
 
     if (
       initialGrowDone &&
       workerServerPossibleThreadCount >= threadsNeededToCompensateGrowSecurity
     ) {
-      const timeTillScriptCanRun = initialGrowDone - Date.now() + short;
+      const timeTillScriptCanRun =
+        initialGrowDone - Date.now() + config.timeouts.short;
       if (threadsNeededToCompensateGrowSecurity > 0) {
         ns.exec(
-          weakenScriptPath,
+          config.scriptPaths.weakenScriptPath,
           workerServer,
           threadsNeededToCompensateGrowSecurity,
           batchableServer,
@@ -100,8 +103,11 @@ export default (
           server: batchableServer,
           status: "hackable",
           timeScriptsDone:
-            Date.now() + timeTillScriptCanRun + weakenTime + long,
-          script: weakenScriptPath,
+            Date.now() +
+            timeTillScriptCanRun +
+            weakenTime +
+            config.timeouts.long,
+          script: config.scriptPaths.weakenScriptPath,
           threads: 0,
         });
       }

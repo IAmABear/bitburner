@@ -1,8 +1,7 @@
-import getThreads from "/scripts/utils/getThreads";
-import QueueManger, { QueueEvent } from "/scripts/utils/queueManager";
-import { short } from "/scripts/utils/timeoutTimes";
-import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
-import { preparingToUpgradeScriptPath } from "/scripts/utils/scriptPaths";
+import getThreads from "/utils/getThreads";
+import QueueManger, { QueueEvent } from "/utils/queueManager";
+import config from "config";
+import getPossibleThreadCount from "/utils/getPossibleThreadCount";
 
 export type BatchStatus =
   | "hackable"
@@ -38,7 +37,7 @@ export default (
           Date.now() +
           scriptTimeoutBeforeRunning +
           onSuccessEvent.scriptCompletionTime +
-          short,
+          config.timeouts.short,
         script: scriptPath,
         threads: 0,
       });
@@ -59,7 +58,10 @@ export default (
 
     if (
       workerServerPossibleThreadCount >= threadsNeeded &&
-      !ns.scriptRunning(preparingToUpgradeScriptPath, workerServer)
+      !ns.scriptRunning(
+        config.scriptPaths.preparingToUpgradeScriptPath,
+        workerServer
+      )
     ) {
       ns.exec(
         scriptPath,
@@ -75,12 +77,12 @@ export default (
       //   "run-script-events.js",
       //   JSON.stringify({
       //     id: (Math.random() + Date.now()).toString(),
-      //     content: scriptPath.split("/scripts/serverScripts/")[1],
+      //     content: scriptPath.split("/serverScripts/")[1],
       //     start:
       //       Date.now() +
       //       scriptTimeoutBeforeRunning +
       //       onSuccessEvent.scriptCompletionTime +
-      //       short,
+      //       config.timeouts.short,
       //   }),
       //   "a"
       // );
@@ -95,7 +97,7 @@ export default (
             Date.now() +
             scriptTimeoutBeforeRunning +
             onSuccessEvent.scriptCompletionTime +
-            short,
+            config.timeouts.short,
           script: scriptPath,
           threads: 0,
         });
