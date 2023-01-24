@@ -9,6 +9,6 @@ export default {
     growScriptPath: "/serverScripts/grow.js",
     weakenScriptPath: "/serverScripts/weaken.js",
     hackScriptPath: "/serverScripts/hack.js",
-    preparingToUpgradeScriptPath: "/serverScripts/preparingToUpgrade.js",
+    preparingToUpgradeScriptPath: "/serverScripts/preparing-to-upgrade.js",
   },
 };
