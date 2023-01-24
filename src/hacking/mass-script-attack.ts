@@ -1,5 +1,5 @@
-import getWorkerServers from "/scripts/utils/getWorkerServers";
-import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
+import getWorkerServers from "/utils/getWorkerServers";
+import getPossibleThreadCount from "/utils/getPossibleThreadCount";
 import config from "config";
 
 export async function main(ns: NS): Promise<void> {

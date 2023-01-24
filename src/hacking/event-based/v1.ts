@@ -1,11 +1,11 @@
-import getServers from "/scripts/utils/getServers.js";
-import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
-import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
-import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
+import getServers from "/utils/getServers.js";
+import getPossibleThreadCount from "/utils/getPossibleThreadCount";
+import threadsNeededToWeaken from "/utils/threadsNeededToWeaken";
+import threadsNeededToGrow from "/utils/threadsNeededToGrow";
 import config from "config";
 import { Server } from "/../NetscriptDefinitions";
-import QueueManager from "/scripts/utils/queueManager";
-import serversToHack from "/scripts/utils/serversToHack";
+import QueueManager from "/utils/queueManager";
+import serversToHack from "/utils/serversToHack";
 
 let executionTimeHacking = 0;
 let previousBatchResultsAbleToSupport = 1;

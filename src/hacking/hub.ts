@@ -1,5 +1,5 @@
-import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
-import getServers from "/scripts/utils/getServers.js";
+import getPossibleThreadCount from "/utils/getPossibleThreadCount";
+import getServers from "/utils/getServers.js";
 import config from "config";
 
 const runScript = (

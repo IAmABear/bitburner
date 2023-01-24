@@ -1,5 +1,5 @@
-import crackOpenServer from "/scripts/utils/crackOpenServer";
-import scanServer from "/scripts/utils/scanServer";
+import crackOpenServer from "/utils/crackOpenServer";
+import scanServer from "/utils/scanServer";
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");

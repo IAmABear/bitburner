@@ -1,9 +1,9 @@
-import QueueManger, { QueueEvent } from "/scripts/utils/queueManager";
+import QueueManger, { QueueEvent } from "/utils/queueManager";
 import config from "/config";
-import getWorkerServers from "/scripts/utils/getWorkerServers";
-import runScript, { BatchStatus } from "/scripts/utils/runScript";
-import prepServer from "/scripts/utils/prepServer";
-import serversToHack from "/scripts/utils/serversToHack";
+import getWorkerServers from "/utils/getWorkerServers";
+import runScript, { BatchStatus } from "/utils/runScript";
+import prepServer from "/utils/prepServer";
+import serversToHack from "/utils/serversToHack";
 
 const getCompletionStatus = (
   ns: NS,

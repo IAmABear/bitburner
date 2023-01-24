@@ -1,4 +1,4 @@
-import serversToHack from "/scripts/utils/serversToHack";
+import serversToHack from "/utils/serversToHack";
 
 export async function main(ns: NS): Promise<void> {
   const servers = await serversToHack(ns, 3);

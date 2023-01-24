@@ -1,5 +1,5 @@
-import crackOpenServer from "/scripts/utils/crackOpenServer";
-import scanServer from "/scripts/utils/scanServer";
+import crackOpenServer from "/utils/crackOpenServer";
+import scanServer from "/utils/scanServer";
 import config from "config";
 
 async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {

@@ -1,4 +1,4 @@
-import getServers from "/scripts/utils/getServers";
+import getServers from "/utils/getServers";
 
 type WorkerServerOptions = {
   includeHome: boolean;

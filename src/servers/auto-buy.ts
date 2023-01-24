@@ -1,7 +1,7 @@
 import config from "config";
 
-const upgradeScriptPath = "/scripts/servers/upgrade-servers.js";
-const buyScriptPath = "/scripts/servers/buy-server.js";
+const upgradeScriptPath = "/servers/upgrade-servers.js";
+const buyScriptPath = "/servers/buy-server.js";
 
 export async function main(ns: NS): Promise<void> {
   let buyScriptsRunning = true;

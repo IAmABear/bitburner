@@ -1,7 +1,7 @@
-import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
-import QueueManger from "/scripts/utils/queueManager";
-import threadsNeededToGrow from "/scripts/utils/threadsNeededToGrow";
-import threadsNeededToWeaken from "/scripts/utils/threadsNeededToWeaken";
+import getPossibleThreadCount from "/utils/getPossibleThreadCount";
+import QueueManger from "/utils/queueManager";
+import threadsNeededToGrow from "/utils/threadsNeededToGrow";
+import threadsNeededToWeaken from "/utils/threadsNeededToWeaken";
 import config from "config";
 
 const growThreadSecurityIncrease = 0.004;

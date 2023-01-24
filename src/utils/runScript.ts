@@ -1,7 +1,7 @@
-import getThreads from "/scripts/utils/getThreads";
-import QueueManger, { QueueEvent } from "/scripts/utils/queueManager";
+import getThreads from "/utils/getThreads";
+import QueueManger, { QueueEvent } from "/utils/queueManager";
 import config from "config";
-import getPossibleThreadCount from "/scripts/utils/getPossibleThreadCount";
+import getPossibleThreadCount from "/utils/getPossibleThreadCount";
 
 export type BatchStatus =
   | "hackable"
@@ -77,7 +77,7 @@ export default (
       //   "run-script-events.js",
       //   JSON.stringify({
       //     id: (Math.random() + Date.now()).toString(),
-      //     content: scriptPath.split("/scripts/serverScripts/")[1],
+      //     content: scriptPath.split("/serverScripts/")[1],
       //     start:
       //       Date.now() +
       //       scriptTimeoutBeforeRunning +

@@ -1,12 +1,12 @@
 import config from "config";
 
 export async function main(ns: NS): Promise<void> {
-  if (!ns.isRunning("/scripts/servers/server-auto-hack.js", "home")) {
-    await ns.run("/scripts/servers/server-auto-hack.js");
+  if (!ns.isRunning("/servers/server-auto-hack.js", "home")) {
+    await ns.run("/servers/server-auto-hack.js");
   }
 
-  if (!ns.isRunning("/scripts/servers/auto-buy.js", "home")) {
-    await ns.run("/scripts/servers/auto-buy.js");
+  if (!ns.isRunning("/servers/auto-buy.js", "home")) {
+    await ns.run("/servers/auto-buy.js");
   }
 
   const servers = await ns.getPurchasedServers();
@@ -31,8 +31,8 @@ export async function main(ns: NS): Promise<void> {
   }
 
   if (ns.getServer("home").maxRam <= 3200) {
-    await ns.run("/scripts/hacking/event-based/v1.js");
+    await ns.run("/hacking/event-based/v1.js");
   } else {
-    await ns.run("/scripts/hacking/event-hacking.js", undefined, "all");
+    await ns.run("/hacking/event-hacking.js", undefined, "all");
   }
 }
