@@ -14,6 +14,7 @@ export async function main(ns: NS): Promise<void> {
     .filter((task: GangTaskStats) =>
       gangInfo.isHacking ? task.isHacking : task.isCombat
     );
+  const preferredTaskType = ns.args[0] as string;
 
   while (true) {
     const gangMembers = ns.gang.getMemberNames();

@@ -165,7 +165,7 @@ const growServer = (
     event,
     config.scriptPaths.growScriptPath,
     threadsNeededToGrow,
-    event.timeScriptsDone - Date.now() + short,
+    event.timeScriptsDone - Date.now() + config.timeouts.short,
     {
       status: "fullyGrown",
       scriptCompletionTime: growthTime,
@@ -196,9 +196,9 @@ const hackServer = (
     ns,
     servers,
     event,
-    config.scriptPaths.riptPath,
+    config.scriptPaths.hackScriptPath,
     threadsNeededToHack,
-    event.timeScriptsDone - Date.now() - hackTime + short,
+    event.timeScriptsDone - Date.now() - hackTime + config.timeouts.short,
     {
       status: "fullyHacked",
       scriptCompletionTime: hackTime,
@@ -376,7 +376,7 @@ const updateBatchableServers = async (
         server: batchableServer,
         status: "needsGrowing",
         timeScriptsDone: 0,
-        script: weakenScriptPath,
+        script: config.scriptPaths.weakenScriptPath,
         threads: 0,
       },
       queueManager

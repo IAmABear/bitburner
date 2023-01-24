@@ -94,7 +94,10 @@ export async function main(ns: NS): Promise<void> {
             ns.getServerMoneyAvailable("home")
         ) {
           try {
-            ns.exec(preparingToUpgradeScriptPath, targetServer);
+            ns.exec(
+              config.scriptPaths.preparingToUpgradeScriptPath,
+              targetServer
+            );
             serversReadyForUpgrade.push({
               hostname: targetServer,
               newRam: newTargetRam,
