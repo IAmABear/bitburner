@@ -11,7 +11,10 @@ export async function main(ns: NS): Promise<void> {
     if (ns.getPurchasedServerLimit() >= servers.length) {
       if (ns.getPurchasedServerCost(ram) < ns.getServerMoneyAvailable("home")) {
         dynamicSleep = config.timeouts.skip;
-        const newServer = await ns.purchaseServer("ghost", ram);
+        const newServer = await ns.purchaseServer(
+          config.namingConventions.ghostServersPrefix,
+          ram
+        );
 
         if (newServer) {
           servers.push(newServer);
