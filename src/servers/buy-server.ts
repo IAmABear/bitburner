@@ -1,4 +1,5 @@
 import config from "config";
+import copyScriptFilesToServer from "/utils/copyScriptFilesToServer";
 
 let dynamicSleep = config.timeouts.long;
 export async function main(ns: NS): Promise<void> {
@@ -11,15 +12,7 @@ export async function main(ns: NS): Promise<void> {
         const targetServer = await ns.purchaseServer("ghost-" + ram, ram);
 
         if (targetServer) {
-          await ns.scp(
-            [
-              config.scriptPaths.hackScriptPath,
-              config.scriptPaths.growScriptPath,
-              config.scriptPaths.weakenScriptPath,
-              config.scriptPaths.preparingToUpgradeScriptPath,
-            ],
-            targetServer
-          );
+          await copyScriptFilesToServer(ns, targetServer);
         }
       } else {
         dynamicSleep = config.timeouts.long;

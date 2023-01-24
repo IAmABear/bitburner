@@ -1,20 +1,7 @@
+import copyScriptFilesToServer from "/utils/copyScriptFilesToServer";
 import crackOpenServer from "/utils/crackOpenServer";
 import scanServer from "/utils/scanServer";
 import config from "config";
-
-async function copyHackFilesToServer(ns: NS, server: string): Promise<boolean> {
-  const res = await ns.scp(
-    [
-      config.scriptPaths.hackScriptPath,
-      config.scriptPaths.growScriptPath,
-      config.scriptPaths.weakenScriptPath,
-      config.scriptPaths.preparingToUpgradeScriptPath,
-    ],
-    server
-  );
-
-  return res;
-}
 
 let currentHackingLevel = 0;
 export async function main(ns: NS): Promise<void> {
@@ -31,7 +18,7 @@ export async function main(ns: NS): Promise<void> {
             ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(server)
           ) {
             await crackOpenServer(ns, server);
-            await copyHackFilesToServer(ns, server);
+            await copyScriptFilesToServer(ns, server);
           }
         } else {
           await crackOpenServer(ns, server);

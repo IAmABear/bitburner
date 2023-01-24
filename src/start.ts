@@ -1,4 +1,5 @@
 import config from "config";
+import copyScriptFilesToServer from "/utils/copyScriptFilesToServer";
 
 export async function main(ns: NS): Promise<void> {
   if (!ns.isRunning("/servers/server-auto-hack.js", "home")) {
@@ -19,15 +20,7 @@ export async function main(ns: NS): Promise<void> {
       ns.rm(serverFiles[serverFile], targetServer);
     }
 
-    await ns.scp(
-      [
-        config.scriptPaths.hackScriptPath,
-        config.scriptPaths.growScriptPath,
-        config.scriptPaths.weakenScriptPath,
-        config.scriptPaths.preparingToUpgradeScriptPath,
-      ],
-      targetServer
-    );
+    await copyScriptFilesToServer(ns, targetServer);
   }
 
   if (ns.getServer("home").maxRam <= 3200) {

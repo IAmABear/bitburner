@@ -1,4 +1,5 @@
 import config from "config";
+import copyScriptFilesToServer from "/utils/copyScriptFilesToServer";
 
 type ServerReadyForUpgrade = {
   hostname: string;
@@ -53,15 +54,7 @@ export async function main(ns: NS): Promise<void> {
               continue;
             }
 
-            await ns.scp(
-              [
-                config.scriptPaths.hackScriptPath,
-                config.scriptPaths.growScriptPath,
-                config.scriptPaths.weakenScriptPath,
-                config.scriptPaths.preparingToUpgradeScriptPath,
-              ],
-              newServerName
-            );
+            await copyScriptFilesToServer(ns, newServerName);
           }
 
           serversReadyForUpgrade = serversReadyForUpgrade.filter(
