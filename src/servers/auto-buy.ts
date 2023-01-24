@@ -4,7 +4,7 @@ const buyScriptPath = "/servers/buy-server.js";
 export async function main(ns: NS): Promise<void> {
   if (ns.getPurchasedServers().length === ns.getPurchasedServerLimit()) {
     if (!ns.isRunning(upgradeScriptPath, "home")) {
-      ns.run(upgradeScriptPath);
+      ns.run(upgradeScriptPath, 1, ns.getPurchasedServers().join(","));
     }
 
     if (ns.isRunning(buyScriptPath, "home")) {

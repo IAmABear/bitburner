@@ -6,10 +6,11 @@ export async function main(ns: NS): Promise<void> {
   const ram = Number(ns.args[0]) || 8;
 
   while (true) {
-    if (ns.getPurchasedServerLimit() >= ns.getPurchasedServers().length) {
+    const purchasedServers = ns.getPurchasedServers();
+    if (ns.getPurchasedServerLimit() >= purchasedServers.length) {
       if (ns.getPurchasedServerCost(ram) < ns.getServerMoneyAvailable("home")) {
         dynamicSleep = config.timeouts.skip;
-        const targetServer = await ns.purchaseServer("ghost-" + ram, ram);
+        const targetServer = await ns.purchaseServer("ghost");
 
         if (targetServer) {
           await copyScriptFilesToServer(ns, targetServer);
@@ -20,7 +21,12 @@ export async function main(ns: NS): Promise<void> {
 
       await ns.sleep(dynamicSleep);
     } else {
-      ns.exec("/servers/upgrade-servers.js", "home");
+      ns.exec(
+        "/servers/upgrade-servers.js",
+        "home",
+        1,
+        purchasedServers.join(",")
+      );
       break;
     }
   }

@@ -27,7 +27,7 @@ export default async (
       const serverFound = serversFound[serverFoundIndex];
 
       if (!scannedServers.includes(serverFound)) {
-        if (onlyGhost && serverFound.includes("ghost-")) {
+        if (onlyGhost && serverFound.includes("ghost")) {
           scannedServers.push(serverFound);
           await scanServer(ns, serverFound, {
             includeGhost,
@@ -37,8 +37,8 @@ export default async (
         } else if (
           !onlyGhost &&
           ((includeHome && serverFound === "home") ||
-            (includeGhost && serverFound.includes("ghost-")) ||
-            (!serverFound.includes("ghost-") && serverFound !== "home"))
+            (includeGhost && serverFound.includes("ghost")) ||
+            (!serverFound.includes("ghost") && serverFound !== "home"))
         ) {
           scannedServers.push(serverFound);
           await scanServer(ns, serverFound, {
