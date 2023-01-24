@@ -1,13 +1,12 @@
-import config from "config";
 import copyScriptFilesToServer from "/utils/copyScriptFilesToServer";
 
 export async function main(ns: NS): Promise<void> {
-  if (!ns.isRunning("/servers/server-auto-hack.js", "home")) {
-    await ns.run("/servers/server-auto-hack.js");
-  }
-
   if (!ns.isRunning("/servers/auto-buy.js", "home")) {
     await ns.run("/servers/auto-buy.js");
+  }
+
+  if (!ns.isRunning("/servers/server-auto-hack.js", "home")) {
+    await ns.run("/servers/server-auto-hack.js");
   }
 
   const servers = await ns.getPurchasedServers();
