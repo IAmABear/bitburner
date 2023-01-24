@@ -1,26 +1,16 @@
-import config from "config";
-
 const upgradeScriptPath = "/servers/upgrade-servers.js";
 const buyScriptPath = "/servers/buy-server.js";
 
 export async function main(ns: NS): Promise<void> {
-  let buyScriptsRunning = true;
-
-  while (buyScriptsRunning) {
-    if (ns.getPurchasedServers().length === ns.getPurchasedServerLimit()) {
-      if (!ns.isRunning(upgradeScriptPath, "home")) {
-        ns.run(upgradeScriptPath);
-      }
-
-      if (ns.isRunning(buyScriptPath, "home")) {
-        ns.scriptKill(buyScriptPath, "home");
-      }
-
-      buyScriptsRunning = false;
-    } else if (!ns.isRunning(buyScriptPath, "home")) {
-      ns.run(buyScriptPath);
+  if (ns.getPurchasedServers().length === ns.getPurchasedServerLimit()) {
+    if (!ns.isRunning(upgradeScriptPath, "home")) {
+      ns.run(upgradeScriptPath);
     }
 
-    await ns.sleep(config.timeouts.medium);
+    if (ns.isRunning(buyScriptPath, "home")) {
+      ns.scriptKill(buyScriptPath, "home");
+    }
+  } else if (!ns.isRunning(buyScriptPath, "home")) {
+    ns.run(buyScriptPath);
   }
 }
