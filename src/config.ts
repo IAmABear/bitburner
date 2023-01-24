@@ -13,5 +13,6 @@ export default {
   },
   namingConventions: {
     ghostServersPrefix: "ghost",
+    gangMember: "banger",
   },
 };
