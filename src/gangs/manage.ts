@@ -7,7 +7,7 @@ export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
 
   const gangInfo = ns.gang.getGangInformation();
-
+  ns.print(gangInfo);
   const tasks = ns.gang
     .getTaskNames()
     .map((taskName: string) => ns.gang.getTaskStats(taskName))
@@ -49,7 +49,7 @@ export async function main(ns: NS): Promise<void> {
       ) {
         ns.gang.setMemberTask(
           member,
-          gangInfo.isHacking ? "Train Combat" : "Train Hacking"
+          !gangInfo.isHacking ? "Train Combat" : "Train Hacking"
         );
       } else {
         ns.gang.setMemberTask(member, prefferedTask.name);
