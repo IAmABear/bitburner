@@ -41,6 +41,9 @@ export async function main(ns: NS): Promise<void> {
     .filter((task: GangTaskStats) =>
       gangInfo.isHacking ? task.isHacking : task.isCombat
     );
+  const territoryWarfareTask = tasks.filter(
+    (task) => task.name === "Territory Warfare"
+  )[0];
   const preferredTaskType = ns.args[0] as string;
 
   if (!ns.scriptRunning("/gangs/recruit.js", "home")) {
@@ -70,20 +73,48 @@ export async function main(ns: NS): Promise<void> {
     const gangMembers = ns.gang.getMemberNames();
     const fullCrew = gangMembers.length >= 12;
 
-    const prefferedTask = tasks.sort((a: GangTaskStats, b: GangTaskStats) => {
-      if (preferredTaskType === "money" || fullCrew) {
-        return b.baseMoney - a.baseMoney;
-      } else {
-        return b.baseRespect - a.baseRespect;
+    if (gangInfo.territory >= 1) {
+      if (gangInfo.territoryWarfareEngaged) {
+        ns.gang.setTerritoryWarfare(false);
       }
-    })[0];
+    } else {
+      if (fullCrew) {
+        const otherGangsInfo = ns.gang.getOtherGangInformation();
+        const winChances = Object.keys(otherGangsInfo).reduce(
+          (allChances: number[], gangName) => {
+            if (
+              otherGangsInfo[gangName].territory &&
+              gangName !== gangInfo.faction
+            ) {
+              return [
+                ...allChances,
+                Math.floor(ns.gang.getChanceToWinClash(gangName) * 100),
+              ];
+            }
+            return allChances;
+          },
+          []
+        );
+        if (winChances.filter((winChance) => winChance <= 50).length >= 2) {
+          ns.gang.setTerritoryWarfare(true);
+        }
+      }
+    }
+
+    const prefferedTask =
+      (gangInfo.territoryWarfareEngaged && fullCrew) ||
+      (fullCrew && gangInfo.territory < 1)
+        ? territoryWarfareTask
+        : tasks.sort((a: GangTaskStats, b: GangTaskStats) => {
+            if (preferredTaskType === "money" || fullCrew) {
+              return b.baseMoney - a.baseMoney;
+            } else {
+              return b.baseRespect - a.baseRespect;
+            }
+          })[0];
 
     gangMembers.forEach((member: string) => {
       const memberInfo = ns.gang.getMemberInformation(member);
-      ns.print("--------------");
-      ns.print(
-        `Going through member: ${memberInfo.name} with currently ${memberInfo.augmentations.length} augmentations installed`
-      );
       const ascResult = ns.gang.getAscensionResult(member);
 
       if (
@@ -105,11 +136,16 @@ export async function main(ns: NS): Promise<void> {
       } else {
         ns.gang.setMemberTask(member, prefferedTask.name);
       }
-      ns.print(memberInfo.upgrades);
-      /**
-       * Buying all the augmentations for now
-       */
-      if (memberInfo.augmentations.length != augmentationEquipment.length) {
+
+      if (
+        (memberInfo.augmentations.length != augmentationEquipment.length &&
+          !gangInfo.territoryWarfareEngaged) ||
+        (gangInfo.territoryWarfareEngaged &&
+          !gangInfo.isHacking &&
+          memberInfo.upgrades.length >= combatEquipment.length) ||
+        (gangInfo.isHacking &&
+          memberInfo.upgrades.length >= hackingEquipment.length)
+      ) {
         const missingAugmentation = augmentationEquipment.filter(
           (augmentationEquipment) =>
             !memberInfo.augmentations.includes(augmentationEquipment.name)
