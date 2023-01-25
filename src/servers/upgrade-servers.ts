@@ -10,7 +10,7 @@ type ServerReadyForUpgrade = {
 let dynamicSleep = config.timeouts.long;
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
-  if ((ns.args[0] as string) === "") {
+  if (!ns.args[0]) {
     ns.tprint("No servers given to upgrade, exiting...");
   }
   const servers: string[] = (ns.args[0] as string).split(",");

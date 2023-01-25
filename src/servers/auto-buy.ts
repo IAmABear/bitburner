@@ -2,7 +2,7 @@ const upgradeScriptPath = "/servers/upgrade-servers.js";
 const buyScriptPath = "/servers/buy-server.js";
 
 export async function main(ns: NS): Promise<void> {
-  const servers: string[] = (ns.args[0] as string).split(",");
+  const servers: string[] = ns.args[0] ? (ns.args[0] as string).split(",") : [];
   if (servers.length === ns.getPurchasedServerLimit()) {
     if (ns.isRunning(buyScriptPath, "home")) {
       ns.scriptKill(buyScriptPath, "home");
