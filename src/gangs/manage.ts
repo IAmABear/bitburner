@@ -1,7 +1,34 @@
-import { GangTaskStats } from "/../NetscriptDefinitions";
+import {
+  EquipmentStats,
+  GangMemberInfo,
+  GangTaskStats,
+} from "/../NetscriptDefinitions";
 import config from "config";
 
 const levelThreshold = 300;
+const augmentationTypeEquipment = "Augmentation";
+const combatTypeEquipment = ["Weapon", "Armor", "Vehicle"];
+const hackingTypeEquipments = ["Rootkit"];
+
+interface CustomEquipment extends EquipmentStats {
+  cost: number;
+  type: string;
+  name: string;
+}
+
+const buyAvaibleEquipment = (
+  ns: NS,
+  member: GangMemberInfo,
+  equipments: CustomEquipment[]
+) => {
+  for (let index = 0; index < equipments.length; index++) {
+    const equipment = equipments[index];
+
+    if (equipment.cost <= ns.getServerMoneyAvailable("home")) {
+      ns.gang.purchaseEquipment(member.name, equipment.name);
+    }
+  }
+};
 
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
@@ -20,11 +47,31 @@ export async function main(ns: NS): Promise<void> {
     ns.exec("/gangs/recruit.js", "home");
   }
 
+  const equipmentNames = ns.gang.getEquipmentNames();
+  const equipments: CustomEquipment[] = equipmentNames.map(
+    (equipmentName: string) => ({
+      ...ns.gang.getEquipmentStats(equipmentName),
+      cost: ns.gang.getEquipmentCost(equipmentName),
+      type: ns.gang.getEquipmentType(equipmentName),
+      name: equipmentName,
+    })
+  );
+  const augmentationEquipment = equipments.filter(
+    (equipment) => equipment.type === augmentationTypeEquipment
+  );
+  const combatEquipment = equipments.filter((equipment) =>
+    combatTypeEquipment.includes(equipment.type)
+  );
+  const hackingEquipment = equipments.filter((equipment) =>
+    hackingTypeEquipments.includes(equipment.type)
+  );
+
   while (true) {
     const gangMembers = ns.gang.getMemberNames();
-    ns.print(`gangMembers.length: ${gangMembers.length}`);
+    const fullCrew = gangMembers.length >= 12;
+
     const prefferedTask = tasks.sort((a: GangTaskStats, b: GangTaskStats) => {
-      if (preferredTaskType === "money" || gangMembers.length >= 12) {
+      if (preferredTaskType === "money" || fullCrew) {
         return b.baseMoney - a.baseMoney;
       } else {
         return b.baseRespect - a.baseRespect;
@@ -33,6 +80,10 @@ export async function main(ns: NS): Promise<void> {
 
     gangMembers.forEach((member: string) => {
       const memberInfo = ns.gang.getMemberInformation(member);
+      ns.print("--------------");
+      ns.print(
+        `Going through member: ${memberInfo.name} with currently ${memberInfo.augmentations.length} augmentations installed`
+      );
       const ascResult = ns.gang.getAscensionResult(member);
 
       if (
@@ -53,6 +104,31 @@ export async function main(ns: NS): Promise<void> {
         );
       } else {
         ns.gang.setMemberTask(member, prefferedTask.name);
+      }
+      ns.print(memberInfo.upgrades);
+      /**
+       * Buying all the augmentations for now
+       */
+      if (memberInfo.augmentations.length != augmentationEquipment.length) {
+        const missingAugmentation = augmentationEquipment.filter(
+          (augmentationEquipment) =>
+            !memberInfo.augmentations.includes(augmentationEquipment.name)
+        );
+        buyAvaibleEquipment(ns, memberInfo, missingAugmentation);
+      } else {
+        if (!gangInfo.isHacking) {
+          const missingEquipment = combatEquipment.filter(
+            (equipment) => !memberInfo.upgrades.includes(equipment.name)
+          );
+
+          buyAvaibleEquipment(ns, memberInfo, missingEquipment);
+        } else {
+          const missingEquipment = hackingEquipment.filter(
+            (equipment) => !memberInfo.upgrades.includes(equipment.name)
+          );
+
+          buyAvaibleEquipment(ns, memberInfo, missingEquipment);
+        }
       }
     });
 
