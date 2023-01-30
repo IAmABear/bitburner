@@ -1,6 +1,7 @@
 import config from "config";
 import copyScriptFilesToServer from "/utils/copyScriptFilesToServer";
 import { Server } from "/../NetscriptDefinitions";
+import colorPicker from "/utils/colorPicker";
 
 type ServerReadyForUpgrade = {
   hostname: string;
@@ -15,15 +16,47 @@ export async function main(ns: NS): Promise<void> {
     ns.tprint("No servers given to upgrade, exiting...");
   }
   const serverNames: string[] = (ns.args[0] as string).split(",");
-  const servers = serverNames
-    .map((serverName: string) => ns.getServer(serverName))
-    .sort((a: Server, b: Server) => a.maxRam - b.maxRam)
-    .map((server: Server) => server.hostname);
 
   let serversReadyForUpgrade: ServerReadyForUpgrade[] = [];
 
   while (true) {
+    ns.print("------");
+    const servers = serverNames.map((serverName: string) =>
+      ns.getServer(serverName)
+    );
+    const sortedServers = servers.sort(
+      (a: Server, b: Server) => a.maxRam - b.maxRam
+    );
+
+    ns.print(
+      `Money avaible: ${colorPicker(
+        `${Math.ceil(ns.getServerMoneyAvailable("home"))}`,
+        "green"
+      )}`
+    );
+    ns.print(
+      `Upgrade costs: ${Math.ceil(
+        ns.getPurchasedServerUpgradeCost(
+          sortedServers[0].hostname,
+          sortedServers[0].maxRam * 2
+        )
+      )} / ${Math.ceil(
+        ns.getPurchasedServerUpgradeCost(
+          sortedServers[sortedServers.length - 1].hostname,
+          sortedServers[sortedServers.length - 1].maxRam * 2
+        )
+      )}.`
+    );
+
     if (serversReadyForUpgrade.length) {
+      for (const server of serversReadyForUpgrade) {
+        ns.print(
+          `${server.hostname} to be upgraded to ${
+            server.newRam
+          } for ${colorPicker(`${server.upgradeCost}`, "green")}`
+        );
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for (const serverReadyForUpgradeIndex in serversReadyForUpgrade) {
         const serverReadyForUpgrade =
@@ -58,7 +91,7 @@ export async function main(ns: NS): Promise<void> {
             )
           ) {
             ns.print(
-              `Upraded ${serverReadyForUpgrade.hostname} to ${serverReadyForUpgrade.newRam} ram.`
+              `Upgraded ${serverReadyForUpgrade.hostname} to ${serverReadyForUpgrade.newRam} ram.`
             );
             await copyScriptFilesToServer(ns, serverReadyForUpgrade.hostname);
 
@@ -74,39 +107,40 @@ export async function main(ns: NS): Promise<void> {
         }
       }
     } else {
-      for (const serverIndex in servers) {
-        const targetServer = servers[serverIndex];
-        if (!ns.serverExists(targetServer)) {
+      for (const targetServer of sortedServers) {
+        if (!ns.serverExists(targetServer.hostname)) {
           continue;
         }
-        const targetServerCurrentRam = ns.getServerMaxRam(targetServer);
+        const targetServerCurrentRam = targetServer.maxRam;
         const maxPossibleRamServer = ns.getPurchasedServerMaxRam();
         const newTargetRam = targetServerCurrentRam * 2;
 
         const upgradeCost = ns.getPurchasedServerCost(newTargetRam);
+
         if (
           newTargetRam < maxPossibleRamServer &&
-          upgradeCost +
-            serversReadyForUpgrade.reduce(
-              (totalPrice: number, server: ServerReadyForUpgrade) =>
-                totalPrice + server.upgradeCost,
-              0
-            ) <
-            ns.getServerMoneyAvailable("home")
+          ns.getServerMoneyAvailable("home") >=
+            upgradeCost +
+              serversReadyForUpgrade.reduce(
+                (totalPrice: number, server: ServerReadyForUpgrade) =>
+                  totalPrice + server.upgradeCost,
+                0
+              )
         ) {
           try {
             ns.exec(
               config.scriptPaths.preparingToUpgradeScriptPath,
-              targetServer
+              targetServer.hostname
             );
+            ns.print(`Adding ${targetServer.hostname} to the upgrade list.`);
             serversReadyForUpgrade.push({
-              hostname: targetServer,
+              hostname: targetServer.hostname,
               newRam: newTargetRam,
               upgradeCost,
             });
           } catch (e) {
             ns.print(
-              `Couldnt target ${targetServer} for upgrade due to an error`
+              `Couldnt target ${targetServer.hostname} for upgrade due to an error`
             );
           }
         } else {
