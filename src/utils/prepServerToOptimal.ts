@@ -22,6 +22,14 @@ const runScriptOnServers = async (
   requestedThreads: number
 ): Promise<number> => {
   let threadsNeeded = requestedThreads;
+
+  if (!threadsNeeded) {
+    ns.print(
+      colorPicker("No threads required for prepping, skipping....", "red")
+    );
+    return Date.now();
+  }
+
   for (const workerServer of workerServers) {
     const possibleThreadCount = getPossibleThreadCount(
       ns,
