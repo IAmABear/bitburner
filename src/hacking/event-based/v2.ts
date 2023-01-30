@@ -2,14 +2,14 @@ import QueueManger, { QueueEvent } from "/utils/queueManager";
 import config from "/config";
 import getWorkerServers from "/utils/getWorkerServers";
 import runScript, { BatchStatus } from "/utils/runScript";
-import prepServer from "/utils/prepServer";
 import serversToHack from "/utils/serversToHack";
+import prepServerToOptimal from "/utils/prepServerToOptimal";
+import colorPicker from "/utils/colorPicker";
 
 const getCompletionStatus = (
   ns: NS,
   event: QueueEvent
 ): { status: BatchStatus; scriptCompletionTime: number; script: string } => {
-  ns.print(event);
   switch (event.status) {
     case "hackable":
       return {
@@ -57,8 +57,14 @@ export async function main(ns: NS): Promise<void> {
       includeHackableServers: (ns.args[0] as string) === "all",
     });
     if (events.length === 0) {
-      void prepServer(ns, targetServer.hostname, workerServers, queueManager);
-      await ns.sleep(config.timeouts.medium);
+      ns.print("------------------");
+      ns.print(colorPicker("No events avaible, prepping server", "red"));
+      await prepServerToOptimal(
+        ns,
+        targetServer.hostname,
+        workerServers,
+        queueManager
+      );
     } else {
       for (let index = 0; index < events.length; index++) {
         const event = events[index];

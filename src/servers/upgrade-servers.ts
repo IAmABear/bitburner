@@ -1,5 +1,6 @@
 import config from "config";
 import copyScriptFilesToServer from "/utils/copyScriptFilesToServer";
+import { Server } from "/../NetscriptDefinitions";
 
 type ServerReadyForUpgrade = {
   hostname: string;
@@ -13,7 +14,12 @@ export async function main(ns: NS): Promise<void> {
   if ((ns.args[0] as string) === "") {
     ns.tprint("No servers given to upgrade, exiting...");
   }
-  const servers: string[] = (ns.args[0] as string).split(",");
+  const serverNames: string[] = (ns.args[0] as string).split(",");
+  const servers = serverNames
+    .map((serverName: string) => ns.getServer(serverName))
+    .sort((a: Server, b: Server) => a.maxRam - b.maxRam)
+    .map((server: Server) => server.hostname);
+
   let serversReadyForUpgrade: ServerReadyForUpgrade[] = [];
 
   while (true) {

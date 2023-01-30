@@ -15,4 +15,8 @@ export default {
     ghostServersPrefix: "ghost",
     gangMember: "banger",
   },
+  bitburner: {
+    growThreadSecurityIncrease: 0.004,
+    weakenThreadSecurityDecrease: 0.05,
+  },
 };
