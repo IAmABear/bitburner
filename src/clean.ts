@@ -1,5 +1,5 @@
 export async function main(ns: NS): Promise<void> {
-  const targetServer = "home";
+  const targetServer = (ns.args[0] as string) || "home";
   const serverFiles = ns.ls(targetServer, "js");
 
   for (const serverFile in serverFiles) {

@@ -11,16 +11,10 @@ export async function main(ns: NS): Promise<void> {
     await ns.run("/servers/server-auto-hack.js");
   }
 
-  for (let index = 0; index < servers.length; index++) {
-    const targetServer = servers[index];
+  for (const server of servers) {
+    ns.exec("clean.js", "home", undefined, server as string);
 
-    const serverFiles = ns.ls(targetServer, "js");
-    for (const serverFile in serverFiles) {
-      await ns.killall(targetServer);
-      ns.rm(serverFiles[serverFile], targetServer);
-    }
-
-    await copyScriptFilesToServer(ns, targetServer);
+    await copyScriptFilesToServer(ns, server);
   }
 
   if (ns.getServer("home").maxRam <= 3200) {
