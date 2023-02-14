@@ -8,8 +8,13 @@ export async function main(ns: NS): Promise<void> {
   const scriptPath = ns.args[0] as string;
   const targatableServer = ns.args[1] as string;
 
-  if (!targatableServer) {
-    ns.tprint("No valid hackable servers found.");
+  if (!scriptPath || !targatableServer) {
+    ns.tprint(
+      colorPicker(
+        "Missing scriptPath and/or taratableServer parameter. Exiting....",
+        "red"
+      )
+    );
     return;
   }
 
