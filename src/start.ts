@@ -7,6 +7,8 @@ export async function main(ns: NS): Promise<void> {
     await ns.run("/servers/auto-buy.js", 1, servers.join(","));
   }
 
+  await ns.sleep(config.timeouts.veryShort);
+
   if (!ns.isRunning("/servers/server-auto-hack.js", "home")) {
     await ns.run("/servers/server-auto-hack.js");
   }
@@ -17,9 +19,13 @@ export async function main(ns: NS): Promise<void> {
     await copyScriptFilesToServer(ns, server);
   }
 
+  await ns.sleep(config.timeouts.veryShort);
+
   if (!ns.isRunning("/gangs/start.js", "home")) {
     await ns.run("/gangs/start.js");
   }
+
+  await ns.sleep(config.timeouts.veryShort);
 
   if (ns.getServer("home").maxRam <= 3200) {
     await ns.run("/hacking/event-based/v1.js");

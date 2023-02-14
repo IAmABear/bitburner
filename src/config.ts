@@ -1,6 +1,7 @@
 export default {
   timeouts: {
     skip: 1,
+    veryShort: 50,
     short: 100,
     medium: 1000,
     long: 5000,
