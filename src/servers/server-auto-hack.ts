@@ -11,9 +11,8 @@ export async function main(ns: NS): Promise<void> {
   while (true) {
     if (currentHackingLevel !== ns.getHackingLevel()) {
       currentHackingLevel = ns.getHackingLevel();
-      for (let i = 0; i < servers.length; i++) {
-        const server = servers[i];
 
+      for (const server of servers) {
         await crackOpenServer(ns, server);
 
         if (!ns.hasRootAccess(server)) {
