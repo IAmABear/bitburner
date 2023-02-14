@@ -17,6 +17,10 @@ export async function main(ns: NS): Promise<void> {
     await copyScriptFilesToServer(ns, server);
   }
 
+  if (!ns.isRunning("/gangs/start.js", "home")) {
+    await ns.run("/gangs/start.js");
+  }
+
   if (ns.getServer("home").maxRam <= 3200) {
     await ns.run("/hacking/event-based/v1.js");
   } else {

@@ -16,10 +16,6 @@ export async function main(ns: NS): Promise<void> {
     );
   const preferredTaskType = ns.args[0] as string;
 
-  if (!ns.scriptRunning("/gangs/recruit.js", "home")) {
-    ns.exec("/gangs/recruit.js", "home");
-  }
-
   while (true) {
     const gangMembers = ns.gang.getMemberNames();
     ns.print(`gangMembers.length: ${gangMembers.length}`);

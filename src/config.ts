@@ -11,6 +11,10 @@ export default {
     weakenScriptPath: "/serverScripts/weaken.js",
     hackScriptPath: "/serverScripts/hack.js",
     preparingToUpgradeScriptPath: "/serverScripts/preparing-to-upgrade.js",
+    gangs: {
+      manage: "/gangs/manage.js",
+      recruit: "/gangs/recruit.js",
+    },
   },
   namingConventions: {
     ghostServersPrefix: "ghost",
