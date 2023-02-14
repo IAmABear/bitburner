@@ -3,6 +3,17 @@ const buyScriptPath = "/servers/buy-server.js";
 
 export async function main(ns: NS): Promise<void> {
   const servers: string[] = (ns.args[0] as string).split(",");
+
+  if (!servers.length) {
+    ns.tprint(
+      colorPicker(
+        "No servers found while running the auto-buy script. Exiting.....",
+        "red"
+      )
+    );
+    return;
+  }
+
   if (servers.length === ns.getPurchasedServerLimit()) {
     if (ns.isRunning(buyScriptPath, "home")) {
       ns.scriptKill(buyScriptPath, "home");

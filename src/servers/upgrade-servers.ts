@@ -11,10 +11,17 @@ type ServerReadyForUpgrade = {
 let dynamicSleep = config.timeouts.long;
 export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
-  if ((ns.args[0] as string) === "") {
-    ns.tprint("No servers given to upgrade, exiting...");
-  }
+
   const serverNames: string[] = (ns.args[0] as string).split(",");
+  if (!serverNames.length) {
+    ns.tprint(
+      colorPicker(
+        "No servers found while running the buy-server script. Exiting.....",
+        "red"
+      )
+    );
+    return;
+  }
   const servers = serverNames
     .map((serverName: string) => ns.getServer(serverName))
     .sort((a: Server, b: Server) => a.maxRam - b.maxRam)
