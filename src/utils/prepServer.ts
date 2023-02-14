@@ -4,9 +4,6 @@ import threadsNeededToGrow from "/utils/threadsNeededToGrow";
 import threadsNeededToWeaken from "/utils/threadsNeededToWeaken";
 import config from "config";
 
-const growThreadSecurityIncrease = 0.004;
-const weakenThreadsecurityDecrease = 0.05;
-
 export default (
   ns: NS,
   batchableServer: string,
@@ -18,8 +15,8 @@ export default (
     server: batchableServer,
   });
   const threadsNeededToCompensateGrowSecurity = Math.ceil(
-    (threadsNeededToGrowToMax * growThreadSecurityIncrease) /
-      weakenThreadsecurityDecrease
+    (threadsNeededToGrowToMax * config.bitburner.growThreadSecurityIncrease) /
+      config.bitburner.weakenThreadSecurityDecrease
   );
 
   let initialWeakenDone = 0;
