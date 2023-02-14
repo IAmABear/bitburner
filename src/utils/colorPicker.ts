@@ -8,7 +8,7 @@ type Colors =
   | "cyan"
   | "white";
 
-export default (text: string, color: Colors) => {
+export default (text: string, color: Colors): string => {
   // x = what you want colored
   let y;
   switch (color) {
