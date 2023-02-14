@@ -14,9 +14,7 @@ export async function main(ns: NS): Promise<void> {
       for (let i = 0; i < servers.length; i++) {
         const server = servers[i];
         if (!ns.hasRootAccess(server)) {
-          if (
-            ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(server)
-          ) {
+          if (currentHackingLevel >= ns.getServerRequiredHackingLevel(server)) {
             await crackOpenServer(ns, server);
             await copyScriptFilesToServer(ns, server);
           }
