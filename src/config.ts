@@ -4,6 +4,7 @@ export default {
     short: 100,
     medium: 1000,
     long: 5000,
+    veryLong: 10000,
   },
   scriptPaths: {
     growScriptPath: "/serverScripts/grow.js",
