@@ -13,13 +13,13 @@ export async function main(ns: NS): Promise<void> {
       currentHackingLevel = ns.getHackingLevel();
       for (let i = 0; i < servers.length; i++) {
         const server = servers[i];
+
+        await crackOpenServer(ns, server);
+
         if (!ns.hasRootAccess(server)) {
           if (currentHackingLevel >= ns.getServerRequiredHackingLevel(server)) {
-            await crackOpenServer(ns, server);
             await copyScriptFilesToServer(ns, server);
           }
-        } else {
-          await crackOpenServer(ns, server);
         }
       }
     }
